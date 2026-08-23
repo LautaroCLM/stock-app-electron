@@ -1,0 +1,4515 @@
+{
+  "createdAt": "2026-07-02T21:44:52.199Z",
+  "sourceDb": "C:\\Users\\herna\\AppData\\Roaming\\inventario-baupi\\data.db",
+  "prefs": {
+    "theme": "light"
+  },
+  "data": {
+    "productos": [
+      {
+        "id": 2670,
+        "codigo": "BR2120",
+        "nombre": "ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042)",
+        "categoria": "Alicates",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 6109.77,
+        "precio": 10386.61
+      },
+      {
+        "id": 2671,
+        "codigo": "BR10454",
+        "nombre": "DESTORNILLADOR Bremen PH (+) 4x125 Pta Magnét",
+        "categoria": "Destornilladores",
+        "stock": 252,
+        "unidad": "un",
+        "precio_costo": 2672.69,
+        "precio": 4543.57
+      },
+      {
+        "id": 2672,
+        "codigo": "BR10448",
+        "nombre": "DESTORNILLADOR Bremen PH (+) 8x200 Pta Magnét",
+        "categoria": "Destornilladores",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 5344.42,
+        "precio": 9085.51
+      },
+      {
+        "id": 2673,
+        "codigo": "BR10459",
+        "nombre": "DESTORNILLADOR Bremen PL (-) 6x150 Pta Magnét",
+        "categoria": "Destornilladores",
+        "stock": 252,
+        "unidad": "un",
+        "precio_costo": 3400.95,
+        "precio": 5781.61
+      },
+      {
+        "id": 2674,
+        "codigo": "BR10460",
+        "nombre": "DESTORNILLADOR Bremen PL (-) 8x200 Pta Magnét",
+        "categoria": "Destornilladores",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 5344.42,
+        "precio": 9085.51
+      },
+      {
+        "id": 2675,
+        "codigo": "BR10442",
+        "nombre": "DESTORNILLADORES Bremen Mgo PP, TPR PH (+) 4x100 Pta Magnét",
+        "categoria": "Destornilladores",
+        "stock": 252,
+        "unidad": "un",
+        "precio_costo": 2186,
+        "precio": 3716.2
+      },
+      {
+        "id": 2676,
+        "codigo": "BR10444",
+        "nombre": "DESTORNILLADORES Bremen Mgo PP, TPR PH (+) 5x150 Pta Magnét",
+        "categoria": "Destornilladores",
+        "stock": 252,
+        "unidad": "un",
+        "precio_costo": 2186,
+        "precio": 3716.2
+      },
+      {
+        "id": 2677,
+        "codigo": "BR10446",
+        "nombre": "DESTORNILLADORES Bremen Mgo PP, TPR PH (+) 6x125 Pta Magnét",
+        "categoria": "Destornilladores",
+        "stock": 252,
+        "unidad": "un",
+        "precio_costo": 3238.95,
+        "precio": 5506.21
+      },
+      {
+        "id": 2678,
+        "codigo": "BR10447",
+        "nombre": "DESTORNILLADORES Bremen Mgo PP, TPR PH (+) 6x150 Pta Magnét",
+        "categoria": "Destornilladores",
+        "stock": 252,
+        "unidad": "un",
+        "precio_costo": 3400.95,
+        "precio": 5781.61
+      },
+      {
+        "id": 2679,
+        "codigo": "BR10452",
+        "nombre": "DESTORNILLADORES Bremen Mgo PP, TPR PL (-) 4x125 Pta Magnét",
+        "categoria": "Destornilladores",
+        "stock": 252,
+        "unidad": "un",
+        "precio_costo": 2267.46,
+        "precio": 3854.68
+      },
+      {
+        "id": 2680,
+        "codigo": "BR10457",
+        "nombre": "DESTORNILLADORES Bremen Mgo PP, TPR PL (-) 6x100 Pta Magnét",
+        "categoria": "Destornilladores",
+        "stock": 252,
+        "unidad": "un",
+        "precio_costo": 3157.95,
+        "precio": 5368.51
+      },
+      {
+        "id": 2681,
+        "codigo": "BR9250",
+        "nombre": "DESTORNILLADORES TORX TAMPER Bremen T-10 (Ø5x100mm)",
+        "categoria": "Destornilladores",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 2853.29,
+        "precio": 4850.59
+      },
+      {
+        "id": 2682,
+        "codigo": "BR9251",
+        "nombre": "DESTORNILLADORES TORX TAMPER Bremen T-15 (Ø5x100mm)",
+        "categoria": "Destornilladores",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3007.58,
+        "precio": 5112.89
+      },
+      {
+        "id": 2683,
+        "codigo": "BR9252",
+        "nombre": "DESTORNILLADORES TORX TAMPER Bremen T-20 (Ø6x100mm)",
+        "categoria": "Destornilladores",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3007.58,
+        "precio": 5112.89
+      },
+      {
+        "id": 2684,
+        "codigo": "BR9253",
+        "nombre": "DESTORNILLADORES TORX TAMPER Bremen T-25 (Ø6x100mm)",
+        "categoria": "Destornilladores",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3470.42,
+        "precio": 5899.71
+      },
+      {
+        "id": 2685,
+        "codigo": "BR9254",
+        "nombre": "DESTORNILLADORES TORX TAMPER Bremen T-27 (Ø6x100mm)",
+        "categoria": "Destornilladores",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3470.42,
+        "precio": 5899.71
+      },
+      {
+        "id": 2686,
+        "codigo": "BR9255",
+        "nombre": "DESTORNILLADORES TORX TAMPER Bremen T-30 (Ø6x100mm)",
+        "categoria": "Destornilladores",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3470.42,
+        "precio": 5899.71
+      },
+      {
+        "id": 2687,
+        "codigo": "BR9256",
+        "nombre": "DESTORNILLADORES TORX TAMPER Bremen T-40 (Ø8x100mm)",
+        "categoria": "Destornilladores",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 4627.07,
+        "precio": 7866.02
+      },
+      {
+        "id": 2688,
+        "codigo": "BR9264",
+        "nombre": "DESTORNILLADORES TORX TAMPER Bremen T-6 (Ø3x75mm)",
+        "categoria": "Destornilladores",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 2159.49,
+        "precio": 3671.13
+      },
+      {
+        "id": 2689,
+        "codigo": "BR9265",
+        "nombre": "DESTORNILLADORES TORX TAMPER Bremen T-8 (Ø3x75mm)",
+        "categoria": "Destornilladores",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 2390.91,
+        "precio": 4064.55
+      },
+      {
+        "id": 2690,
+        "codigo": "BR9582",
+        "nombre": "LLAVE AJUSTABLE CROMADA Bremen Cr. Va. 10\" Profesional BL (4162)",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 20694.11,
+        "precio": 35179.99
+      },
+      {
+        "id": 2691,
+        "codigo": "BR9581",
+        "nombre": "LLAVE AJUSTABLE CROMADA Bremen Cr. Va. 8\" Profesional BL (4161)",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 14088.86,
+        "precio": 23951.06
+      },
+      {
+        "id": 2692,
+        "codigo": "BR9242",
+        "nombre": "LLAVE AJUSTABLE FOSFATIZADA Bremen Cr. Va. 10\" BL (6633)",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 21157.18,
+        "precio": 35967.21
+      },
+      {
+        "id": 2693,
+        "codigo": "BR9241",
+        "nombre": "LLAVE AJUSTABLE FOSFATIZADA Bremen Cr. Va. 8\" BL (6632)",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 15340.38,
+        "precio": 26078.65
+      },
+      {
+        "id": 2694,
+        "codigo": "BR10027",
+        "nombre": "LLAVE ALLEN Serie CORTA Bremen 5.5mm",
+        "categoria": "Llaves",
+        "stock": 168,
+        "unidad": "un",
+        "precio_costo": 6682.48,
+        "precio": 11360.22
+      },
+      {
+        "id": 2695,
+        "codigo": "BR9751",
+        "nombre": "LLAVE ALLEN Serie ESTANDAR Bremen (JGO 10 P.) SAE Cr. Va. (7343)",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 8006.65,
+        "precio": 13611.3
+      },
+      {
+        "id": 2696,
+        "codigo": "BR9750",
+        "nombre": "LLAVE ALLEN Serie ESTÁNDAR Bremen JGO 10 P",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 8006.65,
+        "precio": 13611.3
+      },
+      {
+        "id": 2697,
+        "codigo": "BR9337",
+        "nombre": "LLAVE COMBINADA 1 Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 18216.59,
+        "precio": 30968.2
+      },
+      {
+        "id": 2698,
+        "codigo": "BR9330",
+        "nombre": "LLAVE COMBINADA 1/2 Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 4989.9,
+        "precio": 8482.83
+      },
+      {
+        "id": 2699,
+        "codigo": "BR9326",
+        "nombre": "LLAVE COMBINADA 1/4 Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3364.62,
+        "precio": 5719.85
+      },
+      {
+        "id": 2700,
+        "codigo": "BR9304",
+        "nombre": "LLAVE COMBINADA 10mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3877.86,
+        "precio": 6592.36
+      },
+      {
+        "id": 2701,
+        "codigo": "BR9333",
+        "nombre": "LLAVE COMBINADA 11/16 Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 8012.35,
+        "precio": 13621
+      },
+      {
+        "id": 2702,
+        "codigo": "BR9305",
+        "nombre": "LLAVE COMBINADA 11mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 4277.06,
+        "precio": 7271
+      },
+      {
+        "id": 2703,
+        "codigo": "BR9306",
+        "nombre": "LLAVE COMBINADA 12mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 4619.22,
+        "precio": 7852.67
+      },
+      {
+        "id": 2704,
+        "codigo": "BR9307",
+        "nombre": "LLAVE COMBINADA 13mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 4989.9,
+        "precio": 8482.83
+      },
+      {
+        "id": 2705,
+        "codigo": "BR9308",
+        "nombre": "LLAVE COMBINADA 14mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 5816.8,
+        "precio": 9888.56
+      },
+      {
+        "id": 2706,
+        "codigo": "BR9309",
+        "nombre": "LLAVE COMBINADA 15mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 6501.13,
+        "precio": 11051.92
+      },
+      {
+        "id": 2707,
+        "codigo": "BR9310",
+        "nombre": "LLAVE COMBINADA 16mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 7156.94,
+        "precio": 12166.8
+      },
+      {
+        "id": 2708,
+        "codigo": "BR9311",
+        "nombre": "LLAVE COMBINADA 17mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 7926.81,
+        "precio": 13475.58
+      },
+      {
+        "id": 2709,
+        "codigo": "BR9312",
+        "nombre": "LLAVE COMBINADA 18mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 9038.85,
+        "precio": 15366.05
+      },
+      {
+        "id": 2710,
+        "codigo": "BR9313",
+        "nombre": "LLAVE COMBINADA 19mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 9922.77,
+        "precio": 16868.71
+      },
+      {
+        "id": 2711,
+        "codigo": "BR9314",
+        "nombre": "LLAVE COMBINADA 20mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 10436.02,
+        "precio": 17741.23
+      },
+      {
+        "id": 2712,
+        "codigo": "BR9315",
+        "nombre": "LLAVE COMBINADA 21mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 13258.88,
+        "precio": 22540.1
+      },
+      {
+        "id": 2713,
+        "codigo": "BR9316",
+        "nombre": "LLAVE COMBINADA 22mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 13458.47,
+        "precio": 22879.4
+      },
+      {
+        "id": 2714,
+        "codigo": "BR9317",
+        "nombre": "LLAVE COMBINADA 23mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 15711.06,
+        "precio": 26708.8
+      },
+      {
+        "id": 2715,
+        "codigo": "BR9318",
+        "nombre": "LLAVE COMBINADA 24mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 17079.71,
+        "precio": 29035.51
+      },
+      {
+        "id": 2716,
+        "codigo": "BR9319",
+        "nombre": "LLAVE COMBINADA 25mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 18448.37,
+        "precio": 31362.23
+      },
+      {
+        "id": 2717,
+        "codigo": "BR9320",
+        "nombre": "LLAVE COMBINADA 26mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 19731.49,
+        "precio": 33543.53
+      },
+      {
+        "id": 2718,
+        "codigo": "BR9321",
+        "nombre": "LLAVE COMBINADA 27mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 21128.66,
+        "precio": 35918.72
+      },
+      {
+        "id": 2719,
+        "codigo": "BR9322",
+        "nombre": "LLAVE COMBINADA 28mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 22802.46,
+        "precio": 38764.18
+      },
+      {
+        "id": 2720,
+        "codigo": "BR9323",
+        "nombre": "LLAVE COMBINADA 29mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 24265.17,
+        "precio": 41250.79
+      },
+      {
+        "id": 2721,
+        "codigo": "BR9334",
+        "nombre": "LLAVE COMBINADA 3/4 Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 9922.77,
+        "precio": 16868.71
+      },
+      {
+        "id": 2722,
+        "codigo": "BR9328",
+        "nombre": "LLAVE COMBINADA 3/8 Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3877.86,
+        "precio": 6592.36
+      },
+      {
+        "id": 2723,
+        "codigo": "BR9324",
+        "nombre": "LLAVE COMBINADA 30mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 25548.28,
+        "precio": 43432.08
+      },
+      {
+        "id": 2724,
+        "codigo": "BR9325",
+        "nombre": "LLAVE COMBINADA 32mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 42,
+        "unidad": "un",
+        "precio_costo": 28057.5,
+        "precio": 47697.75
+      },
+      {
+        "id": 2725,
+        "codigo": "BR9327",
+        "nombre": "LLAVE COMBINADA 5/16 Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3564.22,
+        "precio": 6059.17
+      },
+      {
+        "id": 2726,
+        "codigo": "BR9332",
+        "nombre": "LLAVE COMBINADA 5/8 Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 7166.94,
+        "precio": 12183.8
+      },
+      {
+        "id": 2727,
+        "codigo": "BR9300",
+        "nombre": "LLAVE COMBINADA 6mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3364.62,
+        "precio": 5719.85
+      },
+      {
+        "id": 2728,
+        "codigo": "BR9329",
+        "nombre": "LLAVE COMBINADA 7/16 Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 4277.06,
+        "precio": 7271
+      },
+      {
+        "id": 2729,
+        "codigo": "BR9335",
+        "nombre": "LLAVE COMBINADA 7/8 Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 13458.47,
+        "precio": 22879.4
+      },
+      {
+        "id": 2730,
+        "codigo": "BR9301",
+        "nombre": "LLAVE COMBINADA 7mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3364.62,
+        "precio": 5719.85
+      },
+      {
+        "id": 2731,
+        "codigo": "BR9302",
+        "nombre": "LLAVE COMBINADA 8mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3564.22,
+        "precio": 6059.17
+      },
+      {
+        "id": 2732,
+        "codigo": "BR9331",
+        "nombre": "LLAVE COMBINADA 9/16 Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 78,
+        "unidad": "un",
+        "precio_costo": 5816.8,
+        "precio": 9888.56
+      },
+      {
+        "id": 2733,
+        "codigo": "BR9303",
+        "nombre": "LLAVE COMBINADA 9mm Bremen Cr-V",
+        "categoria": "Llaves",
+        "stock": 75,
+        "unidad": "un",
+        "precio_costo": 3678.27,
+        "precio": 6253.06
+      },
+      {
+        "id": 2734,
+        "codigo": "BR10522",
+        "nombre": "LLAVE HEXAGONAL Cr-V CORTA 10mm Wembley",
+        "categoria": "Llaves",
+        "stock": 78,
+        "unidad": "un",
+        "precio_costo": 3585.93,
+        "precio": 6096.08
+      },
+      {
+        "id": 2735,
+        "codigo": "BR10525",
+        "nombre": "LLAVE HEXAGONAL Cr-V CORTA 13mm Wembley",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3585.93,
+        "precio": 6096.08
+      },
+      {
+        "id": 2736,
+        "codigo": "BR10533",
+        "nombre": "LLAVE HEXAGONAL Cr-V CORTA 14mm Wembley",
+        "categoria": "Llaves",
+        "stock": 84,
+        "unidad": "un",
+        "precio_costo": 3585.93,
+        "precio": 6096.08
+      },
+      {
+        "id": 2737,
+        "codigo": "BR10527",
+        "nombre": "LLAVE HEXAGONAL Cr-V CORTA 14mm Wembley",
+        "categoria": "Llaves",
+        "stock": 40,
+        "unidad": "un",
+        "precio_costo": 5139.19,
+        "precio": 8736.62
+      },
+      {
+        "id": 2738,
+        "codigo": "BR10520",
+        "nombre": "LLAVE HEXAGONAL Cr-V CORTA 8mm Wembley",
+        "categoria": "Llaves",
+        "stock": 74,
+        "unidad": "un",
+        "precio_costo": 3585.93,
+        "precio": 6096.08
+      },
+      {
+        "id": 2739,
+        "codigo": "BR9354",
+        "nombre": "PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785)",
+        "categoria": "Pelacables",
+        "stock": 19,
+        "unidad": "un",
+        "precio_costo": 12189.61,
+        "precio": 20722.34
+      },
+      {
+        "id": 2740,
+        "codigo": "BR9353",
+        "nombre": "PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104)",
+        "categoria": "Pelacables",
+        "stock": 4,
+        "unidad": "un",
+        "precio_costo": 7230.01,
+        "precio": 12291.02
+      },
+      {
+        "id": 2741,
+        "codigo": "BR2623",
+        "nombre": "PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219)",
+        "categoria": "Pinzas",
+        "stock": 0,
+        "unidad": "un",
+        "precio_costo": 12607.46,
+        "precio": 34292.29
+      },
+      {
+        "id": 2742,
+        "codigo": "BR2126",
+        "nombre": "PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049)",
+        "categoria": "Pinzas",
+        "stock": 1,
+        "unidad": "m",
+        "precio_costo": 7550.62,
+        "precio": 2
+      }
+    ],
+    "categorias": [
+      {
+        "id": 3,
+        "nombre": "cubierta"
+      },
+      {
+        "id": 4,
+        "nombre": "aceite"
+      },
+      {
+        "id": 5,
+        "nombre": "guerrini"
+      },
+      {
+        "id": 6,
+        "nombre": "ejemplo"
+      }
+    ],
+    "ventas": [
+      {
+        "id": 1,
+        "producto_id": 76,
+        "cantidad": 2,
+        "total": 24379.22,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-10 23:33:57"
+      },
+      {
+        "id": 2,
+        "producto_id": 79,
+        "cantidad": 1,
+        "total": 140002,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-11 15:24:55"
+      },
+      {
+        "id": 3,
+        "producto_id": 79,
+        "cantidad": 2,
+        "total": 280004,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-11 15:26:08"
+      },
+      {
+        "id": 4,
+        "producto_id": 79,
+        "cantidad": 200,
+        "total": 28000400,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-11 15:26:30"
+      },
+      {
+        "id": 5,
+        "producto_id": 73,
+        "cantidad": 2,
+        "total": 84566.94,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-24 13:57:51"
+      },
+      {
+        "id": 6,
+        "producto_id": 74,
+        "cantidad": 1,
+        "total": 34214.71,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-24 13:58:44"
+      },
+      {
+        "id": 7,
+        "producto_id": 74,
+        "cantidad": 2,
+        "total": 68429.42,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-24 18:49:02"
+      },
+      {
+        "id": 8,
+        "producto_id": 74,
+        "cantidad": 1,
+        "total": 34214.71,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-24 18:52:07"
+      },
+      {
+        "id": 9,
+        "producto_id": 82,
+        "cantidad": 2,
+        "total": 6446,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-24 19:03:07"
+      },
+      {
+        "id": 10,
+        "producto_id": 74,
+        "cantidad": 2,
+        "total": 68429.42,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-24 19:21:53"
+      },
+      {
+        "id": 11,
+        "producto_id": 73,
+        "cantidad": 2,
+        "total": 153911.84,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-25 13:53:24"
+      },
+      {
+        "id": 12,
+        "producto_id": 74,
+        "cantidad": 2,
+        "total": 150695.26,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-25 13:54:30"
+      },
+      {
+        "id": 13,
+        "producto_id": 73,
+        "cantidad": 4,
+        "total": 307823.68,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-25 13:54:30"
+      },
+      {
+        "id": 14,
+        "producto_id": 72,
+        "cantidad": 1,
+        "total": 128495.24,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-25 13:54:30"
+      },
+      {
+        "id": 15,
+        "producto_id": 74,
+        "cantidad": 2,
+        "total": 150695.26,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-25 13:58:13"
+      },
+      {
+        "id": 16,
+        "producto_id": 73,
+        "cantidad": 1,
+        "total": 76955.92,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-25 13:58:13"
+      },
+      {
+        "id": 17,
+        "producto_id": 73,
+        "cantidad": 4,
+        "total": 307823.68,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-25 13:58:31"
+      },
+      {
+        "id": 18,
+        "producto_id": 73,
+        "cantidad": 3,
+        "total": 230867.76,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-25 14:17:39"
+      },
+      {
+        "id": 19,
+        "producto_id": 73,
+        "cantidad": 1,
+        "total": 76955.92,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-25 14:18:27"
+      },
+      {
+        "id": 20,
+        "producto_id": 73,
+        "cantidad": 7,
+        "total": 538691.44,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-25 14:18:58"
+      },
+      {
+        "id": 21,
+        "producto_id": 72,
+        "cantidad": 6,
+        "total": 770971.4400000001,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-25 14:19:18"
+      },
+      {
+        "id": 22,
+        "producto_id": 71,
+        "cantidad": 4,
+        "total": 1020825.6,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-25 14:19:57"
+      },
+      {
+        "id": 23,
+        "producto_id": 71,
+        "cantidad": 2,
+        "total": 510412.8,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-25 14:20:09"
+      },
+      {
+        "id": 24,
+        "producto_id": 71,
+        "cantidad": 2,
+        "total": 510412.8,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-25 14:20:18"
+      },
+      {
+        "id": 25,
+        "producto_id": 70,
+        "cantidad": 4,
+        "total": 694993.36,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-25 14:23:37"
+      },
+      {
+        "id": 26,
+        "producto_id": 70,
+        "cantidad": 4,
+        "total": 694993.36,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-25 14:23:48"
+      },
+      {
+        "id": 27,
+        "producto_id": 70,
+        "cantidad": 4,
+        "total": 694993.36,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-25 14:24:01"
+      },
+      {
+        "id": 28,
+        "producto_id": 86,
+        "cantidad": 4,
+        "total": 8,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-25 14:45:21"
+      },
+      {
+        "id": 29,
+        "producto_id": 86,
+        "cantidad": 10,
+        "total": 20,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-25 14:48:34"
+      },
+      {
+        "id": 30,
+        "producto_id": 83,
+        "cantidad": 2,
+        "total": 24439.08,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-25 14:49:04"
+      },
+      {
+        "id": 31,
+        "producto_id": 83,
+        "cantidad": 2,
+        "total": 24439.08,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-25 14:49:05"
+      },
+      {
+        "id": 32,
+        "producto_id": 83,
+        "cantidad": 2,
+        "total": 24439.08,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-25 14:49:06"
+      },
+      {
+        "id": 33,
+        "producto_id": 86,
+        "cantidad": 2,
+        "total": 4,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-25 14:52:34"
+      },
+      {
+        "id": 34,
+        "producto_id": 84,
+        "cantidad": 4,
+        "total": 57840.08,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-25 14:53:27"
+      },
+      {
+        "id": 35,
+        "producto_id": 86,
+        "cantidad": 4,
+        "total": 8,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-25 14:57:58"
+      },
+      {
+        "id": 36,
+        "producto_id": 86,
+        "cantidad": 3,
+        "total": 1200000,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-25 14:59:12"
+      },
+      {
+        "id": 37,
+        "producto_id": 86,
+        "cantidad": 1,
+        "total": 40000000,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-25 14:59:34"
+      },
+      {
+        "id": 38,
+        "producto_id": 86,
+        "cantidad": 1,
+        "total": 40000000,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-25 15:00:06"
+      },
+      {
+        "id": 39,
+        "producto_id": 86,
+        "cantidad": 1,
+        "total": 40000000,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-25 15:00:15"
+      },
+      {
+        "id": 40,
+        "producto_id": 86,
+        "cantidad": 2,
+        "total": 80000000,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-25 15:00:47"
+      },
+      {
+        "id": 41,
+        "producto_id": 86,
+        "cantidad": 2,
+        "total": 80000000,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-25 15:06:08"
+      },
+      {
+        "id": 42,
+        "producto_id": 87,
+        "cantidad": 1,
+        "total": 0,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-26 11:53:24"
+      },
+      {
+        "id": 43,
+        "producto_id": 58,
+        "cantidad": 2,
+        "total": 366958.18,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-26 11:56:30"
+      },
+      {
+        "id": 44,
+        "producto_id": 59,
+        "cantidad": 2,
+        "total": 366958.18,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-26 11:56:30"
+      },
+      {
+        "id": 45,
+        "producto_id": 89,
+        "cantidad": 2,
+        "total": 8000,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-26 11:57:43"
+      },
+      {
+        "id": 46,
+        "producto_id": 89,
+        "cantidad": 1,
+        "total": 4000,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-26 11:57:57"
+      },
+      {
+        "id": 47,
+        "producto_id": 89,
+        "cantidad": 2,
+        "total": 8000,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-26 12:21:54"
+      },
+      {
+        "id": 48,
+        "producto_id": 89,
+        "cantidad": 1,
+        "total": 4000,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-26 15:41:59"
+      },
+      {
+        "id": 49,
+        "producto_id": 89,
+        "cantidad": 1,
+        "total": 4000,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-26 15:53:08"
+      },
+      {
+        "id": 50,
+        "producto_id": 83,
+        "cantidad": 1,
+        "total": 43623.76,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-26 16:13:47"
+      },
+      {
+        "id": 51,
+        "producto_id": 90,
+        "cantidad": 2,
+        "total": 24379.22,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-27 12:12:49"
+      },
+      {
+        "id": 52,
+        "producto_id": 84,
+        "cantidad": 2,
+        "total": 14460.02,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-27 12:14:41"
+      },
+      {
+        "id": 53,
+        "producto_id": 83,
+        "cantidad": 2,
+        "total": 12219.54,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-27 12:18:08"
+      },
+      {
+        "id": 54,
+        "producto_id": 83,
+        "cantidad": 2,
+        "total": 12219.54,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-27 12:18:17"
+      },
+      {
+        "id": 55,
+        "producto_id": 73,
+        "cantidad": 2,
+        "total": 15101.24,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-27 12:21:03"
+      },
+      {
+        "id": 56,
+        "producto_id": 67,
+        "cantidad": 2,
+        "total": 16013.3,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-27 12:26:59"
+      },
+      {
+        "id": 57,
+        "producto_id": 69,
+        "cantidad": 2,
+        "total": 42314.36,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-27 12:27:19"
+      },
+      {
+        "id": 58,
+        "producto_id": 71,
+        "cantidad": 1,
+        "total": 20694.11,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-02-27 12:32:03"
+      },
+      {
+        "id": 59,
+        "producto_id": 72,
+        "cantidad": 2,
+        "total": 25214.92,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-27 12:53:31"
+      },
+      {
+        "id": 60,
+        "producto_id": 65,
+        "cantidad": 2,
+        "total": 13364.96,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-27 13:03:22"
+      },
+      {
+        "id": 61,
+        "producto_id": 90,
+        "cantidad": 1,
+        "total": 12189.61,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-27 13:04:51"
+      },
+      {
+        "id": 62,
+        "producto_id": 83,
+        "cantidad": 2,
+        "total": 15885.4,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-27 13:07:10"
+      },
+      {
+        "id": 63,
+        "producto_id": 71,
+        "cantidad": 2,
+        "total": 53804.68,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-27 13:13:26"
+      },
+      {
+        "id": 64,
+        "producto_id": 84,
+        "cantidad": 1,
+        "total": 9399.01,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-27 13:16:32"
+      },
+      {
+        "id": 65,
+        "producto_id": 73,
+        "cantidad": 2,
+        "total": 19631.62,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-02-27 13:16:50"
+      },
+      {
+        "id": 66,
+        "producto_id": 90,
+        "cantidad": 2,
+        "total": 38031.58,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-27 13:18:22"
+      },
+      {
+        "id": 67,
+        "producto_id": 94,
+        "cantidad": 1,
+        "total": 12189.61,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-27 16:20:14"
+      },
+      {
+        "id": 68,
+        "producto_id": 69,
+        "cantidad": 2,
+        "total": 42314.36,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-27 16:23:39"
+      },
+      {
+        "id": 69,
+        "producto_id": 90,
+        "cantidad": 3,
+        "total": 57047.37,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-02-27 16:27:21"
+      },
+      {
+        "id": 70,
+        "producto_id": 94,
+        "cantidad": 1,
+        "total": 12189.61,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-03-10 17:53:17"
+      },
+      {
+        "id": 71,
+        "producto_id": 90,
+        "cantidad": 6,
+        "total": 114094.74,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-03-10 17:53:17"
+      },
+      {
+        "id": 72,
+        "producto_id": 90,
+        "cantidad": 3,
+        "total": 62752.11,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-03-11 18:07:44"
+      },
+      {
+        "id": 73,
+        "producto_id": 70,
+        "cantidad": 5,
+        "total": 77488.75,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-03-11 18:32:44"
+      },
+      {
+        "id": 74,
+        "producto_id": 63,
+        "cantidad": 2,
+        "total": 5111.62,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-03-12 17:43:28"
+      },
+      {
+        "id": 75,
+        "producto_id": 72,
+        "cantidad": 2,
+        "total": 27736.42,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-03-12 18:10:21"
+      },
+      {
+        "id": 76,
+        "producto_id": 71,
+        "cantidad": 1,
+        "total": 22763.52,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-03-12 18:10:21"
+      },
+      {
+        "id": 77,
+        "producto_id": 56,
+        "cantidad": 3,
+        "total": 17636.579999999998,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-03-14 18:32:37"
+      },
+      {
+        "id": 78,
+        "producto_id": 95,
+        "cantidad": 1,
+        "total": 2000,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-03-14 18:44:18"
+      },
+      {
+        "id": 79,
+        "producto_id": 98,
+        "cantidad": 4,
+        "total": 128,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-03-14 18:46:26"
+      },
+      {
+        "id": 80,
+        "producto_id": 98,
+        "cantidad": 3,
+        "total": 96,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-03-14 18:48:38"
+      },
+      {
+        "id": 81,
+        "producto_id": 98,
+        "cantidad": 2,
+        "total": 64,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-03-17 17:30:10"
+      },
+      {
+        "id": 82,
+        "producto_id": 83,
+        "cantidad": 4,
+        "total": 26883,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-03-17 17:30:33"
+      },
+      {
+        "id": 83,
+        "producto_id": 95,
+        "cantidad": 1,
+        "total": 2000,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-03-19 16:47:17"
+      },
+      {
+        "id": 84,
+        "producto_id": 90,
+        "cantidad": 4,
+        "total": 83669.48,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-06 12:31:00"
+      },
+      {
+        "id": 85,
+        "producto_id": 90,
+        "cantidad": 2,
+        "total": 41834.74,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-06 12:34:47"
+      },
+      {
+        "id": 86,
+        "producto_id": 90,
+        "cantidad": 2,
+        "total": 41834.74,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-04-08 15:54:22"
+      },
+      {
+        "id": 87,
+        "producto_id": 90,
+        "cantidad": 2,
+        "total": 41834.74,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-04-08 23:34:02"
+      },
+      {
+        "id": 88,
+        "producto_id": 90,
+        "cantidad": 2,
+        "total": 41834.74,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-04-08 23:34:56"
+      },
+      {
+        "id": 89,
+        "producto_id": 67,
+        "cantidad": 1,
+        "total": 8807.32,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-04-08 23:34:56"
+      },
+      {
+        "id": 90,
+        "producto_id": 68,
+        "cantidad": 1,
+        "total": 16874.42,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-04-08 23:34:56"
+      },
+      {
+        "id": 91,
+        "producto_id": 90,
+        "cantidad": 2,
+        "total": 41834.74,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-08 23:35:44"
+      },
+      {
+        "id": 92,
+        "producto_id": 84,
+        "cantidad": 1,
+        "total": 7953.01,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-08 23:35:44"
+      },
+      {
+        "id": 93,
+        "producto_id": 90,
+        "cantidad": 3,
+        "total": 62752.11,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-04-08 23:38:45"
+      },
+      {
+        "id": 94,
+        "producto_id": 90,
+        "cantidad": 2,
+        "total": 41834.74,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-04-08 23:44:48"
+      },
+      {
+        "id": 95,
+        "producto_id": 90,
+        "cantidad": 3,
+        "total": 62752.11,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-04-08 23:52:46"
+      },
+      {
+        "id": 96,
+        "producto_id": 90,
+        "cantidad": 2,
+        "total": 41834.74,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-04-09 00:04:16"
+      },
+      {
+        "id": 97,
+        "producto_id": 90,
+        "cantidad": 1,
+        "total": 20917.37,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-04-09 00:04:32"
+      },
+      {
+        "id": 98,
+        "producto_id": 90,
+        "cantidad": 3,
+        "total": 62752.11,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-09 00:17:24"
+      },
+      {
+        "id": 99,
+        "producto_id": 90,
+        "cantidad": 2,
+        "total": 41834.74,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-04-09 18:13:03"
+      },
+      {
+        "id": 100,
+        "producto_id": 90,
+        "cantidad": 2,
+        "total": 41834.74,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-04-09 18:16:57"
+      },
+      {
+        "id": 101,
+        "producto_id": 71,
+        "cantidad": 1,
+        "total": 22763.52,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-09 18:22:21"
+      },
+      {
+        "id": 102,
+        "producto_id": 72,
+        "cantidad": 1,
+        "total": 13868.21,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-09 18:22:21"
+      },
+      {
+        "id": 103,
+        "producto_id": 73,
+        "cantidad": 2,
+        "total": 16611.36,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-09 18:22:21"
+      },
+      {
+        "id": 104,
+        "producto_id": 2518,
+        "cantidad": 2,
+        "total": 1630,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 16:41:19"
+      },
+      {
+        "id": 105,
+        "producto_id": 2518,
+        "cantidad": 1,
+        "total": 815,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-04-15 16:42:57"
+      },
+      {
+        "id": 106,
+        "producto_id": 2517,
+        "cantidad": 1,
+        "total": 9214,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-04-15 16:42:57"
+      },
+      {
+        "id": 107,
+        "producto_id": 2515,
+        "cantidad": 1,
+        "total": 1009.8,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-04-15 16:42:57"
+      },
+      {
+        "id": 108,
+        "producto_id": 2518,
+        "cantidad": 1,
+        "total": 815,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 17:07:48"
+      },
+      {
+        "id": 109,
+        "producto_id": 2515,
+        "cantidad": 1,
+        "total": 1009.8,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 17:07:48"
+      },
+      {
+        "id": 110,
+        "producto_id": 2514,
+        "cantidad": 1,
+        "total": 583,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 17:07:48"
+      },
+      {
+        "id": 111,
+        "producto_id": 2514,
+        "cantidad": 1,
+        "total": 583,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 17:08:07"
+      },
+      {
+        "id": 112,
+        "producto_id": 2515,
+        "cantidad": 1,
+        "total": 1009.8,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 17:08:07"
+      },
+      {
+        "id": 113,
+        "producto_id": 2513,
+        "cantidad": 1,
+        "total": 4775,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 17:08:07"
+      },
+      {
+        "id": 114,
+        "producto_id": 2518,
+        "cantidad": 1,
+        "total": 815,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-04-15 17:11:54"
+      },
+      {
+        "id": 115,
+        "producto_id": 2515,
+        "cantidad": 1,
+        "total": 1009.8,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-04-15 17:11:54"
+      },
+      {
+        "id": 116,
+        "producto_id": 2514,
+        "cantidad": 1,
+        "total": 583,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-04-15 17:11:54"
+      },
+      {
+        "id": 117,
+        "producto_id": 2518,
+        "cantidad": 1,
+        "total": 815,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 17:13:51"
+      },
+      {
+        "id": 118,
+        "producto_id": 2515,
+        "cantidad": 1,
+        "total": 1009.8,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 17:13:51"
+      },
+      {
+        "id": 119,
+        "producto_id": 2514,
+        "cantidad": 1,
+        "total": 583,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 17:13:51"
+      },
+      {
+        "id": 120,
+        "producto_id": 2510,
+        "cantidad": 1,
+        "total": 3995,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 17:17:27"
+      },
+      {
+        "id": 121,
+        "producto_id": 2509,
+        "cantidad": 1,
+        "total": 1595,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 17:17:27"
+      },
+      {
+        "id": 122,
+        "producto_id": 2508,
+        "cantidad": 1,
+        "total": 2964,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 17:17:27"
+      },
+      {
+        "id": 123,
+        "producto_id": 2518,
+        "cantidad": 2,
+        "total": 1630,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-04-15 17:18:18"
+      },
+      {
+        "id": 124,
+        "producto_id": 2515,
+        "cantidad": 2,
+        "total": 2019.6,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 18:30:05"
+      },
+      {
+        "id": 125,
+        "producto_id": 2514,
+        "cantidad": 1,
+        "total": 583,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 18:30:05"
+      },
+      {
+        "id": 126,
+        "producto_id": 2518,
+        "cantidad": 1,
+        "total": 815,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 18:51:26"
+      },
+      {
+        "id": 127,
+        "producto_id": 2515,
+        "cantidad": 1,
+        "total": 1009.8,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 18:51:26"
+      },
+      {
+        "id": 128,
+        "producto_id": 2514,
+        "cantidad": 1,
+        "total": 583,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 18:51:26"
+      },
+      {
+        "id": 129,
+        "producto_id": 2518,
+        "cantidad": 1,
+        "total": 815,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 18:56:21"
+      },
+      {
+        "id": 130,
+        "producto_id": 2512,
+        "cantidad": 1,
+        "total": 8500,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 18:56:21"
+      },
+      {
+        "id": 131,
+        "producto_id": 2513,
+        "cantidad": 1,
+        "total": 4775,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 18:56:21"
+      },
+      {
+        "id": 132,
+        "producto_id": 2515,
+        "cantidad": 1,
+        "total": 1009.8,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 19:05:00"
+      },
+      {
+        "id": 133,
+        "producto_id": 2514,
+        "cantidad": 1,
+        "total": 583,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 19:05:00"
+      },
+      {
+        "id": 134,
+        "producto_id": 2515,
+        "cantidad": 1,
+        "total": 1009.8,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 19:05:31"
+      },
+      {
+        "id": 135,
+        "producto_id": 2514,
+        "cantidad": 1,
+        "total": 583,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 19:05:31"
+      },
+      {
+        "id": 136,
+        "producto_id": 2513,
+        "cantidad": 1,
+        "total": 4775,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-15 19:05:31"
+      },
+      {
+        "id": 137,
+        "producto_id": 2518,
+        "cantidad": 1,
+        "total": 1790.55,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-04-20 15:56:33"
+      },
+      {
+        "id": 138,
+        "producto_id": 2515,
+        "cantidad": 1,
+        "total": 2218.53,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-04-20 15:56:33"
+      },
+      {
+        "id": 139,
+        "producto_id": 2514,
+        "cantidad": 1,
+        "total": 1280.85,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-04-20 15:56:33"
+      },
+      {
+        "id": 140,
+        "producto_id": 2523,
+        "cantidad": 3,
+        "total": 45000,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-20 16:38:03"
+      },
+      {
+        "id": 141,
+        "producto_id": 2742,
+        "cantidad": 2,
+        "total": 25672.1,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-04-21 16:43:27"
+      },
+      {
+        "id": 142,
+        "producto_id": 2742,
+        "cantidad": 2,
+        "total": 25672.1,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-21 16:56:28"
+      },
+      {
+        "id": 143,
+        "producto_id": 2742,
+        "cantidad": 2,
+        "total": 25672.1,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-21 16:58:21"
+      },
+      {
+        "id": 144,
+        "producto_id": 2741,
+        "cantidad": 1,
+        "total": 21432.68,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-21 16:58:21"
+      },
+      {
+        "id": 145,
+        "producto_id": 2742,
+        "cantidad": 1,
+        "total": 12836.05,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-21 17:01:41"
+      },
+      {
+        "id": 146,
+        "producto_id": 2741,
+        "cantidad": 2,
+        "total": 42865.36,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-21 17:01:41"
+      },
+      {
+        "id": 147,
+        "producto_id": 2742,
+        "cantidad": 2,
+        "total": 25672.1,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-21 17:21:22"
+      },
+      {
+        "id": 148,
+        "producto_id": 2742,
+        "cantidad": 1,
+        "total": 20537.68,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-24 14:57:50"
+      },
+      {
+        "id": 149,
+        "producto_id": 2741,
+        "cantidad": 2,
+        "total": 68584.58,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-04-24 14:57:50"
+      },
+      {
+        "id": 150,
+        "producto_id": 2740,
+        "cantidad": 2,
+        "total": 24582.04,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-16 16:59:40"
+      },
+      {
+        "id": 151,
+        "producto_id": 2739,
+        "cantidad": 2,
+        "total": 41444.68,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-21 13:02:05"
+      },
+      {
+        "id": 152,
+        "producto_id": 2739,
+        "cantidad": 3,
+        "total": 62167.020000000004,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-23 14:43:39"
+      },
+      {
+        "id": 153,
+        "producto_id": 2738,
+        "cantidad": 2,
+        "total": 12192.16,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-23 14:43:39"
+      },
+      {
+        "id": 154,
+        "producto_id": 2732,
+        "cantidad": 2,
+        "total": 19777.12,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-23 14:44:27"
+      },
+      {
+        "id": 155,
+        "producto_id": 2733,
+        "cantidad": 2,
+        "total": 12506.12,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-23 14:44:27"
+      },
+      {
+        "id": 156,
+        "producto_id": 2734,
+        "cantidad": 2,
+        "total": 12192.16,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-23 14:44:27"
+      },
+      {
+        "id": 157,
+        "producto_id": 2740,
+        "cantidad": 1,
+        "total": 12291.02,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-23 14:48:36"
+      },
+      {
+        "id": 158,
+        "producto_id": 2742,
+        "cantidad": 1,
+        "total": 2,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-24 09:46:36"
+      },
+      {
+        "id": 159,
+        "producto_id": 2743,
+        "cantidad": 2,
+        "total": 44,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-06-24 18:15:01"
+      },
+      {
+        "id": 160,
+        "producto_id": 2742,
+        "cantidad": 2,
+        "total": 4,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-06-24 18:15:02"
+      },
+      {
+        "id": 161,
+        "producto_id": 2741,
+        "cantidad": 1,
+        "total": 34292.29,
+        "cliente": null,
+        "metodo_pago": "Mercado Pago",
+        "fecha": "2026-06-24 18:15:02"
+      },
+      {
+        "id": 162,
+        "producto_id": 2743,
+        "cantidad": 1,
+        "total": 22,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-24 18:15:31"
+      },
+      {
+        "id": 163,
+        "producto_id": 2742,
+        "cantidad": 1,
+        "total": 2,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-24 18:15:31"
+      },
+      {
+        "id": 164,
+        "producto_id": 2741,
+        "cantidad": 1,
+        "total": 34292.29,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-24 18:15:31"
+      },
+      {
+        "id": 165,
+        "producto_id": 2743,
+        "cantidad": 1,
+        "total": 22,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-27 21:26:09"
+      },
+      {
+        "id": 166,
+        "producto_id": 2741,
+        "cantidad": 1,
+        "total": 34292.29,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-27 21:26:09"
+      },
+      {
+        "id": 167,
+        "producto_id": 2733,
+        "cantidad": 2,
+        "total": 12506.12,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-27 21:26:09"
+      },
+      {
+        "id": 168,
+        "producto_id": 2743,
+        "cantidad": 4,
+        "total": 88,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-29 18:05:19"
+      },
+      {
+        "id": 169,
+        "producto_id": 2740,
+        "cantidad": 1,
+        "total": 12291.02,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-29 18:05:19"
+      },
+      {
+        "id": 170,
+        "producto_id": 2739,
+        "cantidad": 2,
+        "total": 41444.68,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-29 18:05:19"
+      },
+      {
+        "id": 171,
+        "producto_id": 2740,
+        "cantidad": 8,
+        "total": 98328.16,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-30 16:58:34"
+      },
+      {
+        "id": 172,
+        "producto_id": 2739,
+        "cantidad": 2,
+        "total": 41444.68,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-30 16:58:34"
+      },
+      {
+        "id": 173,
+        "producto_id": 2739,
+        "cantidad": 2,
+        "total": 41444.68,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-30 17:00:00"
+      },
+      {
+        "id": 174,
+        "producto_id": 2738,
+        "cantidad": 1,
+        "total": 6096.08,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-30 17:00:00"
+      },
+      {
+        "id": 175,
+        "producto_id": 2739,
+        "cantidad": 2,
+        "total": 41444.68,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-06-30 17:00:48"
+      },
+      {
+        "id": 176,
+        "producto_id": 2738,
+        "cantidad": 2,
+        "total": 12192.16,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-06-30 17:00:48"
+      },
+      {
+        "id": 177,
+        "producto_id": 2733,
+        "cantidad": 1,
+        "total": 6253.06,
+        "cliente": null,
+        "metodo_pago": "Transferencia",
+        "fecha": "2026-06-30 17:00:48"
+      },
+      {
+        "id": 178,
+        "producto_id": 2742,
+        "cantidad": 2,
+        "total": 4,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-30 17:14:31"
+      },
+      {
+        "id": 179,
+        "producto_id": 2740,
+        "cantidad": 2,
+        "total": 24582.04,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-06-30 17:40:36"
+      },
+      {
+        "id": 180,
+        "producto_id": 1,
+        "cantidad": 5,
+        "total": 2500,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-07-01 18:13:55"
+      },
+      {
+        "id": 181,
+        "producto_id": 2737,
+        "cantidad": 2,
+        "total": 17473.24,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-07-02 15:01:02"
+      },
+      {
+        "id": 182,
+        "producto_id": 2738,
+        "cantidad": 1,
+        "total": 6096.08,
+        "cliente": null,
+        "metodo_pago": "Efectivo",
+        "fecha": "2026-07-02 15:01:02"
+      }
+    ],
+    "historial": [
+      {
+        "id": 1,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-10 13:11:55"
+      },
+      {
+        "id": 2,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-10 13:14:32"
+      },
+      {
+        "id": 3,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-10 13:16:11"
+      },
+      {
+        "id": 4,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-10 13:18:51"
+      },
+      {
+        "id": 5,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-10 13:42:20"
+      },
+      {
+        "id": 6,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-10 13:48:05"
+      },
+      {
+        "id": 7,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-10 13:53:25"
+      },
+      {
+        "id": 8,
+        "accion": "Exportar Excel",
+        "detalle": "Productos exportados: 76",
+        "fecha": "2026-02-10 13:53:38"
+      },
+      {
+        "id": 9,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 77, Nombre: nosexd",
+        "fecha": "2026-02-10 13:54:05"
+      },
+      {
+        "id": 10,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (2u) | Total: $24379.22 | Pago: Efectivo",
+        "fecha": "2026-02-10 23:33:57"
+      },
+      {
+        "id": 11,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-10 23:37:11"
+      },
+      {
+        "id": 12,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-10 23:37:18"
+      },
+      {
+        "id": 13,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-10 23:40:16"
+      },
+      {
+        "id": 14,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 01:03:01"
+      },
+      {
+        "id": 15,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 01:03:11"
+      },
+      {
+        "id": 16,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 12:05:28"
+      },
+      {
+        "id": 17,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 12:05:39"
+      },
+      {
+        "id": 18,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 12:06:02"
+      },
+      {
+        "id": 19,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 12:06:44"
+      },
+      {
+        "id": 20,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 12:06:52"
+      },
+      {
+        "id": 21,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 12:07:33"
+      },
+      {
+        "id": 22,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 12:30:29"
+      },
+      {
+        "id": 23,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 12:30:42"
+      },
+      {
+        "id": 24,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 12:30:52"
+      },
+      {
+        "id": 25,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 13:52:52"
+      },
+      {
+        "id": 26,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 76, Nombre: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785)",
+        "fecha": "2026-02-11 13:53:04"
+      },
+      {
+        "id": 27,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 14:55:18"
+      },
+      {
+        "id": 28,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos:  | Total: $0.00 | Pago: Mercado Pago",
+        "fecha": "2026-02-11 14:55:33"
+      },
+      {
+        "id": 29,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Porcentaje: 40%, Categoría: __all__",
+        "fecha": "2026-02-11 14:57:02"
+      },
+      {
+        "id": 30,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 15:22:52"
+      },
+      {
+        "id": 31,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: tasas (1u) | Total: $140002.00 | Pago: Transferencia",
+        "fecha": "2026-02-11 15:24:55"
+      },
+      {
+        "id": 32,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: tasas (2u) | Total: $280004.00 | Pago: Efectivo",
+        "fecha": "2026-02-11 15:26:08"
+      },
+      {
+        "id": 33,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: tasas (200u) | Total: $28000400.00 | Pago: Efectivo",
+        "fecha": "2026-02-11 15:26:30"
+      },
+      {
+        "id": 34,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos:  | Total: $0.00 | Pago: Mercado Pago",
+        "fecha": "2026-02-11 17:05:27"
+      },
+      {
+        "id": 35,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 79, Nombre: tasas",
+        "fecha": "2026-02-11 17:13:14"
+      },
+      {
+        "id": 36,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 78, Nombre: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785)",
+        "fecha": "2026-02-11 17:13:17"
+      },
+      {
+        "id": 37,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 75, Nombre: PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104)",
+        "fecha": "2026-02-11 17:13:19"
+      },
+      {
+        "id": 38,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-11 17:13:26"
+      },
+      {
+        "id": 39,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-23 17:55:39"
+      },
+      {
+        "id": 40,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 81, Nombre: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785)",
+        "fecha": "2026-02-24 13:41:52"
+      },
+      {
+        "id": 41,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 80, Nombre: PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104)",
+        "fecha": "2026-02-24 13:57:46"
+      },
+      {
+        "id": 42,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (2u) | Total: $84566.94 | Pago: Mercado Pago",
+        "fecha": "2026-02-24 13:57:51"
+      },
+      {
+        "id": 43,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (1u) | Total: $34214.71 | Pago: Transferencia",
+        "fecha": "2026-02-24 13:58:44"
+      },
+      {
+        "id": 44,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (2u) | Total: $68429.42 | Pago: Efectivo",
+        "fecha": "2026-02-24 18:49:02"
+      },
+      {
+        "id": 45,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (1u) | Total: $34214.71 | Pago: Efectivo",
+        "fecha": "2026-02-24 18:52:07"
+      },
+      {
+        "id": 46,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: papu12 (2u) | Total: $6446.00 | Pago: Transferencia",
+        "fecha": "2026-02-24 19:03:07"
+      },
+      {
+        "id": 47,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 82, Nombre: papu12",
+        "fecha": "2026-02-24 19:21:38"
+      },
+      {
+        "id": 48,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (2u) | Total: $68429.42 | Pago: Transferencia",
+        "fecha": "2026-02-24 19:21:53"
+      },
+      {
+        "id": 49,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Porcentaje: 40%, Categoría: __all__",
+        "fecha": "2026-02-24 22:35:38"
+      },
+      {
+        "id": 50,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Porcentaje: 30%, Categoría: __all__",
+        "fecha": "2026-02-24 22:35:43"
+      },
+      {
+        "id": 51,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Porcentaje: 60%, Categoría: Destornilladores",
+        "fecha": "2026-02-25 10:04:17"
+      },
+      {
+        "id": 52,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Porcentaje: 21%, Categoría: Llaves",
+        "fecha": "2026-02-25 12:51:01"
+      },
+      {
+        "id": 53,
+        "accion": "Agregar categoría",
+        "detalle": "Nombre: mesa 2",
+        "fecha": "2026-02-25 12:54:22"
+      },
+      {
+        "id": 54,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (2u) | Total: $153911.84 | Pago: Mercado Pago",
+        "fecha": "2026-02-25 13:53:24"
+      },
+      {
+        "id": 55,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (2u), PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (4u), PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (1u) | Total: $587014.18 | Pago: Mercado Pago",
+        "fecha": "2026-02-25 13:54:30"
+      },
+      {
+        "id": 56,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (2u), PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (1u) | Total: $227651.18 | Pago: Efectivo",
+        "fecha": "2026-02-25 13:58:13"
+      },
+      {
+        "id": 57,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (4u) | Total: $307823.68 | Pago: Transferencia",
+        "fecha": "2026-02-25 13:58:31"
+      },
+      {
+        "id": 58,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos:  | Total: $0.00 | Pago: Transferencia",
+        "fecha": "2026-02-25 14:04:15"
+      },
+      {
+        "id": 59,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (3u) | Total: $230867.76 | Pago: Transferencia",
+        "fecha": "2026-02-25 14:17:39"
+      },
+      {
+        "id": 60,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (1u) | Total: $76955.92 | Pago: Efectivo",
+        "fecha": "2026-02-25 14:18:27"
+      },
+      {
+        "id": 61,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (7u) | Total: $538691.44 | Pago: Efectivo",
+        "fecha": "2026-02-25 14:18:58"
+      },
+      {
+        "id": 62,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (6u) | Total: $770971.44 | Pago: Mercado Pago",
+        "fecha": "2026-02-25 14:19:18"
+      },
+      {
+        "id": 63,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE AJUSTABLE CROMADA Bremen Cr. Va. 10\" Profesional BL (4162) (4u) | Total: $1020825.60 | Pago: Transferencia",
+        "fecha": "2026-02-25 14:19:57"
+      },
+      {
+        "id": 64,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE AJUSTABLE CROMADA Bremen Cr. Va. 10\" Profesional BL (4162) (2u) | Total: $510412.80 | Pago: Transferencia",
+        "fecha": "2026-02-25 14:20:09"
+      },
+      {
+        "id": 65,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE AJUSTABLE CROMADA Bremen Cr. Va. 10\" Profesional BL (4162) (2u) | Total: $510412.80 | Pago: Mercado Pago",
+        "fecha": "2026-02-25 14:20:18"
+      },
+      {
+        "id": 66,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE AJUSTABLE CROMADA Bremen Cr. Va. 8\" Profesional BL (4161) (4u) | Total: $694993.36 | Pago: Transferencia",
+        "fecha": "2026-02-25 14:23:37"
+      },
+      {
+        "id": 67,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE AJUSTABLE CROMADA Bremen Cr. Va. 8\" Profesional BL (4161) (4u) | Total: $694993.36 | Pago: Mercado Pago",
+        "fecha": "2026-02-25 14:23:48"
+      },
+      {
+        "id": 68,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE AJUSTABLE CROMADA Bremen Cr. Va. 8\" Profesional BL (4161) (4u) | Total: $694993.36 | Pago: Efectivo",
+        "fecha": "2026-02-25 14:24:01"
+      },
+      {
+        "id": 69,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-25 14:24:40"
+      },
+      {
+        "id": 70,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-25 14:24:54"
+      },
+      {
+        "id": 71,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-25 14:25:07"
+      },
+      {
+        "id": 72,
+        "accion": "Agregar categoría",
+        "detalle": "Nombre: categoria prueba",
+        "fecha": "2026-02-25 14:26:49"
+      },
+      {
+        "id": 73,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: nombre prueba (4u) | Total: $8.00 | Pago: Transferencia",
+        "fecha": "2026-02-25 14:45:21"
+      },
+      {
+        "id": 74,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-25 14:45:34"
+      },
+      {
+        "id": 75,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-25 14:45:43"
+      },
+      {
+        "id": 76,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-25 14:46:03"
+      },
+      {
+        "id": 77,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-25 14:46:12"
+      },
+      {
+        "id": 78,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 85, Nombre: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785)",
+        "fecha": "2026-02-25 14:46:20"
+      },
+      {
+        "id": 79,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: nombre prueba (10u) | Total: $20.00 | Pago: Transferencia",
+        "fecha": "2026-02-25 14:48:34"
+      },
+      {
+        "id": 80,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (2u) | Total: $24439.08 | Pago: Mercado Pago",
+        "fecha": "2026-02-25 14:49:04"
+      },
+      {
+        "id": 81,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (2u) | Total: $24439.08 | Pago: Mercado Pago",
+        "fecha": "2026-02-25 14:49:05"
+      },
+      {
+        "id": 82,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (2u) | Total: $24439.08 | Pago: Mercado Pago",
+        "fecha": "2026-02-25 14:49:06"
+      },
+      {
+        "id": 83,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: nombre prueba (2u) | Total: $4.00 | Pago: Mercado Pago",
+        "fecha": "2026-02-25 14:52:34"
+      },
+      {
+        "id": 84,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104) (4u) | Total: $57840.08 | Pago: Transferencia",
+        "fecha": "2026-02-25 14:53:27"
+      },
+      {
+        "id": 85,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: nombre prueba (4u) | Total: $8.00 | Pago: Efectivo",
+        "fecha": "2026-02-25 14:57:58"
+      },
+      {
+        "id": 86,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: nombre prueba (3u) | Total: $1200000.00 | Pago: Mercado Pago",
+        "fecha": "2026-02-25 14:59:12"
+      },
+      {
+        "id": 87,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: nombre prueba (1u) | Total: $40000000.00 | Pago: Transferencia",
+        "fecha": "2026-02-25 14:59:34"
+      },
+      {
+        "id": 88,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: nombre prueba (1u) | Total: $40000000.00 | Pago: Transferencia",
+        "fecha": "2026-02-25 15:00:06"
+      },
+      {
+        "id": 89,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: nombre prueba (1u) | Total: $40000000.00 | Pago: Mercado Pago",
+        "fecha": "2026-02-25 15:00:15"
+      },
+      {
+        "id": 90,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: nombre prueba (2u) | Total: $80000000.00 | Pago: Transferencia",
+        "fecha": "2026-02-25 15:00:47"
+      },
+      {
+        "id": 91,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: nombre prueba (2u) | Total: $80000000.00 | Pago: Transferencia",
+        "fecha": "2026-02-25 15:06:08"
+      },
+      {
+        "id": 92,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-25 15:06:29"
+      },
+      {
+        "id": 93,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-25 15:06:38"
+      },
+      {
+        "id": 94,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 88, Nombre: 123",
+        "fecha": "2026-02-25 15:06:58"
+      },
+      {
+        "id": 95,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Porcentaje: 50%, Categoría: __all__",
+        "fecha": "2026-02-25 15:07:15"
+      },
+      {
+        "id": 96,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Porcentaje: 70%, Categoría: __all__",
+        "fecha": "2026-02-25 15:07:22"
+      },
+      {
+        "id": 97,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Porcentaje: 40%, Categoría: __all__",
+        "fecha": "2026-02-25 15:07:31"
+      },
+      {
+        "id": 98,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (1u) | Total: $0.00 | Pago: Efectivo",
+        "fecha": "2026-02-26 11:53:24"
+      },
+      {
+        "id": 99,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE HEXAGONAL Cr-V CORTA 8mm Wembley (2u), LLAVE HEXAGONAL Cr-V CORTA 10mm Wembley (2u) | Total: $733916.36 | Pago: Efectivo",
+        "fecha": "2026-02-26 11:56:30"
+      },
+      {
+        "id": 100,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: brrbrrpatapin (2u) | Total: $8000.00 | Pago: Transferencia",
+        "fecha": "2026-02-26 11:57:43"
+      },
+      {
+        "id": 101,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: brrbrrpatapin (1u) | Total: $4000.00 | Pago: Mercado Pago",
+        "fecha": "2026-02-26 11:57:57"
+      },
+      {
+        "id": 102,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: brrbrrpatapin (2u) | Total: $8000.00 | Pago: Transferencia",
+        "fecha": "2026-02-26 12:21:54"
+      },
+      {
+        "id": 103,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: brrbrrpatapin (1u) | Total: $4000.00 | Pago: Mercado Pago",
+        "fecha": "2026-02-26 15:41:59"
+      },
+      {
+        "id": 104,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: brrbrrpatapin (1u) | Total: $4000.00 | Pago: Mercado Pago",
+        "fecha": "2026-02-26 15:53:08"
+      },
+      {
+        "id": 105,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (1u) | Total: $43623.76 | Pago: Mercado Pago",
+        "fecha": "2026-02-26 16:13:47"
+      },
+      {
+        "id": 106,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-26 23:10:34"
+      },
+      {
+        "id": 107,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 89, Nombre: brrbrrpatapin",
+        "fecha": "2026-02-26 23:10:41"
+      },
+      {
+        "id": 108,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 87, Nombre: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785)",
+        "fecha": "2026-02-26 23:10:47"
+      },
+      {
+        "id": 109,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-26 23:11:14"
+      },
+      {
+        "id": 110,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 86, Nombre: nombre prueba",
+        "fecha": "2026-02-26 23:11:26"
+      },
+      {
+        "id": 111,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-26 23:23:32"
+      },
+      {
+        "id": 112,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-26 23:24:30"
+      },
+      {
+        "id": 113,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-26 23:24:38"
+      },
+      {
+        "id": 114,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-26 23:24:46"
+      },
+      {
+        "id": 115,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-26 23:25:47"
+      },
+      {
+        "id": 116,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-26 23:26:03"
+      },
+      {
+        "id": 117,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (2u) | Total: $24379.22 | Pago: Mercado Pago",
+        "fecha": "2026-02-27 12:12:49"
+      },
+      {
+        "id": 118,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104) (2u) | Total: $14460.02 | Pago: Mercado Pago",
+        "fecha": "2026-02-27 12:14:41"
+      },
+      {
+        "id": 119,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (2u) | Total: $12219.54 | Pago: Mercado Pago",
+        "fecha": "2026-02-27 12:18:08"
+      },
+      {
+        "id": 120,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (2u) | Total: $12219.54 | Pago: Transferencia",
+        "fecha": "2026-02-27 12:18:17"
+      },
+      {
+        "id": 121,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (2u) | Total: $15101.24 | Pago: Transferencia",
+        "fecha": "2026-02-27 12:21:03"
+      },
+      {
+        "id": 122,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE ALLEN Serie ESTANDAR Bremen (JGO 10 P.) SAE Cr. Va. (7343) (2u) | Total: $16013.30 | Pago: Transferencia",
+        "fecha": "2026-02-27 12:26:59"
+      },
+      {
+        "id": 123,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE AJUSTABLE FOSFATIZADA Bremen Cr. Va. 10\" BL (6633) (2u) | Total: $42314.36 | Pago: Efectivo",
+        "fecha": "2026-02-27 12:27:19"
+      },
+      {
+        "id": 124,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE AJUSTABLE CROMADA Bremen Cr. Va. 10\" Profesional BL (4162) (1u) | Total: $20694.11 | Pago: Efectivo",
+        "fecha": "2026-02-27 12:32:03"
+      },
+      {
+        "id": 125,
+        "accion": "Eliminar categoría",
+        "detalle": "ID: 2, Nombre: categoria prueba",
+        "fecha": "2026-02-27 12:39:39"
+      },
+      {
+        "id": 126,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 92, Nombre: 123231",
+        "fecha": "2026-02-27 12:40:56"
+      },
+      {
+        "id": 127,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 91, Nombre: 132321",
+        "fecha": "2026-02-27 12:40:58"
+      },
+      {
+        "id": 128,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (2u) | Total: $25214.92 | Pago: Mercado Pago",
+        "fecha": "2026-02-27 12:53:31"
+      },
+      {
+        "id": 129,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE ALLEN Serie CORTA Bremen 7mm (2u) | Total: $13364.96 | Pago: Mercado Pago",
+        "fecha": "2026-02-27 13:03:22"
+      },
+      {
+        "id": 130,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-27 13:04:07"
+      },
+      {
+        "id": 131,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-27 13:04:15"
+      },
+      {
+        "id": 132,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (1u) | Total: $12189.61 | Pago: Mercado Pago",
+        "fecha": "2026-02-27 13:04:51"
+      },
+      {
+        "id": 133,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Porcentaje: 30%, Categoría: __all__",
+        "fecha": "2026-02-27 13:05:05"
+      },
+      {
+        "id": 134,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (2u) | Total: $15885.40 | Pago: Mercado Pago",
+        "fecha": "2026-02-27 13:07:10"
+      },
+      {
+        "id": 135,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE AJUSTABLE CROMADA Bremen Cr. Va. 10\" Profesional BL (4162) (2u) | Total: $53804.68 | Pago: Transferencia",
+        "fecha": "2026-02-27 13:13:26"
+      },
+      {
+        "id": 136,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104) (1u) | Total: $9399.01 | Pago: Transferencia",
+        "fecha": "2026-02-27 13:16:32"
+      },
+      {
+        "id": 137,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (2u) | Total: $19631.62 | Pago: Mercado Pago",
+        "fecha": "2026-02-27 13:16:50"
+      },
+      {
+        "id": 138,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Porcentaje: 20%, Categoría: __all__",
+        "fecha": "2026-02-27 13:17:37"
+      },
+      {
+        "id": 139,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 93, Nombre: 312132",
+        "fecha": "2026-02-27 13:18:03"
+      },
+      {
+        "id": 140,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (2u) | Total: $38031.58 | Pago: Transferencia",
+        "fecha": "2026-02-27 13:18:22"
+      },
+      {
+        "id": 141,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-27 16:20:00"
+      },
+      {
+        "id": 142,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (1u) | Total: $12189.61 | Pago: Transferencia",
+        "fecha": "2026-02-27 16:20:14"
+      },
+      {
+        "id": 143,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE AJUSTABLE FOSFATIZADA Bremen Cr. Va. 10\" BL (6633) (2u) | Total: $42314.36 | Pago: Transferencia",
+        "fecha": "2026-02-27 16:23:39"
+      },
+      {
+        "id": 144,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (3u) | Total: $57047.37 | Pago: Transferencia",
+        "fecha": "2026-02-27 16:27:21"
+      },
+      {
+        "id": 145,
+        "accion": "Eliminar categoría",
+        "detalle": "ID: 1, Nombre: mesa 2",
+        "fecha": "2026-02-27 16:29:24"
+      },
+      {
+        "id": 146,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: Book 11.xlsx, Filas: 76",
+        "fecha": "2026-02-27 16:31:28"
+      },
+      {
+        "id": 147,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (1u), PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (6u) | Total: $126284.35 | Pago: Transferencia",
+        "fecha": "2026-03-10 17:53:17"
+      },
+      {
+        "id": 148,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Porcentaje: 10%, Categoría: __all__",
+        "fecha": "2026-03-10 17:59:32"
+      },
+      {
+        "id": 149,
+        "accion": "Editar producto",
+        "detalle": "Producto: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (BR9354) - Precio venta: $13408.57, Precio costo: $600",
+        "fecha": "2026-03-10 18:05:57"
+      },
+      {
+        "id": 150,
+        "accion": "Editar producto",
+        "detalle": "Producto: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (BR9354) - Precio venta: $800, Precio costo: $600",
+        "fecha": "2026-03-10 18:19:01"
+      },
+      {
+        "id": 151,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (3u) | Total: $62752.11 | Pago: Transferencia",
+        "fecha": "2026-03-11 18:07:44"
+      },
+      {
+        "id": 152,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE AJUSTABLE CROMADA Bremen Cr. Va. 8\" Profesional BL (4161) (5u) | Total: $77488.75 | Pago: Transferencia",
+        "fecha": "2026-03-11 18:32:44"
+      },
+      {
+        "id": 153,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE ALLEN Serie CORTA Bremen 6mm (2u) | Total: $5111.62 | Pago: Mercado Pago",
+        "fecha": "2026-03-12 17:43:28"
+      },
+      {
+        "id": 154,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (2u), LLAVE AJUSTABLE CROMADA Bremen Cr. Va. 10\" Profesional BL (4162) (1u) | Total: $50499.94 | Pago: Transferencia",
+        "fecha": "2026-03-12 18:10:21"
+      },
+      {
+        "id": 155,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: DESTORNILLADOR Bremen PH (+) 8x200 Pta Magnét (3u) | Total: $17636.58 | Pago: Efectivo",
+        "fecha": "2026-03-14 18:32:37"
+      },
+      {
+        "id": 156,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 96, Nombre: dasdsa",
+        "fecha": "2026-03-14 18:42:21"
+      },
+      {
+        "id": 157,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: nosexd (1u) | Total: $2000.00 | Pago: Transferencia",
+        "fecha": "2026-03-14 18:44:18"
+      },
+      {
+        "id": 158,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 97, Nombre: 32131232",
+        "fecha": "2026-03-14 18:45:50"
+      },
+      {
+        "id": 159,
+        "accion": "Agregar producto",
+        "detalle": "Producto: 32132 (123) - Stock: 32 un",
+        "fecha": "2026-03-14 18:46:09"
+      },
+      {
+        "id": 160,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: 32132 (4u) | Total: $128.00 | Pago: Transferencia",
+        "fecha": "2026-03-14 18:46:26"
+      },
+      {
+        "id": 161,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: 32132 (3u) | Total: $96.00 | Pago: Transferencia",
+        "fecha": "2026-03-14 18:48:38"
+      },
+      {
+        "id": 162,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: 32132 (2u) | Total: $64.00 | Pago: Efectivo",
+        "fecha": "2026-03-17 17:30:10"
+      },
+      {
+        "id": 163,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: ALICATE CORTE OBLICUO Wembley 6\" c/Aisl. (8231) (EX-7042) (4u) | Total: $26883.00 | Pago: Efectivo",
+        "fecha": "2026-03-17 17:30:33"
+      },
+      {
+        "id": 164,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 98, Nombre: 32132",
+        "fecha": "2026-03-17 17:30:50"
+      },
+      {
+        "id": 165,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: nosexd (1u) | Total: $2000.00 | Pago: Transferencia",
+        "fecha": "2026-03-19 16:47:17"
+      },
+      {
+        "id": 166,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 95, Nombre: nosexd",
+        "fecha": "2026-04-06 12:26:35"
+      },
+      {
+        "id": 167,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (4u) | Total: $83669.48 | Pago: Transferencia",
+        "fecha": "2026-04-06 12:31:00"
+      },
+      {
+        "id": 168,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (2u) | Total: $41834.74 | Pago: Transferencia",
+        "fecha": "2026-04-06 12:34:47"
+      },
+      {
+        "id": 169,
+        "accion": "Respaldo",
+        "detalle": "Archivo generado: backup_20260406_154622.json",
+        "fecha": "2026-04-06 15:46:22"
+      },
+      {
+        "id": 170,
+        "accion": "Respaldo",
+        "detalle": "Archivo generado: backup_20260406_154854.json",
+        "fecha": "2026-04-06 15:48:54"
+      },
+      {
+        "id": 171,
+        "accion": "Respaldo",
+        "detalle": "Archivo generado: backup_20260406_155438.json",
+        "fecha": "2026-04-06 15:54:38"
+      },
+      {
+        "id": 172,
+        "accion": "Respaldo",
+        "detalle": "Archivo generado: backup_20260406_155939.json",
+        "fecha": "2026-04-06 15:59:39"
+      },
+      {
+        "id": 173,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (2u) | Total: $41834.74 | Pago: Mercado Pago",
+        "fecha": "2026-04-08 15:54:22"
+      },
+      {
+        "id": 174,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (2u) | Total: $41834.74 | Pago: Mercado Pago",
+        "fecha": "2026-04-08 23:34:02"
+      },
+      {
+        "id": 175,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (2u), LLAVE ALLEN Serie ESTANDAR Bremen (JGO 10 P.) SAE Cr. Va. (7343) (1u), LLAVE AJUSTABLE FOSFATIZADA Bremen Cr. Va. 8\" BL (6632) (1u) | Total: $67516.48 | Pago: Efectivo",
+        "fecha": "2026-04-08 23:34:56"
+      },
+      {
+        "id": 176,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (2u), PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104) (1u) | Total: $49787.75 | Pago: Transferencia",
+        "fecha": "2026-04-08 23:35:44"
+      },
+      {
+        "id": 177,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (3u) | Total: $62752.11 | Pago: Efectivo",
+        "fecha": "2026-04-08 23:38:45"
+      },
+      {
+        "id": 178,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (2u) | Total: $41834.74 | Pago: Efectivo",
+        "fecha": "2026-04-08 23:44:48"
+      },
+      {
+        "id": 179,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (3u) | Total: $62752.11 | Pago: Efectivo",
+        "fecha": "2026-04-08 23:52:46"
+      },
+      {
+        "id": 180,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (2u) | Total: $41834.74 | Pago: Efectivo",
+        "fecha": "2026-04-09 00:04:16"
+      },
+      {
+        "id": 181,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (1u) | Total: $20917.37 | Pago: Mercado Pago",
+        "fecha": "2026-04-09 00:04:32"
+      },
+      {
+        "id": 182,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (3u) | Total: $62752.11 | Pago: Transferencia",
+        "fecha": "2026-04-09 00:17:24"
+      },
+      {
+        "id": 183,
+        "accion": "Exportar Excel",
+        "detalle": "Productos exportados: 78",
+        "fecha": "2026-04-09 17:56:06"
+      },
+      {
+        "id": 184,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: ejemplo.xlsx, Filas: 174",
+        "fecha": "2026-04-09 17:59:59"
+      },
+      {
+        "id": 185,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (2u) | Total: $41834.74 | Pago: Efectivo",
+        "fecha": "2026-04-09 18:13:03"
+      },
+      {
+        "id": 186,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES dasdsad Bremen Capacisdad 0,5 - 8 mm Tipo SKUM BL (7785) (2u) | Total: $41834.74 | Pago: Efectivo",
+        "fecha": "2026-04-09 18:16:57"
+      },
+      {
+        "id": 187,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE AJUSTABLE CROMADA Bremen Cr. Va. 10\" Profesional BL (4162) (1u), PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (1u), PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (2u) | Total: $53243.09 | Pago: Transferencia",
+        "fecha": "2026-04-09 18:22:21"
+      },
+      {
+        "id": 188,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Porcentaje: 20%, Categoría: __all__",
+        "fecha": "2026-04-10 14:54:13"
+      },
+      {
+        "id": 189,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Porcentaje: 100%, Categoría: __all__",
+        "fecha": "2026-04-10 14:54:35"
+      },
+      {
+        "id": 190,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: ferreteria  10 cris (2).xlsx, Filas: 2422",
+        "fecha": "2026-04-10 15:05:37"
+      },
+      {
+        "id": 191,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 2519, Nombre: PILA ENERGIZER AAA",
+        "fecha": "2026-04-15 00:08:15"
+      },
+      {
+        "id": 192,
+        "accion": "Editar producto",
+        "detalle": "Producto: VENDA PARA TECHO 1 MT X 50 MTS (C-2419) - Precio venta: $9214, Precio costo: $9214",
+        "fecha": "2026-04-15 11:47:57"
+      },
+      {
+        "id": 193,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PILA ENERGIZER AA (2u) | Total: $1630.00 | Pago: Transferencia",
+        "fecha": "2026-04-15 16:41:19"
+      },
+      {
+        "id": 194,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PILA ENERGIZER AA (1u), VENDA PARA TECHO 1 MT X 50 MTS (1u), VENDA PARA TECHO 20 CM X 25 MTS (1u) | Total: $11038.80 | Pago: Mercado Pago",
+        "fecha": "2026-04-15 16:42:57"
+      },
+      {
+        "id": 195,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PILA ENERGIZER AA (1u), VENDA PARA TECHO 20 CM X 25 MTS (1u), VENDA PARA TECHO 10CM X 25 MTS (1u) | Total: $2407.80 | Pago: Transferencia",
+        "fecha": "2026-04-15 17:07:48"
+      },
+      {
+        "id": 196,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: VENDA PARA TECHO 10CM X 25 MTS (1u), VENDA PARA TECHO 20 CM X 25 MTS (1u), VENDA PARA TECHO 1MT X 25 MTS (1u) | Total: $6367.80 | Pago: Transferencia",
+        "fecha": "2026-04-15 17:08:07"
+      },
+      {
+        "id": 197,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PILA ENERGIZER AA (1u), VENDA PARA TECHO 20 CM X 25 MTS (1u), VENDA PARA TECHO 10CM X 25 MTS (1u) | Total: $2407.80 | Pago: Mercado Pago",
+        "fecha": "2026-04-15 17:11:54"
+      },
+      {
+        "id": 198,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PILA ENERGIZER AA (1u), VENDA PARA TECHO 20 CM X 25 MTS (1u), VENDA PARA TECHO 10CM X 25 MTS (1u) | Total: $2407.80 | Pago: Transferencia",
+        "fecha": "2026-04-15 17:13:51"
+      },
+      {
+        "id": 199,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PULPITO (1u), UNIPOX (1u), POXIRAN (1u) | Total: $8554.00 | Pago: Transferencia",
+        "fecha": "2026-04-15 17:17:27"
+      },
+      {
+        "id": 200,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PILA ENERGIZER AA (2u) | Total: $1630.00 | Pago: Efectivo",
+        "fecha": "2026-04-15 17:18:18"
+      },
+      {
+        "id": 201,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: VENDA PARA TECHO 20 CM X 25 MTS (2u), VENDA PARA TECHO 10CM X 25 MTS (1u) | Total: $2602.60 | Pago: Transferencia",
+        "fecha": "2026-04-15 18:30:05"
+      },
+      {
+        "id": 202,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PILA ENERGIZER AA (1u), VENDA PARA TECHO 20 CM X 25 MTS (1u), VENDA PARA TECHO 10CM X 25 MTS (1u) | Total: $2407.80 | Pago: Transferencia",
+        "fecha": "2026-04-15 18:51:26"
+      },
+      {
+        "id": 203,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PILA ENERGIZER AA (1u), WD-40 GRANDE (1u), VENDA PARA TECHO 1MT X 25 MTS (1u) | Total: $14090.00 | Pago: Transferencia",
+        "fecha": "2026-04-15 18:56:21"
+      },
+      {
+        "id": 204,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: VENDA PARA TECHO 20 CM X 25 MTS (1u), VENDA PARA TECHO 10CM X 25 MTS (1u) | Total: $1592.80 | Pago: Transferencia",
+        "fecha": "2026-04-15 19:05:00"
+      },
+      {
+        "id": 205,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: VENDA PARA TECHO 20 CM X 25 MTS (1u), VENDA PARA TECHO 10CM X 25 MTS (1u), VENDA PARA TECHO 1MT X 25 MTS (1u) | Total: $6367.80 | Pago: Transferencia",
+        "fecha": "2026-04-15 19:05:31"
+      },
+      {
+        "id": 206,
+        "accion": "Editar producto",
+        "detalle": "Producto: PILA ENERGIZER AA (C-2420) - Precio venta: $815, Precio costo: $815",
+        "fecha": "2026-04-16 16:18:16"
+      },
+      {
+        "id": 207,
+        "accion": "Agregar producto",
+        "detalle": "Producto: lacaca (1233) - Stock: 0 un",
+        "fecha": "2026-04-16 16:30:47"
+      },
+      {
+        "id": 208,
+        "accion": "Editar producto",
+        "detalle": "Producto: lacaca (1233) - Precio venta: $4, Precio costo: $2",
+        "fecha": "2026-04-16 16:30:58"
+      },
+      {
+        "id": 209,
+        "accion": "Editar producto",
+        "detalle": "Producto: lacaca (1233) - Precio venta: $4, Precio costo: $2",
+        "fecha": "2026-04-16 16:30:58"
+      },
+      {
+        "id": 210,
+        "accion": "Editar producto",
+        "detalle": "Producto: VENDA PARA TECHO 50CM X 25 MTS (C-2418) - Precio venta: $2886, Precio costo: $2886",
+        "fecha": "2026-04-16 16:34:47"
+      },
+      {
+        "id": 211,
+        "accion": "Editar producto",
+        "detalle": "Producto: VENDA PARA TECHO 50CM X 25 MTS (C-2418) - Precio venta: $2886, Precio costo: $2886",
+        "fecha": "2026-04-16 16:34:47"
+      },
+      {
+        "id": 212,
+        "accion": "Editar producto",
+        "detalle": "Producto: ARENA X 10 K (C-2394) - Precio venta: $1900, Precio costo: $1900",
+        "fecha": "2026-04-16 16:35:23"
+      },
+      {
+        "id": 213,
+        "accion": "Editar producto",
+        "detalle": "Producto: ARENA X 10 K (C-2394) - Precio venta: $1900, Precio costo: $1900",
+        "fecha": "2026-04-16 16:35:23"
+      },
+      {
+        "id": 214,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Precios de costo: 20%, Categoría: clavos",
+        "fecha": "2026-04-16 19:35:51"
+      },
+      {
+        "id": 215,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Precios de venta: 30%, Categoría: __all__",
+        "fecha": "2026-04-16 19:36:05"
+      },
+      {
+        "id": 216,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Precios de costo: 20%, Categoría: __all__",
+        "fecha": "2026-04-16 19:36:16"
+      },
+      {
+        "id": 217,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Precios de venta: 30%, Categoría: Todas",
+        "fecha": "2026-04-17 17:34:14"
+      },
+      {
+        "id": 218,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Precios de costo: 30%, Categoría: Todas",
+        "fecha": "2026-04-17 17:34:22"
+      },
+      {
+        "id": 219,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Precios de venta: 30%, Categoría: Todas",
+        "fecha": "2026-04-18 15:06:01"
+      },
+      {
+        "id": 220,
+        "accion": "Editar producto",
+        "detalle": "Producto: ARENA X 5 K (C-2393) - Precio venta: $2526.55, Precio costo: $1794",
+        "fecha": "2026-04-20 14:57:10"
+      },
+      {
+        "id": 221,
+        "accion": "Editar producto",
+        "detalle": "Producto: ARENA X 5 K (C-2393) - Precio venta: $2526.55, Precio costo: $1794",
+        "fecha": "2026-04-20 14:57:10"
+      },
+      {
+        "id": 222,
+        "accion": "Editar producto",
+        "detalle": "Producto: CONCRETO X 10 K (C-2392) - Precio venta: $6239.48, Precio costo: $4430.4",
+        "fecha": "2026-04-20 14:57:13"
+      },
+      {
+        "id": 223,
+        "accion": "Editar producto",
+        "detalle": "Producto: CONCRETO X 10 K (C-2392) - Precio venta: $6239.48, Precio costo: $4430.4",
+        "fecha": "2026-04-20 14:57:13"
+      },
+      {
+        "id": 224,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PILA ENERGIZER AA (1u), VENDA PARA TECHO 20 CM X 25 MTS (1u), VENDA PARA TECHO 10CM X 25 MTS (1u) | Total: $5289.93 | Pago: Efectivo",
+        "fecha": "2026-04-20 15:56:33"
+      },
+      {
+        "id": 225,
+        "accion": "Eliminar todos los productos",
+        "detalle": "",
+        "fecha": "2026-04-20 16:09:38"
+      },
+      {
+        "id": 226,
+        "accion": "Agregar producto",
+        "detalle": "Producto: 123 (123) - Stock: 23 un",
+        "fecha": "2026-04-20 16:27:49"
+      },
+      {
+        "id": 227,
+        "accion": "Eliminar todos los productos",
+        "detalle": "",
+        "fecha": "2026-04-20 16:27:58"
+      },
+      {
+        "id": 228,
+        "accion": "Agregar categoría",
+        "detalle": "Nombre: cubierta",
+        "fecha": "2026-04-20 16:35:09"
+      },
+      {
+        "id": 229,
+        "accion": "Agregar producto",
+        "detalle": "Producto: rueda 1 (12331) - Stock: 12 un",
+        "fecha": "2026-04-20 16:35:31"
+      },
+      {
+        "id": 230,
+        "accion": "Agregar categoría",
+        "detalle": "Nombre: aceite",
+        "fecha": "2026-04-20 16:36:07"
+      },
+      {
+        "id": 231,
+        "accion": "Agregar producto",
+        "detalle": "Producto: aceite 1 (332) - Stock: 22 un",
+        "fecha": "2026-04-20 16:36:26"
+      },
+      {
+        "id": 232,
+        "accion": "Editar producto",
+        "detalle": "Producto: rueda 1 (12331) - Precio venta: $120000, Precio costo: $80000",
+        "fecha": "2026-04-20 16:36:44"
+      },
+      {
+        "id": 233,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: aceite 1 (3u) | Total: $45000.00 | Pago: Transferencia",
+        "fecha": "2026-04-20 16:38:03"
+      },
+      {
+        "id": 234,
+        "accion": "Editar producto",
+        "detalle": "Producto: rueda 1 (12331) - Precio venta: $120000, Precio costo: $80000",
+        "fecha": "2026-04-20 16:39:23"
+      },
+      {
+        "id": 235,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: inventario.xlsx, Filas: 76",
+        "fecha": "2026-04-20 16:41:01"
+      },
+      {
+        "id": 236,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: inventario.xlsx, Filas: 76",
+        "fecha": "2026-04-20 16:41:24"
+      },
+      {
+        "id": 237,
+        "accion": "Editar producto",
+        "detalle": "Producto: rueda 1 (12331) - Precio venta: $120000, Precio costo: $80000",
+        "fecha": "2026-04-20 16:42:07"
+      },
+      {
+        "id": 238,
+        "accion": "Agregar categoría",
+        "detalle": "Nombre: guerrini",
+        "fecha": "2026-04-20 16:44:28"
+      },
+      {
+        "id": 239,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (BR2126) - Precio venta: $7550.62, Precio costo: $7550.62",
+        "fecha": "2026-04-20 16:44:36"
+      },
+      {
+        "id": 240,
+        "accion": "Eliminar todos los productos",
+        "detalle": "",
+        "fecha": "2026-04-20 16:45:49"
+      },
+      {
+        "id": 241,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: inventario.xlsx, Filas: 76",
+        "fecha": "2026-04-20 20:27:45"
+      },
+      {
+        "id": 242,
+        "accion": "Eliminar todos los productos",
+        "detalle": "",
+        "fecha": "2026-04-20 20:31:01"
+      },
+      {
+        "id": 243,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: inventario.xlsx, Filas: 76",
+        "fecha": "2026-04-20 20:31:18"
+      },
+      {
+        "id": 244,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: inventario.xlsx, Filas: 76",
+        "fecha": "2026-04-20 20:31:36"
+      },
+      {
+        "id": 245,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: inventario.xlsx, Filas: 76",
+        "fecha": "2026-04-20 20:31:50"
+      },
+      {
+        "id": 246,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: inventario.xlsx, Filas: 76",
+        "fecha": "2026-04-20 20:32:03"
+      },
+      {
+        "id": 247,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (BR2126) - Precio venta: $7550.62, Precio costo: $7550.62",
+        "fecha": "2026-04-21 16:26:22"
+      },
+      {
+        "id": 248,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (BR2623) - Precio venta: $12607.46, Precio costo: $12607.46",
+        "fecha": "2026-04-21 16:26:30"
+      },
+      {
+        "id": 249,
+        "accion": "Editar producto",
+        "detalle": "Producto: PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104) (BR9353) - Precio venta: $7230.01, Precio costo: $7230.01",
+        "fecha": "2026-04-21 16:26:33"
+      },
+      {
+        "id": 250,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (BR2126) - Precio venta: $7550.62, Precio costo: $7550.62",
+        "fecha": "2026-04-21 16:26:44"
+      },
+      {
+        "id": 251,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (BR2126) - Precio venta: $7550.62, Precio costo: $7550.62",
+        "fecha": "2026-04-21 16:26:44"
+      },
+      {
+        "id": 252,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Precios de venta: 70%, Categoría: Todas",
+        "fecha": "2026-04-21 16:33:37"
+      },
+      {
+        "id": 253,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (2u) | Total: $25672.10 | Pago: Mercado Pago",
+        "fecha": "2026-04-21 16:43:27"
+      },
+      {
+        "id": 254,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (2u) | Total: $25672.10 | Pago: Transferencia",
+        "fecha": "2026-04-21 16:56:28"
+      },
+      {
+        "id": 255,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (2u), PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (1u) | Total: $47104.78 | Pago: Transferencia",
+        "fecha": "2026-04-21 16:58:21"
+      },
+      {
+        "id": 256,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (1u), PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (2u) | Total: $55701.41 | Pago: Transferencia",
+        "fecha": "2026-04-21 17:01:41"
+      },
+      {
+        "id": 257,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (2u) | Total: $25672.10 | Pago: Transferencia",
+        "fecha": "2026-04-21 17:21:22"
+      },
+      {
+        "id": 258,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Precios de venta: 60%, Categoría: Pinzas",
+        "fecha": "2026-04-24 14:53:37"
+      },
+      {
+        "id": 259,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (1u), PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (2u) | Total: $89122.26 | Pago: Transferencia",
+        "fecha": "2026-04-24 14:57:50"
+      },
+      {
+        "id": 260,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104) (2u) | Total: $24582.04 | Pago: Efectivo",
+        "fecha": "2026-06-16 16:59:41"
+      },
+      {
+        "id": 261,
+        "accion": "Editar producto",
+        "detalle": "Producto: PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104) (BR9353) - Precio venta: $12291.02, Precio costo: $7230.01",
+        "fecha": "2026-06-19 14:51:59"
+      },
+      {
+        "id": 262,
+        "accion": "Respaldo",
+        "detalle": "Archivo generado: backup_20260619_145819.json",
+        "fecha": "2026-06-19 14:58:19"
+      },
+      {
+        "id": 263,
+        "accion": "Editar producto",
+        "detalle": "Producto: PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104) (BR9353) - Precio venta: $12291.02, Precio costo: $7230.01",
+        "fecha": "2026-06-20 17:37:15"
+      },
+      {
+        "id": 264,
+        "accion": "Editar producto",
+        "detalle": "Producto: PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104) (BR9353) - Precio venta: $12291.02, Precio costo: $7230.01",
+        "fecha": "2026-06-20 17:37:15"
+      },
+      {
+        "id": 265,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (2u) | Total: $41444.68 | Pago: Efectivo",
+        "fecha": "2026-06-21 13:02:05"
+      },
+      {
+        "id": 266,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (BR2126) - Precio venta: $20537.68, Precio costo: $7550.62",
+        "fecha": "2026-06-21 13:08:09"
+      },
+      {
+        "id": 267,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (BR2126) - Precio venta: $20537.68, Precio costo: $7550.62",
+        "fecha": "2026-06-21 13:08:14"
+      },
+      {
+        "id": 268,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (BR2126) - Precio venta: $2, Precio costo: $7550.62",
+        "fecha": "2026-06-22 19:14:45"
+      },
+      {
+        "id": 269,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (3u), LLAVE HEXAGONAL Cr-V CORTA 8mm Wembley (2u) | Total: $74359.18 | Pago: Efectivo",
+        "fecha": "2026-06-23 14:43:39"
+      },
+      {
+        "id": 270,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE COMBINADA 9/16 Bremen Cr-V (2u), LLAVE COMBINADA 9mm Bremen Cr-V (2u), LLAVE HEXAGONAL Cr-V CORTA 10mm Wembley (2u) | Total: $44475.40 | Pago: Efectivo",
+        "fecha": "2026-06-23 14:44:27"
+      },
+      {
+        "id": 271,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104) (1u) | Total: $12291.02 | Pago: Efectivo",
+        "fecha": "2026-06-23 14:48:36"
+      },
+      {
+        "id": 272,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (BR2126) - Precio venta: $2, Precio costo: $7550.62",
+        "fecha": "2026-06-23 17:47:38"
+      },
+      {
+        "id": 273,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (BR2126) - Precio venta: $2, Precio costo: $7550.62",
+        "fecha": "2026-06-23 17:47:39"
+      },
+      {
+        "id": 274,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (1u) | Total: $2.00 | Pago: Efectivo",
+        "fecha": "2026-06-24 09:46:36"
+      },
+      {
+        "id": 275,
+        "accion": "Exportar Excel",
+        "detalle": "Productos exportados: 73",
+        "fecha": "2026-06-24 10:02:46"
+      },
+      {
+        "id": 276,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (BR2623) - Precio venta: $34292.29, Precio costo: $12607.46",
+        "fecha": "2026-06-24 18:12:50"
+      },
+      {
+        "id": 277,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (BR2623) - Precio venta: $34292.29, Precio costo: $12607.46",
+        "fecha": "2026-06-24 18:12:50"
+      },
+      {
+        "id": 278,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: inventario.xlsx, Filas: 73",
+        "fecha": "2026-06-24 18:13:01"
+      },
+      {
+        "id": 279,
+        "accion": "Importar Excel",
+        "detalle": "Archivo: inventario.xlsx, Filas: 73",
+        "fecha": "2026-06-24 18:13:10"
+      },
+      {
+        "id": 280,
+        "accion": "Actualizar precios avanzados",
+        "detalle": "Precios de venta: 70%, Categoría: aceite",
+        "fecha": "2026-06-24 18:13:26"
+      },
+      {
+        "id": 281,
+        "accion": "Agregar categoría",
+        "detalle": "Nombre: ejemplo",
+        "fecha": "2026-06-24 18:14:01"
+      },
+      {
+        "id": 282,
+        "accion": "Agregar producto",
+        "detalle": "Producto: producto de ejemplo (234) - Stock: 22 un",
+        "fecha": "2026-06-24 18:14:07"
+      },
+      {
+        "id": 283,
+        "accion": "Editar producto",
+        "detalle": "Producto: producto de ejemplo (234) - Precio venta: $22, Precio costo: $2200",
+        "fecha": "2026-06-24 18:14:14"
+      },
+      {
+        "id": 284,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: producto de ejemplo (2u), PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (2u), PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (1u) | Total: $34340.29 | Pago: Mercado Pago",
+        "fecha": "2026-06-24 18:15:02"
+      },
+      {
+        "id": 285,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: producto de ejemplo (1u), PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (1u), PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (1u) | Total: $34316.29 | Pago: Efectivo",
+        "fecha": "2026-06-24 18:15:31"
+      },
+      {
+        "id": 286,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: producto de ejemplo (1u), PINZA PICO DE LORO Wembley 10\" Doble Cremallera Ac. C. (8219) (1u), LLAVE COMBINADA 9mm Bremen Cr-V (2u) | Total: $46820.41 | Pago: Efectivo",
+        "fecha": "2026-06-27 21:26:09"
+      },
+      {
+        "id": 287,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: producto de ejemplo (4u), PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104) (1u), PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (2u) | Total: $53823.70 | Pago: Efectivo",
+        "fecha": "2026-06-29 18:05:19"
+      },
+      {
+        "id": 288,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (BR2126) - Precio venta: $2, Precio costo: $7550.62",
+        "fecha": "2026-06-29 18:15:47"
+      },
+      {
+        "id": 289,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (BR2126) - Precio venta: $2, Precio costo: $7550.62",
+        "fecha": "2026-06-29 18:15:47"
+      },
+      {
+        "id": 290,
+        "accion": "Editar producto",
+        "detalle": "Producto: producto de ejemplo (23455) - Precio venta: $22, Precio costo: $2200",
+        "fecha": "2026-06-29 18:38:49"
+      },
+      {
+        "id": 291,
+        "accion": "Eliminar producto",
+        "detalle": "ID: 2743, Nombre: producto de ejemplo",
+        "fecha": "2026-06-29 18:40:32"
+      },
+      {
+        "id": 292,
+        "accion": "Respaldo",
+        "detalle": "Archivo generado: backup_20260629_185326.json",
+        "fecha": "2026-06-29 18:53:26"
+      },
+      {
+        "id": 293,
+        "accion": "Respaldo",
+        "detalle": "Archivo generado: backup_20260629_185329.json",
+        "fecha": "2026-06-29 18:53:29"
+      },
+      {
+        "id": 294,
+        "accion": "Agregar empleado",
+        "detalle": "Empleado: Carlos Lopez (DNI: 46284786)",
+        "fecha": "2026-06-30 16:10:18"
+      },
+      {
+        "id": 295,
+        "accion": "Agregar empleado",
+        "detalle": "Empleado: Micaela Gonzales (DNI: 46324785)",
+        "fecha": "2026-06-30 16:12:21"
+      },
+      {
+        "id": 296,
+        "accion": "Crear horario",
+        "detalle": "Horario: Turno tarde",
+        "fecha": "2026-06-30 16:13:29"
+      },
+      {
+        "id": 297,
+        "accion": "Editar horario",
+        "detalle": "Horario: Turno tarde",
+        "fecha": "2026-06-30 16:13:35"
+      },
+      {
+        "id": 298,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104) (8u), PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (2u) | Total: $139772.84 | Pago: Efectivo",
+        "fecha": "2026-06-30 16:58:34"
+      },
+      {
+        "id": 299,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (2u), LLAVE HEXAGONAL Cr-V CORTA 8mm Wembley (1u) | Total: $47540.76 | Pago: Efectivo",
+        "fecha": "2026-06-30 17:00:00"
+      },
+      {
+        "id": 300,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785) (2u), LLAVE HEXAGONAL Cr-V CORTA 8mm Wembley (2u), LLAVE COMBINADA 9mm Bremen Cr-V (1u) | Total: $59889.90 | Pago: Transferencia",
+        "fecha": "2026-06-30 17:00:48"
+      },
+      {
+        "id": 301,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (2u) | Total: $4.00 | Pago: Efectivo",
+        "fecha": "2026-06-30 17:14:31"
+      },
+      {
+        "id": 302,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104) (2u) | Total: $24582.04 | Pago: Efectivo",
+        "fecha": "2026-06-30 17:40:37"
+      },
+      {
+        "id": 303,
+        "accion": "Agregar proveedor",
+        "detalle": "Proveedor: 321",
+        "fecha": "2026-06-30 17:53:19"
+      },
+      {
+        "id": 304,
+        "accion": "Agregar maquina",
+        "detalle": "Maquina: tractor",
+        "fecha": "2026-07-01 16:40:58"
+      },
+      {
+        "id": 305,
+        "accion": "Trabajo maquina",
+        "detalle": "ID: 1 - 3h",
+        "fecha": "2026-07-01 16:43:47"
+      },
+      {
+        "id": 306,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: Amoladora Bosch (5u) | Total: $2500.00 | Pago: Efectivo",
+        "fecha": "2026-07-01 18:13:55"
+      },
+      {
+        "id": 307,
+        "accion": "Eliminar maquina",
+        "detalle": "ID: 1",
+        "fecha": "2026-07-01 23:15:09"
+      },
+      {
+        "id": 308,
+        "accion": "Venta (Carrito)",
+        "detalle": "Productos: LLAVE HEXAGONAL Cr-V CORTA 14mm Wembley (2u), LLAVE HEXAGONAL Cr-V CORTA 8mm Wembley (1u) | Total: $23569.32 | Pago: Efectivo",
+        "fecha": "2026-07-02 15:01:02"
+      },
+      {
+        "id": 309,
+        "accion": "Editar producto",
+        "detalle": "Producto: PINZA UNIVERSAL Wembley Cr. Va. 7\" c/Aisl. BL (8237) (EX-7049) (BR2126) - Precio venta: $2, Precio costo: $7550.62",
+        "fecha": "2026-07-02 16:43:19"
+      },
+      {
+        "id": 314,
+        "accion": "Restauración",
+        "detalle": "Backup restaurado: backup_20260702_180419.json",
+        "fecha": "2026-07-02 18:44:05"
+      }
+    ],
+    "tickets": [
+      {
+        "id": 82,
+        "fecha": "2026-06-16T19:59:41.017Z",
+        "metodo_pago": "Efectivo",
+        "total": 24582.04,
+        "productos": "[{\"nombre\":\"PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104)\",\"cantidad\":2,\"precio\":12291.02}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 83,
+        "fecha": "2026-06-21T16:02:05.648Z",
+        "metodo_pago": "Efectivo",
+        "total": 41444.68,
+        "productos": "[{\"nombre\":\"PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785)\",\"cantidad\":2,\"precio\":20722.34}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 84,
+        "fecha": "2026-06-23T17:43:39.751Z",
+        "metodo_pago": "Efectivo",
+        "total": 74359.18000000001,
+        "productos": "[{\"nombre\":\"PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785)\",\"cantidad\":3,\"precio\":20722.34},{\"nombre\":\"LLAVE HEXAGONAL Cr-V CORTA 8mm Wembley\",\"cantidad\":2,\"precio\":6096.08}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 85,
+        "fecha": "2026-06-23T17:44:27.823Z",
+        "metodo_pago": "Efectivo",
+        "total": 44475.399999999994,
+        "productos": "[{\"nombre\":\"LLAVE COMBINADA 9/16 Bremen Cr-V\",\"cantidad\":2,\"precio\":9888.56},{\"nombre\":\"LLAVE COMBINADA 9mm Bremen Cr-V\",\"cantidad\":2,\"precio\":6253.06},{\"nombre\":\"LLAVE HEXAGONAL Cr-V CORTA 10mm Wembley\",\"cantidad\":2,\"precio\":6096.08}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 86,
+        "fecha": "2026-06-23T17:48:36.793Z",
+        "metodo_pago": "Efectivo",
+        "total": 80877.6,
+        "productos": "[{\"nombre\":\"PINZA UNIVERSAL Wembley Cr. Va. 7\\\" c/Aisl. BL (8237) (EX-7049)\",\"cantidad\":1,\"precio\":2},{\"nombre\":\"PINZA PICO DE LORO Wembley 10\\\" Doble Cremallera Ac. C. (8219)\",\"cantidad\":2,\"precio\":34292.29},{\"nombre\":\"PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104)\",\"cantidad\":1,\"precio\":12291.02}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 87,
+        "fecha": "2026-06-24T12:46:36.105Z",
+        "metodo_pago": "Efectivo",
+        "total": 2,
+        "productos": "[{\"nombre\":\"PINZA UNIVERSAL Wembley Cr. Va. 7\\\" c/Aisl. BL (8237) (EX-7049)\",\"cantidad\":1,\"precio\":2}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 88,
+        "fecha": "2026-06-24T21:15:02.086Z",
+        "metodo_pago": "Mercado Pago",
+        "total": 34340.29,
+        "productos": "[{\"nombre\":\"producto de ejemplo\",\"cantidad\":2,\"precio\":22},{\"nombre\":\"PINZA UNIVERSAL Wembley Cr. Va. 7\\\" c/Aisl. BL (8237) (EX-7049)\",\"cantidad\":2,\"precio\":2},{\"nombre\":\"PINZA PICO DE LORO Wembley 10\\\" Doble Cremallera Ac. C. (8219)\",\"cantidad\":1,\"precio\":34292.29}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 89,
+        "fecha": "2026-06-24T21:15:31.760Z",
+        "metodo_pago": "Efectivo",
+        "total": 34316.29,
+        "productos": "[{\"nombre\":\"producto de ejemplo\",\"cantidad\":1,\"precio\":22},{\"nombre\":\"PINZA UNIVERSAL Wembley Cr. Va. 7\\\" c/Aisl. BL (8237) (EX-7049)\",\"cantidad\":1,\"precio\":2},{\"nombre\":\"PINZA PICO DE LORO Wembley 10\\\" Doble Cremallera Ac. C. (8219)\",\"cantidad\":1,\"precio\":34292.29}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 90,
+        "fecha": "2026-06-28T00:26:09.341Z",
+        "metodo_pago": "Efectivo",
+        "total": 46822.41,
+        "productos": "[{\"nombre\":\"producto de ejemplo\",\"cantidad\":1,\"precio\":22},{\"nombre\":\"PINZA UNIVERSAL Wembley Cr. Va. 7\\\" c/Aisl. BL (8237) (EX-7049)\",\"cantidad\":1,\"precio\":2},{\"nombre\":\"PINZA PICO DE LORO Wembley 10\\\" Doble Cremallera Ac. C. (8219)\",\"cantidad\":1,\"precio\":34292.29},{\"nombre\":\"LLAVE COMBINADA 9mm Bremen Cr-V\",\"cantidad\":2,\"precio\":6253.06}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 91,
+        "fecha": "2026-06-29T21:05:19.229Z",
+        "metodo_pago": "Efectivo",
+        "total": 53823.7,
+        "productos": "[{\"nombre\":\"producto de ejemplo\",\"cantidad\":4,\"precio\":22},{\"nombre\":\"PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104)\",\"cantidad\":1,\"precio\":12291.02},{\"nombre\":\"PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785)\",\"cantidad\":2,\"precio\":20722.34}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 92,
+        "fecha": "2026-06-30T19:58:34.656Z",
+        "metodo_pago": "Efectivo",
+        "total": 139772.84,
+        "productos": "[{\"nombre\":\"PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104)\",\"cantidad\":8,\"precio\":12291.02},{\"nombre\":\"PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785)\",\"cantidad\":2,\"precio\":20722.34}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 93,
+        "fecha": "2026-06-30T20:00:00.892Z",
+        "metodo_pago": "Efectivo",
+        "total": 47540.76,
+        "productos": "[{\"nombre\":\"PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785)\",\"cantidad\":2,\"precio\":20722.34},{\"nombre\":\"LLAVE HEXAGONAL Cr-V CORTA 8mm Wembley\",\"cantidad\":1,\"precio\":6096.08}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 94,
+        "fecha": "2026-06-30T20:00:48.236Z",
+        "metodo_pago": "Transferencia",
+        "total": 59889.899999999994,
+        "productos": "[{\"nombre\":\"PELACABLES AUTOMATICO Bremen Capacidad 0,5 - 8 mm Tipo SKUM BL (7785)\",\"cantidad\":2,\"precio\":20722.34},{\"nombre\":\"LLAVE HEXAGONAL Cr-V CORTA 8mm Wembley\",\"cantidad\":2,\"precio\":6096.08},{\"nombre\":\"LLAVE COMBINADA 9mm Bremen Cr-V\",\"cantidad\":1,\"precio\":6253.06}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 95,
+        "fecha": "2026-06-30T20:14:31.976Z",
+        "metodo_pago": "Efectivo",
+        "total": 4,
+        "productos": "[{\"nombre\":\"PINZA UNIVERSAL Wembley Cr. Va. 7\\\" c/Aisl. BL (8237) (EX-7049)\",\"cantidad\":2,\"precio\":2}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 0
+      },
+      {
+        "id": 96,
+        "fecha": "2026-06-30T20:40:37.016Z",
+        "metodo_pago": "Efectivo",
+        "total": 115996.7081,
+        "productos": "[{\"nombre\":\"PINZA UNIVERSAL Wembley Cr. Va. 7\\\" c/Aisl. BL (8237) (EX-7049)\",\"cantidad\":5,\"precio\":2},{\"nombre\":\"PINZA PICO DE LORO Wembley 10\\\" Doble Cremallera Ac. C. (8219)\",\"cantidad\":3,\"precio\":34292.29},{\"nombre\":\"PELACABLES AUTOMATICO Bremen Capacidad 0,6 - 2,6 mm BL (7104)\",\"cantidad\":2,\"precio\":12291.02}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 127468.91
+      },
+      {
+        "id": 97,
+        "fecha": "2026-07-02T18:01:02.075Z",
+        "metodo_pago": "Efectivo",
+        "total": 23569.32,
+        "productos": "[{\"nombre\":\"LLAVE HEXAGONAL Cr-V CORTA 14mm Wembley\",\"cantidad\":2,\"precio\":8736.62},{\"nombre\":\"LLAVE HEXAGONAL Cr-V CORTA 8mm Wembley\",\"cantidad\":1,\"precio\":6096.08}]",
+        "tipo": "Venta",
+        "descuento": 0,
+        "subtotal": 23569.32
+      }
+    ],
+    "horarios": [
+      {
+        "id": 1,
+        "nombre": "Lunes a Viernes 08:00 - 17:00",
+        "lunes": "08:00 - 17:00",
+        "martes": "08:00 - 17:00",
+        "miercoles": "08:00 - 17:00",
+        "jueves": "08:00 - 17:00",
+        "viernes": "08:00 - 17:00",
+        "sabado": "Libre",
+        "domingo": "Libre"
+      },
+      {
+        "id": 2,
+        "nombre": "Turno tarde",
+        "lunes": "14:00 - 19:00",
+        "martes": "14:00 - 19:00",
+        "miercoles": "14:00 - 19:00",
+        "jueves": "14:00 - 19:00",
+        "viernes": "14:00 - 19:00",
+        "sabado": "Libre",
+        "domingo": "Libre"
+      }
+    ],
+    "empleados": [
+      {
+        "id": 1,
+        "nombre": "Carlos",
+        "apellido": "Lopez",
+        "dni": "46284786",
+        "fecha_nacimiento": "2004-12-02",
+        "telefono": "1127894944",
+        "email": "Daniellopez@gmail.com",
+        "direccion": "callefalsa123",
+        "cargo": "vendedor",
+        "fecha_ingreso": "2024-02-02",
+        "salario": 90,
+        "observaciones": "genio",
+        "estado": "Activo",
+        "horario_id": 1
+      },
+      {
+        "id": 2,
+        "nombre": "Micaela",
+        "apellido": "Gonzales",
+        "dni": "46324785",
+        "fecha_nacimiento": null,
+        "telefono": "11278845",
+        "email": "micaa@gmail.com",
+        "direccion": "123",
+        "cargo": "Cajero",
+        "fecha_ingreso": "2023-12-12",
+        "salario": null,
+        "observaciones": null,
+        "estado": "Activo",
+        "horario_id": 1
+      }
+    ],
+    "asistencias": [
+      {
+        "id": 1,
+        "empleado_id": 2,
+        "fecha": "2026-06-30",
+        "hora_entrada": "12:12",
+        "hora_salida": "12:03",
+        "estado": "Presente",
+        "observaciones": "bien."
+      }
+    ],
+    "proveedores": [
+      {
+        "id": 1,
+        "razon_social": "321",
+        "contacto": "123",
+        "telefono": "123",
+        "email": "321@gmail.com",
+        "direccion": "123",
+        "ciudad": "312",
+        "provincia": "213",
+        "cuit": "231",
+        "observaciones": "312",
+        "estado": "Activo",
+        "created_at": "2026-06-30 17:53:19"
+      }
+    ],
+    "compras_proveedor": [],
+    "pagos_proveedor": [],
+    "cuenta_corriente_proveedor": [],
+    "maquinas": [],
+    "trabajos_maquinas": [],
+    "combustible_maquinas": [],
+    "mantenimiento_maquinas": []
+  }
+}

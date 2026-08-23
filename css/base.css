@@ -1,0 +1,97 @@
+/* Base variables y reset - refactor iniciado */
+:root{
+  --bg: #ffffff;
+  --bg-gradient-end: #f5f7fa;
+  --surface: #ffffff;
+  --muted: #64748b;
+  --text: #0f172a;
+  --primary-500: #2563eb;
+  --primary-600: #1d4ed8;
+  /* App primary color (unifica todos los botones azules) */
+  --app-primary: #2563eb;
+  --app-primary-contrast: #ffffff;
+  --accent: #10b981;
+  --danger: #ef4444;
+
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --gap-xs: 6px;
+  --gap-sm: 10px;
+  --gap-md: 14px;
+  --gap-lg: 20px;
+
+  --shadow-sm: 0 6px 18px rgba(2,6,23,0.06);
+  --shadow-md: 0 12px 30px rgba(2,6,23,0.08);
+
+  --border-1: 1px solid rgba(15,23,42,0.06);
+}
+
+/* Modo Oscuro - Variables Globales */
+body.dark-theme {
+  --bg: #0b0f19;
+  --bg-gradient-end: #0f172a;
+  --surface: #1e293b;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --border-1: 1px solid rgba(255, 255, 255, 0.08);
+  --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Reset ligero y tipografía */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body,#content{height:100%}
+body{font-family:Inter, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial; background:linear-gradient(135deg,var(--bg) 0%, var(--bg-gradient-end) 100%); color:var(--text); -webkit-font-smoothing:antialiased}
+
+/* Utilities */
+.container{max-width:1200px;margin:0 auto;padding:0 16px}
+.flex{display:flex}
+.center{display:flex;align-items:center;justify-content:center}
+.hidden{display:none !important}
+
+/* Accessibility helpers */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* Forzar tono único para botones azules en la app */
+.btn-primary,
+button.btn-primary,
+.toolbar .btn-primary,
+.topbar .btn-primary,
+.pagination .prev,
+.pagination .next,
+.pagination .prev:enabled,
+.pagination .next:enabled {
+  background: var(--app-primary) !important;
+  border-color: var(--app-primary) !important;
+  color: var(--app-primary-contrast) !important;
+  box-shadow: 0 8px 20px rgba(37,99,235,0.12) !important;
+}
+
+.btn-primary:hover,
+.pagination .prev:hover,
+.pagination .next:hover {
+  background: var(--app-primary) !important;
+  border-color: var(--app-primary) !important;
+  filter: none !important;
+}
+
+/* Asegurar contraste en temas (dark / orange) */
+body.dark-theme .btn-primary,
+body.orange-theme .btn-primary,
+body.dark-theme .toolbar .btn-primary,
+body.orange-theme .toolbar .btn-primary {
+  background: var(--app-primary) !important;
+  border-color: var(--app-primary) !important;
+  color: var(--app-primary-contrast) !important;
+}
+
+/* Sidebar active menu (botón/ítem) con mismo tono */
+.sidebar .menu ul li a.active {
+  background: var(--app-primary) !important;
+  color: var(--app-primary-contrast) !important;
+  box-shadow: 0 4px 12px rgba(37,99,235,0.14) !important;
+}
+
+/* Inputs/outline focus que usen color primario */
+*:focus{outline-color:var(--app-primary)}

@@ -1,0 +1,638 @@
+/* ============================================================
+   FINANZAS DASHBOARD — Rediseño visual moderno (SaaS)
+   No afecta Inventario, Historial, Informes ni otros módulos.
+   ============================================================ */
+
+/* ── Página contenedora ──────────────────────────────────── */
+.finanzas-page {
+  padding: 0;
+  max-width: 1200px;
+  animation: finanzasPageIn 0.35s ease;
+}
+
+@keyframes finanzasPageIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Encabezado superior ─────────────────────────────────── */
+.finanzas-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.finanzas-header-left h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  margin: 0 0 4px;
+}
+
+.finanzas-header-left p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* ── Fila de filtros (período + fecha) ───────────────────── */
+.finanzas-filters-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+/* Grupo de botones de período */
+.finanzas-period-group {
+  display: flex;
+  gap: 6px;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 12px;
+}
+
+/* Sobreescritura para los botones del período —
+   mantiene los data-period y la clase .buttons existentes */
+.finanzas-container .buttons {
+  display: flex;
+  gap: 6px;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 0;
+}
+
+.finanzas-container .buttons button {
+  padding: 8px 20px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.finanzas-container .buttons button:hover {
+  background: rgba(255,255,255,0.7);
+  color: #1e293b;
+}
+
+.finanzas-container .buttons button.active,
+.finanzas-container .buttons button:focus {
+  background: #ffffff;
+  color: #2563eb;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Filtro por fecha */
+.finanzas-date-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 6px 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.finanzas-date-filter label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.finanzas-date-filter input[type="date"] {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: #1e293b;
+  font-family: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.finanzas-date-filter button {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.finanzas-date-filter button:hover {
+  background: #1d4ed8;
+}
+
+/* ── Tarjetas KPI (fila superior) ────────────────────────── */
+.finanzas-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.fkpi-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 22px 24px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 16px rgba(2,6,23,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.fkpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 18px 18px 0 0;
+  background: var(--fkpi-accent, #2563eb);
+}
+
+.fkpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(2,6,23,0.09);
+}
+
+/* Variantes de color de acento */
+.fkpi-card.blue   { --fkpi-accent: #2563eb; }
+.fkpi-card.green  { --fkpi-accent: #10b981; }
+.fkpi-card.violet { --fkpi-accent: #8b5cf6; }
+.fkpi-card.amber  { --fkpi-accent: #f59e0b; }
+.fkpi-card.rose   { --fkpi-accent: #f43f5e; }
+
+.fkpi-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fkpi-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fkpi-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  background: color-mix(in srgb, var(--fkpi-accent, #2563eb) 12%, transparent);
+  color: var(--fkpi-accent, #2563eb);
+}
+
+.fkpi-value {
+  font-size: 30px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+  letter-spacing: -1px;
+  transition: font-size 0.2s ease, color 0.2s ease;
+}
+
+.fkpi-sub {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* ── KPI "principal" – Ventas totales grande ─────────────── */
+.fkpi-card.main-kpi {
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 60%, #3b82f6 100%);
+  border: none;
+  color: white;
+}
+
+.fkpi-card.main-kpi::before {
+  background: rgba(255,255,255,0.25);
+}
+
+.fkpi-card.main-kpi .fkpi-label,
+.fkpi-card.main-kpi .fkpi-sub {
+  color: rgba(255,255,255,0.75);
+}
+
+.fkpi-card.main-kpi .fkpi-value {
+  color: #ffffff;
+  font-size: 36px;
+}
+
+.fkpi-card.main-kpi .fkpi-icon {
+  background: rgba(255,255,255,0.18);
+  color: white;
+}
+
+/* ── Tarjeta de gráfico ──────────────────────────────────── */
+.finanzas-chart-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px 32px 24px;
+  border: 1px solid #f1f5f9;
+  box-shadow:
+    0 1px 2px rgba(2,6,23,0.04),
+    0 6px 20px rgba(2,6,23,0.07);
+  margin-bottom: 24px;
+}
+
+/* Header: título a la izquierda, controles a la derecha */
+.finanzas-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.finanzas-chart-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.finanzas-chart-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.finanzas-chart-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+}
+
+.finanzas-chart-subtitle {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-top: 1px;
+}
+
+.finanzas-chart-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 4px 11px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+}
+
+/* ── Selector de mes — ancho FIJO, flechas inamovibles ───── */
+.month-selector-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 4px;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(2,6,23,0.06);
+}
+
+/* Botones de flecha — circulares, tamaño fijo */
+.month-selector-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.1s ease,
+    box-shadow 0.18s ease;
+}
+
+.month-selector-btn:hover {
+  background: #ffffff;
+  color: #2563eb;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.15);
+  transform: scale(1.08);
+}
+
+.month-selector-btn:active {
+  transform: scale(0.93);
+  box-shadow: none;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+/* Etiqueta del mes — ancho mínimo fijo para que las flechas no se muevan */
+.month-selector-label {
+  display: inline-block;
+  min-width: 138px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.2px;
+  text-transform: capitalize;
+  white-space: nowrap;
+  padding: 0 4px;
+  transition: color 0.2s ease;
+}
+
+/* ── Contenedor del gráfico con soporte de overlay vacío ─── */
+.chart-container {
+  position: relative;
+  height: 270px;
+}
+
+.finanzas-chart-card canvas {
+  width: 100% !important;
+}
+
+/* ── Overlay de mes vacío ─────────────────────────────────── */
+.chart-empty-message {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(255,255,255,0.96);
+  border-radius: 14px;
+  z-index: 10;
+  backdrop-filter: blur(2px);
+  animation: emptyMsgIn 0.25s ease;
+}
+
+@keyframes emptyMsgIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.chart-empty-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #94a3b8;
+}
+
+.chart-empty-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  letter-spacing: 0.1px;
+}
+
+/* ── Mensaje de error/estado ─────────────────────────────── */
+#finanzasMsg {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 8px;
+  padding: 10px 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border-left: 3px solid #cbd5e1;
+}
+
+/* ── Dark-theme overrides ────────────────────────────────── */
+body.dark-theme .finanzas-header-left h1 { color: #f8fafc; }
+body.dark-theme .finanzas-header-left p  { color: #94a3b8; }
+
+body.dark-theme .finanzas-container .buttons {
+  background: #1e293b;
+}
+body.dark-theme .finanzas-container .buttons button {
+  color: #94a3b8;
+}
+body.dark-theme .finanzas-container .buttons button:hover {
+  background: rgba(255,255,255,0.06);
+  color: #f8fafc;
+}
+body.dark-theme .finanzas-container .buttons button.active {
+  background: #0f172a;
+  color: #60a5fa;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+body.dark-theme .finanzas-date-filter {
+  background: #1e293b;
+  border-color: #334155;
+}
+body.dark-theme .finanzas-date-filter label { color: #94a3b8; }
+body.dark-theme .finanzas-date-filter input[type="date"] { color: #f8fafc; color-scheme: dark; }
+
+body.dark-theme .fkpi-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+body.dark-theme .fkpi-card .fkpi-value { color: #f8fafc; }
+body.dark-theme .fkpi-card .fkpi-label { color: #94a3b8; }
+body.dark-theme .fkpi-card .fkpi-sub   { color: #64748b; }
+
+body.dark-theme .fkpi-card.main-kpi {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+}
+
+body.dark-theme .finanzas-chart-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2), 0 6px 20px rgba(0,0,0,0.18);
+}
+body.dark-theme .finanzas-chart-title { color: #f8fafc; }
+body.dark-theme .finanzas-chart-subtitle { color: #64748b; }
+body.dark-theme .finanzas-chart-badge {
+  background: rgba(37,99,235,0.18);
+  color: #93c5fd;
+}
+
+/* Selector de mes — dark */
+body.dark-theme .month-selector-container {
+  background: #0f172a;
+  border-color: #334155;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+body.dark-theme .month-selector-label {
+  color: #f8fafc;
+}
+body.dark-theme .month-selector-btn {
+  color: #64748b;
+}
+body.dark-theme .month-selector-btn:hover {
+  background: #1e293b;
+  color: #60a5fa;
+  box-shadow: 0 2px 8px rgba(96,165,250,0.18);
+}
+body.dark-theme .month-selector-btn:active {
+  background: rgba(37,99,235,0.15);
+  color: #93c5fd;
+}
+
+/* Overlay vacío — dark */
+body.dark-theme .chart-empty-message {
+  background: rgba(30,41,59,0.97);
+}
+body.dark-theme .chart-empty-icon {
+  background: #0f172a;
+  color: #475569;
+}
+body.dark-theme .chart-empty-text {
+  color: #94a3b8;
+}
+
+body.dark-theme #finanzasMsg {
+  background: #0f172a;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .finanzas-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .finanzas-filters-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .finanzas-chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .finanzas-chart-header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .finanzas-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .finanzas-chart-card {
+    padding: 20px 18px;
+  }
+  .month-selector-label {
+    min-width: 118px;
+    font-size: 13px;
+  }
+}
+
+/* BREAKDOWN MODAL RESPONSIVE IMPROVEMENTS */
+.finanzas-breakdown-modal {
+  max-width: 950px !important;
+  width: 95% !important;
+  max-height: 88vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 16px 20px !important;
+  border-radius: 20px !important;
+  box-sizing: border-box !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+}
+
+.finanzas-breakdown-modal .modal-header {
+  flex-shrink: 0 !important;
+  margin-bottom: 12px !important;
+  padding-bottom: 10px !important;
+}
+
+.finanzas-breakdown-modal .period-navigation {
+  flex-shrink: 0 !important;
+  margin-bottom: 16px !important;
+}
+
+.finanzas-modal-body {
+  overflow-y: auto !important;
+  flex-grow: 1 !important;
+  padding-right: 4px !important;
+}
+
+/* Custom Scrollbar for inner modal body */
+.finanzas-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.finanzas-modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.finanzas-modal-body::-webkit-scrollbar-thumb {
+  background-color: var(--border-1);
+  border-radius: 4px;
+}
+
+.finanzas-cards-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+  margin-bottom: 16px !important;
+}
+
+@media (min-width: 768px) {
+  .finanzas-cards-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  
+  .finanzas-cards-grid .muni-breakdown-row.purple {
+    grid-column: span 2 !important;
+  }
+}
+
+/* Reducir altura un 20% y márgenes/paddings */
+.finanzas-breakdown-modal .muni-breakdown-row {
+  padding: 10px 14px !important;
+}
+
+/* Font clamp for amounts so they never overflow */
+.finanzas-breakdown-modal .muni-breakdown-row .amount {
+  font-size: clamp(16px, 2.5vw, 20px) !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+.finanzas-breakdown-modal .stats-card-box {
+  padding: 12px 14px !important;
+  margin-top: 10px !important;
+}
+
+body.dark-theme .finanzas-breakdown-modal .btn-close {
+  color: #94a3b8 !important;
+}

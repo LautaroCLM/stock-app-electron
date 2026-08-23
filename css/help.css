@@ -1,0 +1,577 @@
+/* ============================================================
+   HELP CENTER — Estilos modernos, profesionales y limpios (SaaS)
+   ============================================================ */
+
+/* Animación de entrada suave con desplazamiento vertical */
+@keyframes helpFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.help-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Header */
+.help-header {
+  margin-bottom: 8px;
+  animation: helpFadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.help-header .header-title h1 {
+  font-size: 30px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.help-header .header-title h1 i {
+  color: #2563eb;
+  font-size: 26px;
+}
+
+.help-header .header-title p {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Grid de Tarjetas de Ayuda */
+.help-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  opacity: 0;
+  animation: helpFadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.1s;
+}
+
+.help-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 20px rgba(2, 6, 23, 0.03);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.help-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.06);
+  border-color: #e2e8f0;
+}
+
+.help-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 18px;
+  transition: transform 0.2s ease;
+}
+
+.help-card:hover .help-card-icon {
+  transform: scale(1.08);
+}
+
+.help-card-icon.inventario-icon {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.help-card-icon.ventas-icon {
+  background: #ecfdf5;
+  color: #10b981;
+}
+
+.help-card-icon.informes-icon {
+  background: #f5f3ff;
+  color: #8b5cf6;
+}
+
+.help-card-icon.respaldo-icon {
+  background: #fffbeb;
+  color: #f59e0b;
+}
+
+.help-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 16px;
+}
+
+.help-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.help-card ul li {
+  font-size: 13.5px;
+  color: #475569;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.card-bullet-icon {
+  font-size: 12px;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.inventario-icon ~ ul .card-bullet-icon { color: #3b82f6; }
+.ventas-icon ~ ul .card-bullet-icon { color: #10b981; }
+.informes-icon ~ ul .card-bullet-icon { color: #8b5cf6; }
+.respaldo-icon ~ ul .card-bullet-icon { color: #f59e0b; }
+
+.help-card ul li strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* FAQ (Acordeón) */
+.faq-section {
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 24px rgba(2, 6, 23, 0.03);
+  padding: 32px;
+  opacity: 0;
+  animation: helpFadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.2s;
+}
+
+.faq-section h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.faq-section h2 i {
+  color: #2563eb;
+}
+
+.faq-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.faq-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #ffffff;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.faq-item:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(2, 6, 23, 0.02);
+}
+
+.faq-item[open] {
+  border-color: #2563eb;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.06);
+}
+
+.faq-question {
+  padding: 18px 24px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #1e293b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.faq-question::-webkit-details-marker {
+  display: none;
+}
+
+.faq-question:hover {
+  background-color: #f8fafc;
+}
+
+.faq-chevron {
+  font-size: 12px;
+  color: #64748b;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s ease;
+}
+
+.faq-item[open] .faq-question {
+  background-color: #f8fafc;
+  color: #2563eb;
+}
+
+.faq-item[open] .faq-chevron {
+  transform: rotate(180deg);
+  color: #2563eb;
+}
+
+.faq-answer {
+  padding: 0 24px 20px;
+  background-color: #f8fafc;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.6;
+  border-top: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.faq-item[open] .faq-answer {
+  border-top-color: #f1f5f9;
+}
+
+.faq-answer p {
+  margin: 0;
+}
+
+/* Consejos Rápidos */
+.tips-section {
+  background: #f8fafc;
+  border-radius: 24px;
+  border: 1px solid #f1f5f9;
+  padding: 32px;
+  opacity: 0;
+  animation: helpFadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.3s;
+}
+
+.tips-section h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tips-section h3 i {
+  color: #f59e0b;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.tip-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.tip-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+}
+
+.tip-number {
+  background: #fffbeb;
+  color: #d97706;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.tip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tip-content h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.tip-content p {
+  font-size: 13px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   TEMA OSCURO (DARK THEME)
+   ============================================================ */
+
+body.dark-theme .help-header .header-title h1 {
+  color: #f8fafc;
+}
+
+body.dark-theme .help-header .header-title p {
+  color: #94a3b8;
+}
+
+/* Tarjetas */
+body.dark-theme .help-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+body.dark-theme .help-card:hover {
+  border-color: #475569;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+body.dark-theme .help-card h3 {
+  color: #f8fafc;
+}
+
+body.dark-theme .help-card ul li {
+  color: #cbd5e1;
+}
+
+body.dark-theme .help-card ul li strong {
+  color: #f8fafc;
+}
+
+body.dark-theme .help-card-icon.inventario-icon {
+  background: #1e3a8a;
+  color: #60a5fa;
+}
+
+body.dark-theme .help-card-icon.ventas-icon {
+  background: #064e3b;
+  color: #34d399;
+}
+
+body.dark-theme .help-card-icon.informes-icon {
+  background: #3b0764;
+  color: #c084fc;
+}
+
+body.dark-theme .help-card-icon.respaldo-icon {
+  background: #78350f;
+  color: #fbbf24;
+}
+
+/* FAQ */
+body.dark-theme .faq-section {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+}
+
+body.dark-theme .faq-section h2 {
+  color: #f8fafc;
+}
+
+body.dark-theme .faq-item {
+  border-color: #334155;
+  background: #182235;
+}
+
+body.dark-theme .faq-item:hover {
+  border-color: #475569;
+}
+
+body.dark-theme .faq-item[open] {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+}
+
+body.dark-theme .faq-question {
+  color: #cbd5e1;
+}
+
+body.dark-theme .faq-question:hover {
+  background-color: #1e293b;
+}
+
+body.dark-theme .faq-chevron {
+  color: #94a3b8;
+}
+
+body.dark-theme .faq-item[open] .faq-question {
+  background-color: #1e293b;
+  color: #60a5fa;
+}
+
+body.dark-theme .faq-item[open] .faq-chevron {
+  color: #60a5fa;
+}
+
+body.dark-theme .faq-answer {
+  background-color: #1e293b;
+  color: #94a3b8;
+}
+
+body.dark-theme .faq-item[open] .faq-answer {
+  border-top-color: #334155;
+}
+
+/* Tips */
+body.dark-theme .tips-section {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+body.dark-theme .tips-section h3 {
+  color: #f8fafc;
+}
+
+body.dark-theme .tip-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-theme .tip-card:hover {
+  border-color: #475569;
+}
+
+body.dark-theme .tip-number {
+  background: #78350f;
+  color: #fbbf24;
+}
+
+body.dark-theme .tip-content h4 {
+  color: #f8fafc;
+}
+
+body.dark-theme .tip-content p {
+  color: #94a3b8;
+}
+
+
+/* ============================================================
+   TEMA NARANJA (ORANGE THEME)
+   ============================================================ */
+
+body.orange-theme .help-header .header-title h1 i {
+  color: #ea580c;
+}
+
+/* Acentos en Tarjetas */
+body.orange-theme .inventario-icon ~ ul .card-bullet-icon { color: #ea580c; }
+body.orange-theme .ventas-icon ~ ul .card-bullet-icon { color: #ea580c; }
+body.orange-theme .informes-icon ~ ul .card-bullet-icon { color: #ea580c; }
+body.orange-theme .respaldo-icon ~ ul .card-bullet-icon { color: #ea580c; }
+
+body.orange-theme .help-card-icon.inventario-icon {
+  background: #fff7ed;
+  color: #ea580c;
+}
+body.dark-theme.orange-theme .help-card-icon.inventario-icon {
+  background: #7c2d12;
+  color: #ffedd5;
+}
+
+body.orange-theme .help-card-icon.ventas-icon {
+  background: #fff7ed;
+  color: #ea580c;
+}
+body.dark-theme.orange-theme .help-card-icon.ventas-icon {
+  background: #7c2d12;
+  color: #ffedd5;
+}
+
+body.orange-theme .help-card-icon.informes-icon {
+  background: #fff7ed;
+  color: #ea580c;
+}
+body.dark-theme.orange-theme .help-card-icon.informes-icon {
+  background: #7c2d12;
+  color: #ffedd5;
+}
+
+body.orange-theme .help-card-icon.respaldo-icon {
+  background: #fff7ed;
+  color: #ea580c;
+}
+body.dark-theme.orange-theme .help-card-icon.respaldo-icon {
+  background: #7c2d12;
+  color: #ffedd5;
+}
+
+/* FAQ */
+body.orange-theme .faq-section h2 i {
+  color: #ea580c;
+}
+
+body.orange-theme .faq-item[open] {
+  border-color: #ea580c;
+  box-shadow: 0 4px 16px rgba(234, 88, 12, 0.08);
+}
+body.dark-theme.orange-theme .faq-item[open] {
+  border-color: #ea580c;
+  box-shadow: 0 4px 16px rgba(234, 88, 12, 0.2);
+}
+
+body.orange-theme .faq-item[open] .faq-question {
+  color: #ea580c;
+}
+body.dark-theme.orange-theme .faq-item[open] .faq-question {
+  color: #ffedd5;
+}
+
+body.orange-theme .faq-item[open] .faq-chevron {
+  color: #ea580c;
+}
+body.dark-theme.orange-theme .faq-item[open] .faq-chevron {
+  color: #ffedd5;
+}
+
+/* Tips */
+body.orange-theme .tip-number {
+  background: #fff7ed;
+  color: #ea580c;
+}
+body.dark-theme.orange-theme .tip-number {
+  background: #7c2d12;
+  color: #ffedd5;
+}

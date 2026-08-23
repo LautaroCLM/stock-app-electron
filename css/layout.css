@@ -1,0 +1,6 @@
+/* Layout general */
+.app-container{display:flex;min-height:100vh}
+.sidebar{flex:0 0 260px}
+.content-wrapper{margin-left:260px;padding:24px 30px;width:calc(100% - 260px);min-height:100vh}
+.main-content{flex:1;padding:0;margin-left:0}
+@media(max-width:900px){.content-wrapper{margin-left:0;width:100%;padding:18px}}

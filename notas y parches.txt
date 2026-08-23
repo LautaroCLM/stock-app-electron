@@ -1,0 +1,40 @@
+Gestión de proveedores (asociar productos a proveedores, datos de contacto)✅
+
+Backup automático en la nube (Google Drive, Dropbox)
+
+Editar datos del ticket✅
+
+Reportes más detallados (ganancias, productos más vendidos, etc.) ####✅
+
+Quitar animaciones molestas a la vista ####✅
+
+Historial de precios (seguimiento de cambios de precio) ####
+
+Cierre de caja diario ####
+
+
+
+
+
+
+
+ESTO YA ESTA!!!####
+-------------
+Mejorar por completo los informes
+-------------
+
+productos más/menos vendidos del dia/semana/año
+🔥 Producto estrella de la semana
+💀 Producto que nadie compra
+📦 Productos por reponer
+💰 Categoría que más vende
+
+
+Resumen registros
+- Cantidad de productos que entraron
+- Cantidad que se Borraron
+- Cantidad de productos que se vendieron
+- Cantidad de productos que no se vendieron
+
+Graficos utiles
+

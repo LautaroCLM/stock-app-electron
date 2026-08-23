@@ -1,0 +1,551 @@
+/* Botones unificados */
+button{transition:transform .12s ease,box-shadow .12s ease; cursor: pointer;}
+button:active{transform:scale(.98)}
+.btn-secondary{display:inline-flex;align-items:center;justify-content:center;background:#f6f8fb;border:var(--border-1);color:#334155;height:40px;padding:0 12px;border-radius:12px}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(90deg,var(--primary-500),var(--primary-600));color:#fff;height:40px;padding:0 12px;border-radius:12px;border:none}
+.topbar-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:var(--surface);border:var(--border-1)}
+.toolbar button{background:#fff;border:var(--border-1);border-radius:12px;padding:10px 18px;font-weight:600;color:#334155}
+#btnCart{position:relative;padding:10px 14px;border-radius:12px}
+#cartCount{position:absolute;top:-8px;right:-8px;background:var(--danger);color:#fff;border-radius:999px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid #fff}
+
+/* Botones de Acción y Estado */
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-save {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-weight: 600;
+}
+
+.btn-save:hover {
+  background: #1d4ed8;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-cancel {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-weight: 600;
+}
+
+.btn-cancel:hover {
+  background: #e2e8f0;
+}
+
+.btn-filter {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.btn-filter:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.btn-add-category, .btn-new-category {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-add-category:hover, .btn-new-category:hover {
+  background: #059669;
+}
+
+/* Botones Modernos para Modales */
+.btn-modern-primary {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 700;
+  flex: 1;
+}
+
+.btn-modern-secondary {
+  background: white;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  flex: 1;
+}
+
+/* Botones de Historial y Tickets */
+.btn-action {
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+}
+
+.btn-action.print { background: #10b981; color: white; }
+.btn-action.tickets { background: #3b82f6; color: white; }
+
+.btn-print-ticket {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* Botones de Carrito y Pago */
+.btn-pago, .payment-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-pago[data-metodo="Efectivo"], .payment-btn[data-metodo="Efectivo"] { background: #10b981; }
+.btn-pago[data-metodo="Mercado Pago"], .payment-btn[data-metodo="Mercado Pago"] { 
+  background: #009ee3; 
+  color: white;
+  border: 1px solid #0087c9;
+}
+
+.btn-pago[data-metodo="Mercado Pago"]:hover, .payment-btn[data-metodo="Mercado Pago"]:hover {
+  background: #0087c9;
+  box-shadow: 0 4px 15px rgba(0, 158, 227, 0.4);
+}
+.btn-pago[data-metodo="Transferencia"], .payment-btn[data-metodo="Transferencia"] { background: #6366f1; }
+
+.btn-pago:hover, .payment-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(110%);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-clear { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; border-radius: 10px; padding: 10px 15px; }
+.btn-print { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; border-radius: 10px; padding: 10px 15px; }
+.btn-discount { background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 5px 10px; }
+
+/* Botones de Categorías y Filtros en Listas */
+.category-filter-btn {
+  flex: 1;
+  text-align: left;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.category-filter-btn:hover {
+  color: #2563eb;
+}
+
+.category-delete-btn {
+  background: #fee2e2;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-delete-btn:hover {
+  background: #fecaca;
+  color: #b91c1c;
+}
+
+/* Botones de Cierre y Detalle */
+.btn-close, .summary-detail-close {
+  background: #f1f5f9;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-close:hover, .summary-detail-close:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.summary-detail-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #475569;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.summary-detail-btn.summary-detail-print {
+  background: #10b981;
+  color: white;
+  border: none;
+}
+
+/* Modo Oscuro - Pagos y Cierres */
+body.dark-theme .category-filter-btn { color: #f1f5f9; }
+body.dark-theme .category-filter-btn:hover { color: #60a5fa; }
+body.dark-theme .btn-close, body.dark-theme .summary-detail-close { background: #334155; color: #cbd5e1; }
+body.dark-theme .btn-close:hover, body.dark-theme .summary-detail-close:hover { background: #475569; color: white; }
+body.dark-theme .summary-detail-btn { background: #1e293b; color: #f1f5f9; border-color: #334155; }
+body.dark-theme .summary-detail-btn.summary-detail-print { background: #059669; }
+
+/* Quick Action Buttons (Price Update) */
+.quick-action-btn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.quick-action-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e0;
+}
+
+/* Modo Oscuro - Botones */
+body.dark-theme .btn-secondary { background: #334155; color: #f8fafc; border-color: #475569; }
+body.dark-theme .btn-cancel { background: #334155; color: #f8fafc; border-color: #475569; }
+/* Botones de Acción en Tablas */
+.btnEdit, .btnDelete, .btnCarrito {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btnEdit {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
+}
+
+.btnEdit:hover {
+  background: #2563eb;
+  color: white;
+}
+
+.btnDelete {
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fee2e2;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+.btnDelete:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.btnCarrito {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #dcfce7;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+.btnCarrito:hover {
+  background: #10b981;
+  color: white;
+}
+
+/* Botones de Paginación */
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 15px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #475569;
+  font-weight: 600;
+  font-size: 13px;
+  min-width: 34px;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e0;
+}
+
+.pagination button.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 13px;
+  color: #64748b;
+  margin-right: auto;
+}
+
+/* Botón Aceptar (Modal Confirmación) */
+.btnAceptar {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 25px;
+  font-weight: 700;
+  font-size: 15px;
+  margin-top: 15px;
+  display: block;
+  width: 100%;
+}
+
+.btnAceptar:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Modo Oscuro - Botones de Tabla y Paginación */
+body.dark-theme .btnEdit { background: #1e293b; color: #60a5fa; border-color: #334155; }
+body.dark-theme .btnEdit:hover { background: #2563eb; color: white; }
+body.dark-theme .btnDelete { background: #1e293b; color: #f87171; border-color: #334155; }
+body.dark-theme .btnDelete:hover { background: #ef4444; color: white; }
+body.dark-theme .btnCarrito { background: #1e293b; color: #4ade80; border-color: #334155; }
+body.dark-theme .btnCarrito:hover { background: #10b981; color: white; }
+body.dark-theme .pagination { background: #1e293b; border-color: #334155; }
+body.dark-theme .pagination button { background: #334155; color: #cbd5e1; border-color: #475569; }
+/* Botón Flotante del Carrito */
+#cartFloating {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 65px;
+  height: 65px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  border-radius: 50%;
+  display: none; /* Se muestra vía JS solo en inventario */
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: cartPulse 2s infinite;
+}
+
+#cartFloating i {
+  font-size: 24px;
+  transition: transform 0.3s ease;
+}
+
+#cartFloating:hover {
+  transform: scale(1.1) translateY(-5px);
+  box-shadow: 0 15px 30px rgba(37, 99, 235, 0.5);
+}
+
+#cartFloating:hover i {
+  transform: scale(1.1) rotate(-10deg);
+}
+
+#cartFloating:active {
+  transform: scale(0.95);
+}
+
+#cartFloatingCount {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ff4757;
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 3px 8px rgba(255, 71, 87, 0.3);
+  transition: all 0.2s ease;
+}
+
+/* Animations for Floating Cart */
+@keyframes cartPulse {
+  0% {
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4), 0 0 0 0 rgba(37, 99, 235, 0.3);
+  }
+  70% {
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4), 0 0 0 12px rgba(37, 99, 235, 0);
+  }
+  100% {
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4), 0 0 0 0 rgba(37, 99, 235, 0);
+  }
+}
+
+@keyframes cartPulseDark {
+  0% {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(59, 130, 246, 0.3);
+  }
+  70% {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 0 12px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Modo Oscuro - Botón Flotante */
+body.dark-theme #cartFloating {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  animation: cartPulseDark 2s infinite;
+}
+
+body.dark-theme #cartFloatingCount {
+  border-color: #1e293b;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Botón Eliminar Item del Carrito Moderno */
+.btnRemoveCartItem {
+  background: #fee2e2;
+  border: 1px solid #fee2e2;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  font-size: 0 !important; /* Oculta el emoji ❌ nativo */
+  color: transparent !important;
+  margin: 0 auto;
+}
+
+.btnRemoveCartItem::before {
+  content: "\f00d"; /* FontAwesome Times / X */
+  font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", sans-serif;
+  font-weight: 900;
+  font-size: 14px;
+  color: #dc2626;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.btnRemoveCartItem:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  transform: scale(1.1);
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.25);
+}
+
+.btnRemoveCartItem:hover::before {
+  color: white;
+  transform: rotate(90deg);
+}
+
+.btnRemoveCartItem:active {
+  transform: scale(0.95);
+}
+
+/* Modo Oscuro - Botón Eliminar del Carrito */
+body.dark-theme .btnRemoveCartItem {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+body.dark-theme .btnRemoveCartItem::before {
+  color: #fca5a5;
+}
+
+body.dark-theme .btnRemoveCartItem:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+body.dark-theme .btnRemoveCartItem:hover::before {
+  color: white;
+}

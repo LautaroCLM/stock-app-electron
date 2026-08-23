@@ -1,0 +1,288 @@
+/* ===== PANEL DERECHO LIMPIO - ESTILO TOPBAR ===== */
+
+/* Resetear estilos conflictivos del config-panel */
+.config-panel {
+  position: fixed !important;
+  top: 0 !important;
+  right: -350px !important;
+  width: 320px !important;
+  height: 100vh !important;
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  z-index: 999 !important;
+  transition: right 0.3s ease !important;
+  overflow-y: auto !important;
+  padding: 20px !important;
+  margin: 20px !important;
+}
+
+.config-panel.active {
+  right: 0 !important;
+}
+
+/* Header */
+.config-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.config-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.config-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.config-close:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+/* Usuario */
+.config-user {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+}
+
+.config-user .user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  font-size: 20px;
+}
+
+.config-user .user-name {
+  font-weight: 600;
+  color: #1f2937;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.config-user .user-email {
+  font-size: 14px;
+  color: #6b7280;
+  display: block;
+}
+
+/* Menú */
+.config-menu {
+  margin-bottom: 20px;
+}
+
+.config-section {
+  margin-bottom: 20px;
+}
+
+.config-section h4 {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Botones estilo topbar */
+.config-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.config-option:hover {
+  background: #f8fafc;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.config-option i:first-child {
+  margin-right: 10px;
+  color: #6b7280;
+  width: 16px;
+}
+
+.config-option span {
+  flex: 1;
+  text-align: left;
+}
+
+.config-option i:last-child {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative;
+  width: 40px;
+  height: 20px;
+  background: #d1d5db;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.toggle-slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+body.dark-theme .toggle-switch {
+  background: #3b82f6;
+}
+
+body.dark-theme .toggle-slider {
+  transform: translateX(20px);
+}
+
+/* Logout */
+.config-option.logout {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.config-option.logout:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+/* Footer */
+.config-footer {
+  padding-top: 15px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.app-version {
+  text-align: center;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 10px;
+}
+
+/* Modo oscuro */
+body.dark-theme .config-panel {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+body.dark-theme .config-header {
+  border-bottom-color: #374151;
+}
+
+body.dark-theme .config-header h3 {
+  color: #f9fafb;
+}
+
+body.dark-theme .config-close {
+  background: #374151;
+  border-color: #4b5563;
+  color: #9ca3af;
+}
+
+body.dark-theme .config-close:hover {
+  background: #4b5563;
+  color: #fff;
+}
+
+body.dark-theme .config-user {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+body.dark-theme .config-user .user-name {
+  color: #f9fafb;
+}
+
+body.dark-theme .config-user .user-email {
+  color: #9ca3af;
+}
+
+body.dark-theme .config-section h4 {
+  color: #9ca3af;
+}
+
+body.dark-theme .config-option {
+  background: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+body.dark-theme .config-option:hover {
+  background: #4b5563;
+  border-color: #6b7280;
+}
+
+body.dark-theme .config-footer {
+  border-top-color: #374151;
+}
+
+body.dark-theme .app-version {
+  color: #6b7280;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .config-panel {
+    width: calc(100% - 40px);
+    right: -100%;
+  }
+  
+  .config-panel.active {
+    right: 0;
+  }
+}

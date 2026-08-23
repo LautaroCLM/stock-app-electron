@@ -1,0 +1,6 @@
+/* Formularios y inputs */
+input,select,textarea{padding:8px 12px;border-radius:10px;border:1px solid #e2e8f0;font-size:14px}
+input:focus,select:focus,textarea:focus{outline:none;box-shadow:0 6px 18px rgba(59,130,246,0.08);border-color:var(--primary-500)}
+.topbar-search input, #searchInput{padding:8px 10px;border-radius:999px}
+.search-wrapper input{padding:14px 20px 14px 50px;border-radius:16px}
+.toggle-switch{display:inline-flex;align-items:center}

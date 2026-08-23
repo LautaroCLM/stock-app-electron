@@ -1,0 +1,40 @@
+/* Tablas estilizadas */
+.inventory-table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:12px;overflow:hidden}
+.inventory-table th, .inventory-table td{padding:12px;border-bottom:1px solid #f1f5f9;text-align:left}
+.inventory-table thead{background:#f8fafc}
+.inventory-table tbody tr:hover{background:#f8fafc}
+.stock-badge{display:inline-block;padding:6px 12px;border-radius:30px;font-weight:600}
+
+/* Modo Oscuro - Tabla de Inventario */
+body.dark-theme .inventory-table {
+  background: var(--surface);
+}
+
+body.dark-theme .inventory-table th {
+  color: var(--muted);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .inventory-table td {
+  color: var(--text);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .inventory-table thead {
+  background: #0f172a;
+}
+
+body.dark-theme .inventory-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Fila de bajo stock (inline style background override) */
+body.dark-theme .inventory-table tbody tr[style*="background"] {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+body.dark-theme .inventory-table tbody tr[style*="background"] td {
+  color: #fca5a5 !important;
+}
+
+

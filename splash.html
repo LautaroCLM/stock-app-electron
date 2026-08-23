@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cargando Stock App...</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: rgba(255, 255, 255, 0.85);
+      --border-color: rgba(255, 255, 255, 0.5);
+      --text-title: #0f172a;
+      --text-subtitle: #475569;
+      --text-footer: #94a3b8;
+      --progress-track: rgba(15, 23, 42, 0.08);
+      --progress-fill: linear-gradient(90deg, #3b82f6, #6366f1);
+      --glow-color: rgba(59, 130, 246, 0.04);
+      --shadow-color: rgba(15, 23, 42, 0.06);
+    }
+
+    body.dark-theme {
+      --bg-color: rgba(15, 23, 42, 0.88);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-title: #f8fafc;
+      --text-subtitle: #94a3b8;
+      --text-footer: #475569;
+      --progress-track: rgba(255, 255, 255, 0.08);
+      --progress-fill: linear-gradient(90deg, #3b82f6, #a855f7);
+      --glow-color: rgba(59, 130, 246, 0.15);
+      --shadow-color: rgba(0, 0, 0, 0.35);
+    }
+
+    body {
+      background: transparent;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    .splash-card {
+      width: 480px;
+      height: 360px;
+      border-radius: 24px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 20px 50px var(--shadow-color), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 40px;
+      box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+      transform: scale(1);
+      opacity: 1;
+      filter: blur(0);
+      transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1), 
+                  transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), 
+                  filter 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .ambient-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
+      z-index: 0;
+      pointer-events: none;
+      animation: pulseGlow 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.8; }
+      100% { transform: translate(-50%, -50%) scale(1.1); opacity: 1.2; }
+    }
+
+    /* Centered Logo & Brand Content */
+    .center-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 15px;
+    }
+
+    .logo-wrapper {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: scale(0.8);
+      filter: blur(10px);
+      animation: logoIntro 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s forwards, 
+                 logoFloat 5s ease-in-out 0.95s infinite alternate;
+    }
+
+    @keyframes logoIntro {
+      to {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+      }
+    }
+
+    @keyframes logoFloat {
+      0% { transform: translateY(0px) rotate(0deg); }
+      100% { transform: translateY(-5px) rotate(0.5deg); }
+    }
+
+    .logo-img {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.1));
+      transition: filter 0.3s;
+    }
+
+    body.dark-theme .logo-img {
+      filter: drop-shadow(0 6px 20px rgba(59, 130, 246, 0.3));
+    }
+
+    .text-group {
+      text-align: center;
+      z-index: 1;
+      opacity: 0;
+      transform: translateY(12px);
+      filter: blur(5px);
+      animation: fadeUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.25s forwards;
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+      }
+    }
+
+    h1 {
+      font-family: 'Manrope', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      margin: 0 0 6px 0;
+      letter-spacing: -0.5px;
+      color: var(--text-title);
+      background: linear-gradient(135deg, var(--text-title) 40%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-theme h1 {
+      background: linear-gradient(135deg, #ffffff 40%, #60a5fa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      font-weight: 500;
+      margin: 0;
+      color: var(--text-subtitle);
+      letter-spacing: 0.1px;
+    }
+
+    /* Loading group */
+    .loading-group {
+      width: 100%;
+      max-width: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 1;
+      opacity: 0;
+      animation: fadeInSimple 0.8s ease-out 0.45s forwards;
+      margin-bottom: 25px;
+    }
+
+    @keyframes fadeInSimple {
+      to { opacity: 1; }
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 4px;
+      background: var(--progress-track);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: var(--progress-fill);
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.35);
+      transition: width 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .percentage-text {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-subtitle);
+      margin-top: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    /* Footer Group */
+    .footer-group {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1;
+      font-size: 9.5px;
+      font-weight: 500;
+      color: var(--text-footer);
+      opacity: 0.55;
+      padding: 0 5px;
+      box-sizing: border-box;
+    }
+
+    .footer-group span {
+      letter-spacing: 0.2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="splash-card" id="splashCard">
+    <div class="ambient-glow"></div>
+    
+    <!-- Top Empty Space for flex alignment -->
+    <div></div>
+
+    <!-- Center Section -->
+    <div class="center-group">
+      <div class="logo-wrapper">
+        <img src="" alt="Logo" id="splashLogo" class="logo-img">
+      </div>
+      <div class="text-group">
+        <h1>Stock App</h1>
+        <p class="subtitle">Gestión inteligente para tu negocio</p>
+      </div>
+    </div>
+
+    <!-- Loading Bar Section -->
+    <div class="loading-group">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="percentage-text" id="percentText">Iniciando sistema... 0%</span>
+    </div>
+
+    <!-- Footer Section -->
+    <div class="footer-group">
+      <span>v1.0.0</span>
+      <span>Desarrollado por Lautaro Colman</span>
+    </div>
+  </div>
+
+  <script>
+    async function iniciarApp() {
+      // 1. Determinar el tema e inyectar el tema adecuado
+      let isDark = false;
+      try {
+        const savedTheme = localStorage.getItem('theme');
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        isDark = savedTheme === 'dark' || (!savedTheme && systemDark);
+        
+        if (isDark) {
+          document.body.classList.remove('light-theme');
+          document.body.classList.add('dark-theme');
+        } else {
+          document.body.classList.remove('dark-theme');
+          document.body.classList.add('light-theme');
+        }
+      } catch (e) {
+        console.error('Error al leer el tema:', e);
+        document.body.classList.add('dark-theme'); // default a dark
+        isDark = true;
+      }
+
+      // 2. Cargar el logo logoperla2.png
+      try {
+        const logoPath = await window.electronAPI.getImagePath('logoperla2.png');
+        
+        const imgElement = document.getElementById('splashLogo');
+        imgElement.src = logoPath;
+        
+        imgElement.onerror = function() {
+          // Fallback si falla la ruta nativa
+          this.src = 'img/logoperla2.png';
+        };
+      } catch (err) {
+        console.error('Error al resolver la ruta del logo:', err);
+        document.getElementById('splashLogo').src = 'img/logoperla2.png';
+      }
+
+      // 3. Simulación fluida de carga
+      const progressFill = document.getElementById('progressFill');
+      const percentText = document.getElementById('percentText');
+      const card = document.getElementById('splashCard');
+      
+      let progress = 0;
+      
+      function updateProgress() {
+        if (progress >= 100) {
+          progress = 100;
+          progressFill.style.width = '100%';
+          percentText.textContent = 'CARGANDO SISTEMA • 100%';
+          
+          // Fase de cierre: Fade out elegante (320ms)
+          setTimeout(() => {
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.97)';
+            card.style.filter = 'blur(8px)';
+            
+            setTimeout(() => {
+              window.electronAPI.closeSplash();
+            }, 320);
+          }, 250);
+          return;
+        }
+        
+        progressFill.style.width = `${progress}%`;
+        percentText.textContent = `CARGANDO SISTEMA • ${progress}%`;
+        
+        // Incrementar con pasos aleatorios dinámicos
+        const nextJump = Math.floor(Math.random() * 10) + 4; // entre 4% y 13%
+        progress += nextJump;
+        
+        const nextTimeout = Math.floor(Math.random() * 90) + 50; // entre 50ms y 140ms
+        setTimeout(updateProgress, nextTimeout);
+      }
+
+      // Esperar a que las animaciones iniciales de entrada avancen un poco
+      setTimeout(updateProgress, 400);
+    }
+
+    iniciarApp();
+  </script>
+</body>
+</html>

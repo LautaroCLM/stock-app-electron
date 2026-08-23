@@ -1,0 +1,284 @@
+/* ======================================================
+   Módulo Gastos — CSS Modular
+   Coherente con la estética del sistema
+   ====================================================== */
+
+.gastos-page {
+  padding: 28px 32px;
+  max-width: 1400px;
+  animation: inventarioPageIn 0.35s ease;
+}
+
+.gastos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.gastos-header h1 {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+body.dark-theme .gastos-header h1 {
+  color: #f8fafc;
+}
+
+.gastos-header h1 i {
+  color: #3b82f6;
+}
+
+.gastos-header p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+body.dark-theme .gastos-header p {
+  color: #94a3b8;
+}
+
+.btn-gasto-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2), 0 2px 4px -1px rgba(59, 130, 246, 0.1);
+  transition: all 0.2s ease;
+}
+
+.btn-gasto-primary:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3), 0 4px 6px -2px rgba(59, 130, 246, 0.2);
+}
+
+/* ── Tarjetas de Resumen ─────────────────────────────── */
+.gastos-metrics-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+/* ── Toolbar y Filtros ───────────────────────────────── */
+.gastos-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.gastos-search {
+  position: relative;
+  flex: 1 1 320px;
+}
+
+.gastos-search i {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.gastos-search input {
+  width: 100%;
+  padding: 11px 16px 11px 40px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 13.5px;
+  color: #0f172a;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+body.dark-theme .gastos-search input {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+.gastos-search input:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.gastos-filters {
+  display: flex;
+  gap: 12px;
+}
+
+.gasto-filter-select {
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13.5px;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+body.dark-theme .gasto-filter-select {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+.gasto-filter-select:focus {
+  border-color: #3b82f6;
+}
+
+/* ── Tabla de Gastos ─────────────────────────────────── */
+.gastos-table-wrapper {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+body.dark-theme .gastos-table-wrapper {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.gastos-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.gastos-table th {
+  background: #f8fafc;
+  padding: 14px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.dark-theme .gastos-table th {
+  background: #0f172a;
+  color: #94a3b8;
+  border-bottom-color: #334155;
+}
+
+.gastos-table td {
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: #334155;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+
+body.dark-theme .gastos-table td {
+  color: #cbd5e1;
+  border-bottom-color: #334155;
+}
+
+.gastos-table tr:last-child td {
+  border-bottom: none;
+}
+
+.gastos-table tr:hover td {
+  background: #f8fafc;
+}
+
+body.dark-theme .gastos-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ── Estados (badges) ────────────────────────────────── */
+.badge-pagado {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: #d1fae5;
+  color: #065f46;
+}
+
+body.dark-theme .badge-pagado {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.badge-pendiente {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+body.dark-theme .badge-pendiente {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+/* ── Form Modal ─────────────────────────────────────── */
+.gastos-modal-modern {
+  max-width: 550px !important;
+  border-radius: 18px !important;
+  padding: 24px !important;
+}
+
+/* Acciones en la tabla */
+.gasto-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 6px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.gasto-action-btn.edit {
+  color: #3b82f6;
+}
+
+.gasto-action-btn.edit:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.gasto-action-btn.delete {
+  color: #ef4444;
+}
+
+.gasto-action-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+}

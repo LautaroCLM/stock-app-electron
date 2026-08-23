@@ -1,0 +1,703 @@
+- apartado empleados, agregar empleados, manejar horarios, asistencias.✅
+
+- apartado provedores (agreagar porvedores, agregar deudas, fecha, todo)✅
+
+- apartado de maquinas (manejo de maquinas, cobro por hora, nafta)✅
+
+- solucionar espacios en items✅
+
+- se mejoro el grafico de "finanzas"✅
+
+- se arreglo el carrito, ahora solo aparece en inventario✅
+
+- se arreglaron los modals de inventario✅
+
+- se agregaron las animaciones al entrar en cada pestaña✅
+
+- se hizo un menu lateral con mucho más espacios✅
+
+- en "finanzas" agregar para poder ver el grafico por meses.✅
+
+- en "informes" el grafico de "metodos de pago" ahora dice la cantidad total ganada.✅
+
+- ahora el carrito se vacia automaticamente al hacer una venta✅
+
+- se suma automaticamente el precio en la cantidad del carrito✅
+
+- en provedores no se registran los pagos, solucionarlo( se registran pero se tienen que ir del coso)✅
+
+- crear presupuesto para ferreteria✅
+
+- crear remito para la ferreteria✅
+
+- ítem de cuentas corrientes con el municipio (lado izquierdo) (para registrar el municipio y que pago se le hizo, para saber cuando se cobra, que tenga listado de lo que se llevo y su precio)✅
+
+- confirmar que municipio funcione✅
+
+- en finanzas, ventas del mes, que marque el total pero al abrirlo, un modal, te diga cuanto todavia no entro por municipio✅
+
+- Atmosferico, municipio de por medio (tarda en ingresar el monto)✅
+
+- confirmar que todo funcione✅
+
+- crear rentabilidad para empleados como lo hay con las maquinas (liquidacion del empleado, osea precio por hora)✅
+
+- en inventario marcar de que proveedor es el producto
+
+- en historial, al lado de "imprimir tickets" agregar "imprimir remito" que esten enumerados, tambien ordenados por fecha
+
+- factura B, siempre aplica el 21% de iva, que lo haga automaticamente 
+
+- crear sistema de usuarios
+
+Correcciones
+- arreglar tickets✅
+- Remito/ticket precio✅
+- dirección y precio del remito✅
+
+
+- en maquinas, mantenimiento, agregarle en tipo de mantenimiento "reposicion" (hay que agregar litros por que es para reponer aceite hidraulico, agua y tipos de liquidos)
+
+FUNCIÓN TECLADO 
+
+Fase 1 (muy simple)
+✅ Agregar los tres botones flotantes.
+✅ Activar/desactivar Modo Teclado.
+✅ Flechas ↑ ↓ recorren la lista de productos a velocidad moderada.
+Fase 2
+✅ Resaltar visualmente la fila seleccionada.
+✅ Enter abre el producto.
+✅ Espacio agrega al carrito.
+Fase 3
+✅ Ctrl + F enfoca el buscador.
+✅ Esc desactiva el modo teclado.
+✅ Mantener visible el producto seleccionado mientras se navega.
+
+
+
+
+
+Mi recomendación
+
+Después de leer ese informe, creo que el proyecto debería seguir este orden:
+
+✅ Corregir el bug del stock por id_producto.✅
+✅ Preparar un SyncManager (aunque todavía no haga nada).
+✅ Crear el proyecto en Supabase.
+✅ Replicar las tablas de SQLite en Supabase.
+✅ Empezar sincronizando únicamente Productos.
+✅ Agregar el indicador de estado ("Sin conexión", "Última sincronización: 16:45").
+✅ Recién ahí comenzar con usuarios y roles.
+
+
+
+Fase 0.1
+Crear una capa de acceso a datos
+
+Hoy seguramente pasa esto:
+
+renderer
+
+↓
+
+electronAPI
+
+↓
+
+main.js
+
+↓
+
+SQLite
+
+Eso significa que todos los módulos hablan directamente con SQLite.
+
+Nosotros queremos llegar a esto:
+
+renderer
+
+↓
+
+electronAPI
+
+↓
+
+DataService
+
+↓
+
+SQLite
+
+Y más adelante:
+
+renderer
+
+↓
+
+electronAPI
+
+↓
+
+DataService
+
+↓
+
+SQLite
+   │
+   │
+SyncManager
+   │
+   ▼
+Supabase
+
+Fijate que la UI nunca cambia.
+
+¿Por qué es importante?
+
+Porque cuando llegue Supabase solamente cambiamos el DataService.
+
+No hay que tocar:
+
+renderer
+modales
+historial
+inventario
+
+Nada.
+
+Después
+Fase 0.2
+
+Crear el SyncManager.
+
+Al principio no hace absolutamente nada.
+
+Solo existe.
+
+Ejemplo:
+
+SyncManager
+
+↓
+
+sincronizar()
+
+↓
+
+return;
+
+Todavía sin internet.
+
+Después
+Fase 0.3
+
+Crear Supabase.
+
+Todavía sin conectar la app.
+
+Simplemente:
+
+proyecto
+tablas
+usuarios
+
+
+
+
+
+me quede en el prompt 2, no lo mande todavia, de chatgpt
+
+
+
+
+
+
+
+
+
+Mi recomendación más importante
+
+A partir de este punto, dejaría de llevar el progreso por "fases" y empezaría a llevarlo por módulos funcionales.
+
+Por ejemplo:
+
+Módulo	Estado
+Productos	✅ Migrado
+Categorías	✅ Migrado
+Proveedores	🟡 Parcial
+Compras	❌
+Cuenta corriente proveedores	❌
+Ventas	❌
+Caja	❌
+Gastos	❌
+Empleados	❌
+Asistencias	❌
+Liquidaciones	❌
+Municipio	❌
+Atmosférico	❌
+Reportes	❌
+
+
+
+
+
+
+
+
+
+
+
+
+
+📌 PROYECTO: Inventario StockApp / Inventario Baupi
+Documento de evolución, progreso y próximos pasos
+1. Inicio del proyecto
+
+El objetivo inicial fue crear una aplicación profesional de gestión de inventario para un negocio, buscando reemplazar procesos manuales y tener un sistema propio.
+
+La idea principal era desarrollar una aplicación de escritorio capaz de:
+
+Controlar stock en tiempo real.
+Registrar ventas.
+Gestionar productos.
+Tener historial de movimientos.
+Manejar clientes y proveedores.
+Generar tickets.
+Exportar información.
+Trabajar sin depender completamente de internet.
+Tener sincronización online para respaldo.
+
+La aplicación fue desarrollada utilizando:
+
+Electron como framework de escritorio.
+JavaScript como lenguaje principal.
+SQLite como base de datos local.
+Supabase como backend online.
+better-sqlite3 para manejo rápido de base local.
+electron-builder para generar instaladores.
+2. Arquitectura inicial
+
+Se decidió trabajar con una arquitectura híbrida:
+
+Base local (SQLite)
+
+La aplicación tiene una base local para:
+
+Velocidad.
+Uso offline.
+Evitar depender de internet.
+Respuesta inmediata en ventas.
+
+Ejemplo:
+
+Cuando se realiza una venta:
+
+El usuario cobra.
+Se descuenta stock localmente.
+Se genera el ticket.
+Se guarda la operación en SQLite.
+Base online (Supabase)
+
+Supabase se utiliza como respaldo y sincronización.
+
+La idea fue implementar:
+
+Dual Write
+
+Cada operación importante se escribe en:
+
+SQLite local.
+Supabase online.
+
+Ejemplo:
+
+Venta realizada:
+
+Venta confirmada
+        ↓
+Guardar en SQLite
+        ↓
+Enviar copia a Supabase
+
+Esto permite:
+
+Tener datos seguros.
+Recuperar información.
+Poder agregar futuras funciones online.
+3. Funciones principales desarrolladas
+📦 Gestión de productos
+
+Se creó un sistema para manejar:
+
+Nombre del producto.
+Categoría.
+Precio.
+Stock.
+Unidad de medida.
+Código.
+Alertas.
+
+Permite trabajar con distintos tipos de venta:
+
+Unidad.
+Kilogramos.
+Metros.
+
+Ejemplo:
+
+Un producto puede venderse:
+
+Tornillo:
+Stock: 500 unidades
+
+Cable:
+Stock: 100 metros
+
+Arena:
+Stock: 200 kg
+4. Sistema POS (Punto de venta)
+
+Uno de los módulos principales fue crear un sistema parecido a una caja registradora.
+
+Incluye:
+
+Buscar productos.
+Agregar al carrito.
+Modificar cantidades.
+Calcular total.
+Finalizar venta.
+Descontar stock automáticamente.
+
+Proceso:
+
+Seleccionar producto
+        ↓
+Agregar cantidad
+        ↓
+Calcular precio
+        ↓
+Confirmar pago
+        ↓
+Actualizar stock
+        ↓
+Crear ticket
+        ↓
+Guardar historial
+5. Sistema de tickets
+
+Se trabajó bastante en este módulo.
+
+Estado actual:
+
+✅ Alta de ticket implementada.
+
+La función:
+
+ticketService.saveTicket()
+
+realiza:
+
+Inserta ticket en SQLite.
+Confirma la operación.
+Ejecuta sincronización online.
+
+Después de guardar localmente:
+
+handleDualWrite(
+ supabaseTicketService.addTicket(payload),
+ 'tickets',
+ 'INSERT',
+ payload
+)
+
+Esto significa:
+
+Primero prioridad al sistema local.
+Luego respaldo online.
+6. Problemas encontrados y soluciones
+Problema: Importación Excel
+
+Al principio se agregó una función para importar productos desde Excel.
+
+Problemas encontrados:
+
+Categorías no se importaban correctamente.
+Algunos campos quedaban vacíos.
+La experiencia no era estable.
+
+Se trabajó en:
+
+Reinstalar librería xlsx.
+Revisar estructura de columnas.
+Mejorar validaciones.
+Problema: Búsqueda y filtros
+
+Se detectó que:
+
+La búsqueda funcionaba mal después de usar paginación.
+Los filtros perdían estado.
+
+Se revisó:
+
+Estado interno.
+Actualización de datos.
+Renderizado.
+Problema: Rendimiento
+
+Con aproximadamente:
+
+600 productos
+
+la aplicación empezaba a sentirse pesada.
+
+Se analizaron mejoras:
+
+Reducir renders innecesarios.
+Optimizar consultas SQLite.
+Usar paginación.
+Mejorar búsqueda.
+Problema: Impresión de tickets
+
+Se encontró un error donde:
+
+El ticket podía imprimirse repetidas veces.
+
+Se investigó:
+
+Eventos duplicados.
+Llamadas repetidas.
+Estados del proceso.
+7. Mejoras visuales y experiencia de usuario
+
+La aplicación fue evolucionando hacia un producto más profesional.
+
+Se agregaron ideas como:
+
+Temas visuales.
+Notificaciones.
+Paneles.
+Filtros.
+Búsqueda rápida.
+Reportes.
+Exportaciones.
+
+La intención siempre fue que no pareciera una aplicación básica, sino un software comercial.
+
+8. Base de datos y módulos
+
+La estructura terminó teniendo módulos:
+
+Productos
+
+Control completo del inventario.
+
+Ventas
+
+Registro de operaciones.
+
+Tickets
+
+Comprobantes generados.
+
+Clientes
+
+Base de clientes.
+
+Proveedores
+
+Información de proveedores.
+
+Historial
+
+Movimientos:
+
+Entradas.
+Salidas.
+Ventas.
+Ajustes.
+Reportes
+
+Información del negocio:
+
+Productos vendidos.
+Stock bajo.
+Ventas realizadas.
+9. Integraciones futuras planteadas
+
+Se trabajó la idea de agregar:
+
+Mercado Pago Point / QR
+
+Objetivo:
+
+Permitir cobrar directamente desde la aplicación.
+
+Flujo:
+
+Venta creada
+      ↓
+Generar QR
+      ↓
+Cliente paga
+      ↓
+Confirmar pago
+      ↓
+Cerrar venta
+10. Estado actual del proyecto
+
+Actualmente el proyecto tiene:
+
+✅ Aplicación Electron funcionando.
+✅ Base SQLite local.
+✅ Arquitectura preparada para Supabase.
+✅ Sistema POS avanzado.
+✅ Manejo de productos.
+✅ Historial de ventas.
+✅ Tickets.
+✅ Dual Write en implementación.
+✅ Exportaciones.
+✅ Roles y permisos planteados.
+
+11. Próximos pasos recomendados
+Prioridad 1: Terminar sincronización
+
+Completar:
+
+Productos.
+Ventas.
+Clientes.
+Proveedores.
+Tickets.
+
+Con:
+
+SQLite → Supabase
+Supabase → SQLite
+Prioridad 2: Seguridad
+
+Agregar:
+
+Usuarios.
+Roles.
+
+Ejemplo:
+
+Administrador:
+
+Todo permitido.
+
+Empleado:
+
+Solo ventas.
+Prioridad 3: Optimización
+
+Mejorar:
+
+Carga inicial.
+Búsqueda.
+Grandes cantidades de productos.
+Memoria utilizada.
+
+Objetivo:
+
+Que funcione fluido con:
+
+5.000 - 10.000 productos
+Prioridad 4: Mejorar experiencia comercial
+
+Agregar:
+
+Dashboard principal.
+Gráficos.
+Estadísticas.
+Mejor diseño.
+Animaciones.
+Atajos de teclado.
+Prioridad 5: Preparar venta del software
+
+Convertirlo en producto:
+
+Instalador profesional.
+Sistema de licencias.
+Actualizaciones automáticas.
+Manual de usuario.
+Página comercial.
+12. Visión final del proyecto
+
+La idea final es que Inventario Baupi no sea solamente un programa de stock, sino un sistema completo para negocios:
+
+             INVENTARIO BAUPI
+
+              Productos
+                  |
+Clientes ---- Ventas ---- Proveedores
+                  |
+              Tickets
+                  |
+              Reportes
+                  |
+             Sincronización
+                  |
+              Nube Online
+
+Un software capaz de competir con sistemas comerciales, pero creado totalmente a medida.
+
+Conclusión
+
+El proyecto pasó de ser una idea básica de control de stock a una aplicación con arquitectura profesional.
+
+Las partes más importantes logradas fueron:
+
+Pensar primero en funcionamiento offline.
+Crear una base local rápida.
+Diseñar sincronización online.
+Crear un POS completo.
+Implementar tickets.
+Preparar una estructura escalable.
+
+El siguiente gran salto no es agregar más funciones, sino cerrar la estabilidad del sistema, terminar la sincronización, pulir la interfaz y convertirlo en un producto listo para clientes reales.
+
+Este sería el "documento maestro" del proyecto hasta donde tengo registrado.
+
+¿Qué sigue?
+
+No pasaría todavía a Informes ni Finanzas.
+
+Esos módulos, por lo que me mostraste, son principalmente consultas sobre tablas ya sincronizadas.
+
+El siguiente módulo lógico es Ajustes de Caja, porque:
+
+escribe datos propios;
+afecta la contabilidad;
+tiene relativamente pocas dependencias;
+ya interactúa con ventas (por ejemplo, anulación de ventas), así que completar su sincronización deja consistente todo el flujo de caja entre equipos.
+
+Después de Ajustes de Caja, seguiría con:
+
+✅ Productos
+✅ Categorías
+✅ Proveedores
+✅ Ventas
+✅ Tickets
+Ajustes de Caja
+Gastos
+Municipio
+Máquinas
+Empleados
+Liquidación de empleados
+
+Y recién entonces auditaría Historial, Informes y Finanzas, porque es muy posible que no necesiten migración propia si solo leen datos de las tablas ya sincronizadas.
+
+
+
+
+
+
+todo esto es lo que me falta principal en  la web
+🔐 Autenticación (Supabase Auth).
+🏢 Multiempresa (empresa_id).
+👥 Roles y permisos.
+📄 Reportes (PDF/Excel).
+📱 PWA.
+🌐 Modo offline para la web.
+🎨 Pulido visual y experiencia de usuario.

@@ -1,0 +1,16 @@
+/* ===== SIDEBAR ESTILO COMIC APPS ===== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  background: #FFFFFF;
+  box-shadow: 2px 0 20px rgba(0, 51, 102, 0.08);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+/* (rest omitted in backup for brevity) */

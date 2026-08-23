@@ -1,0 +1,12 @@
+# Next.js build and Turbopack local dev cache
+.next/
+out/
+*.tsbuildinfo
+
+# Dependencies
+node_modules/
+
+# Environment local overrides
+.env
+.env.local
+.env*.local

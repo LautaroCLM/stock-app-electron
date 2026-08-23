@@ -1,0 +1,57 @@
+/* ===== PANEL DERECHO ESTILO TOPBAR (COPIA EXACTA) ===== */
+/* Basado 100% en los estilos del topbar central */
+
+/* Resetear estilos antiguos del config-panel */
+.config-panel {
+  /* Reset completo para evitar conflictos */
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  position: fixed !important;
+  top: 0 !important;
+  right: -350px !important;
+  width: 320px !important;
+  height: 100vh !important;
+  z-index: 999 !important;
+  transition: all 0.3s ease !important;
+  overflow-y: auto !important;
+}
+
+.config-panel.active {
+  right: 0 !important;
+}
+
+/* Aplicar estilo exacto del topbar */
+.config-panel {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(16px) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  padding: 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 18px !important;
+}
+
+/* Header - estilo topbar */
+.config-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.config-header h3 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* (rest omitted in backup for brevity) */

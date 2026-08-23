@@ -1,0 +1,47 @@
+/* Aggregate main stylesheet — imports legacy CSS modules */
+@import url("base.css");
+@import url("layout.css");
+@import url("responsive.css");
+@import url("buttons.css");
+@import url("forms.css");
+@import url("modals.css");
+@import url("pages.css");
+@import url("tables.css");
+@import url("sidebar.css");
+@import url("topbar.css");
+
+/* If any additional legacy files exist, add them here */
+
+/* Config panel (right-side menu) */
+@import url("config-panel.css");
+
+/* Finanzas dashboard redesign */
+@import url("finanzas.css");
+
+/* Historial redesign */
+@import url("historial.css");
+
+/* Informes dashboard redesign */
+@import url("informes.css");
+
+/* Help Center styling */
+@import url("help.css");
+
+/* Empleados module styling */
+@import url("empleados.css");
+
+/* Proveedores module styling */
+@import url("proveedores.css");
+
+/* Máquinas module styling */
+@import url("maquinas.css");
+
+/* Municipio module styling */
+@import url("municipio.css");
+
+/* Liquidación de Empleados module styling */
+@import url("emp_liq.css");
+
+/* Gastos module styling */
+@import url("gastos.css");
+

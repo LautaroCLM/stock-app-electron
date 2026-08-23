@@ -1,0 +1,508 @@
+/* ======================================================
+   Módulo Municipio — CSS Modular
+   Coherente con la estética del sistema (proveedores.css)
+   ====================================================== */
+
+.municipio-page {
+  padding: 28px 32px;
+  max-width: 1400px;
+  animation: inventarioPageIn 0.35s ease;
+}
+
+.muni-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.muni-header h1 {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.muni-header h1 i { color: #3b82f6; }
+.muni-header p { margin: 4px 0 0; color: #64748b; font-size: 14px; }
+
+.btn-muni-primary {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.btn-muni-primary:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+}
+
+/* ── Sub-pestañas ─────────────────────────────────────── */
+.muni-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f1f5f9;
+  border-radius: 14px;
+  padding: 5px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.muni-tab-btn {
+  flex: none;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #64748b;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.muni-tab-btn:hover { background: #e2e8f0; color: #334155; }
+.muni-tab-btn.active { background: #ffffff; color: #3b82f6; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+.muni-tab-section { display: none; }
+.muni-tab-section.active { display: block; }
+
+/* ── KPI Cards ─────────────────────────────────────────── */
+.muni-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.muni-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow 0.2s;
+}
+
+.muni-kpi-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.07); }
+
+.muni-kpi-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.muni-kpi-icon.blue { background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.muni-kpi-icon.green { background-color: rgba(16, 185, 129, 0.1); color: #10b981; }
+.muni-kpi-icon.red { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.muni-kpi-icon.orange { background-color: rgba(249, 115, 22, 0.1); color: #f97316; }
+
+.muni-kpi-val { font-size: 24px; font-weight: 800; color: #0f172a; }
+.muni-kpi-label { font-size: 12px; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ── Herramientas / Filtros ──────────────────────────────── */
+.muni-tools {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.muni-search {
+  position: relative;
+  flex: 1;
+  min-width: 250px;
+}
+
+.muni-search i {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.muni-search input {
+  width: 100%;
+  padding: 10px 14px 10px 40px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  background: #ffffff;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.muni-search input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
+.muni-filter-select {
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  background: #ffffff;
+  outline: none;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.muni-filter-select:focus { border-color: #3b82f6; }
+
+/* ── Tabla de Órdenes ───────────────────────────────────── */
+.muni-table-wrapper {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  overflow-x: auto;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.muni-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  min-width: 1000px;
+}
+
+.muni-table th {
+  background: #f8fafc;
+  padding: 14px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+  user-select: none;
+}
+
+.muni-table td {
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.muni-table tr:last-child td { border-bottom: none; }
+.muni-table tr:hover td { background: #f8fafc; }
+
+.muni-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.muni-badge.pendiente { background: #fef3c7; color: #d97706; }
+.muni-badge.parcial { background: #dbeafe; color: #2563eb; }
+.muni-badge.cobrado { background: #d1fae5; color: #059669; }
+
+.btn-muni-action {
+  background: transparent;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-right: 4px;
+}
+
+.btn-muni-action:hover { background: #f1f5f9; color: #0f172a; }
+.btn-muni-action.delete:hover { background: #fee2e2; color: #ef4444; }
+
+.muni-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #94a3b8;
+}
+
+.muni-empty i { font-size: 36px; margin-bottom: 12px; display: block; }
+.muni-empty p { margin: 0 0 4px; font-weight: 600; color: #64748b; }
+.muni-empty small { font-size: 12px; }
+
+/* ── Buscador de Productos en Modal ───────────────────────── */
+.muni-search-wrapper {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.muni-search-wrapper label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 13.5px;
+  color: #334155;
+}
+
+.muni-search-wrapper input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.muni-search-wrapper input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.muni-search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 2000;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  display: none;
+}
+
+.muni-search-results.active { display: block; }
+
+.muni-search-result-item {
+  padding: 10px 14px;
+  font-size: 13.5px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.muni-search-result-item:last-child { border-bottom: none; }
+.muni-search-result-item:hover { background: #f1f5f9; }
+
+.muni-search-result-item .prod-code { color: #64748b; font-family: monospace; font-size: 12px; }
+.muni-search-result-item .prod-price { font-weight: bold; color: #0f172a; }
+
+/* ── Grilla Carrito de Modal ────────────────────────────── */
+.muni-cart-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  font-size: 13px;
+}
+
+.muni-cart-table th {
+  background: #f1f5f9;
+  padding: 8px 10px;
+  font-weight: 700;
+  text-align: left;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.muni-cart-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.muni-cart-table input[type="number"] {
+  width: 60px;
+  padding: 5px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.muni-cart-total-wrapper {
+  text-align: right;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 10px 0;
+  color: #0f172a;
+  border-top: 2px solid #cbd5e1;
+  margin-top: 5px;
+}
+
+/* Resumen / Detalles Orden */
+.muni-summary-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 18px;
+}
+
+.muni-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.muni-summary-item label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.muni-summary-item span {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* ── Dark Theme Overrides ───────────────────────────────── */
+body.dark-theme .muni-table-wrapper {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-theme .muni-table th {
+  background: #1e293b;
+  color: #cbd5e1;
+  border-bottom-color: #334155;
+}
+
+body.dark-theme .muni-table td {
+  color: #cbd5e1;
+  border-bottom-color: #1e293b;
+}
+
+body.dark-theme .muni-table tr:hover td {
+  background: #1e293b;
+}
+
+body.dark-theme .muni-summary-item span {
+  color: #f1f5f9;
+}
+
+/* ── Financial breakdown modal elements ────────────────── */
+.muni-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-radius: 14px;
+}
+
+.muni-breakdown-row.blue {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+.muni-breakdown-row.green {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+.muni-breakdown-row.yellow {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+.muni-breakdown-row.blue .amount { color: #2563eb; }
+.muni-breakdown-row.green .amount { color: #059669; }
+.muni-breakdown-row.yellow .amount { color: #d97706; }
+
+/* Dark theme overrides for breakdown row */
+body.dark-theme .muni-breakdown-row.blue {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+body.dark-theme .muni-breakdown-row.green {
+  background: rgba(5, 150, 105, 0.1);
+  border-color: rgba(5, 150, 105, 0.3);
+}
+body.dark-theme .muni-breakdown-row.yellow {
+  background: rgba(217, 119, 6, 0.1);
+  border-color: rgba(217, 119, 6, 0.3);
+}
+
+body.dark-theme .muni-breakdown-row.blue .amount { color: #60a5fa; }
+body.dark-theme .muni-breakdown-row.green .amount { color: #34d399; }
+body.dark-theme .muni-breakdown-row.yellow .amount { color: #fbbf24; }
+
+/* Interactive Cursor and hover effects for Finanzas Cards */
+.fkpi-card.green, .fkpi-card.violet {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.fkpi-card.green:hover, .fkpi-card.violet:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+body.dark-theme .fkpi-card.green:hover, body.dark-theme .fkpi-card.violet:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Nuevos desgloses en Finanzas */
+.muni-breakdown-row.purple {
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+}
+.muni-breakdown-row.purple .amount {
+  color: #a855f7;
+}
+
+.muni-breakdown-row.orange {
+  background: #fff7ed;
+  border: 1px solid #ffedd5;
+}
+.muni-breakdown-row.orange .amount {
+  color: #ea580c;
+}
+
+/* Dark mode para nuevos desgloses */
+body.dark-theme .muni-breakdown-row.purple {
+  background: rgba(168, 85, 247, 0.1);
+  border-color: rgba(168, 85, 247, 0.3);
+}
+body.dark-theme .muni-breakdown-row.purple .amount {
+  color: #c084fc;
+}
+
+body.dark-theme .muni-breakdown-row.orange {
+  background: rgba(234, 88, 12, 0.1);
+  border-color: rgba(234, 88, 12, 0.3);
+}
+body.dark-theme .muni-breakdown-row.orange .amount {
+  color: #fb923c;
+}
+
+
+

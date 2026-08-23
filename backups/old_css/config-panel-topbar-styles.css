@@ -1,0 +1,177 @@
+/* ===== PANEL DERECHO ESTILO TOPBAR (TARJETA MODERNA) ===== */
+/* Basado en el diseño del topbar central para mantener coherencia visual */
+
+/* LIMPIEZA DE ESTILOS ANTERIORES */
+.config-panel {
+  /* Resetear estilos antiguos */
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+/* Panel principal - estilo tarjeta como topbar */
+.config-panel {
+  position: fixed;
+  top: 0;
+  right: -350px;
+  width: 320px;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.10);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  z-index: 999;
+  transition: all 0.3s ease;
+  overflow-y: auto;
+  backdrop-filter: blur(16px);
+  padding: 24px 20px;
+  margin: 20px;
+}
+
+.config-panel.active {
+  right: 0;
+}
+
+/* Header del panel - estilo topbar */
+.config-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.config-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.config-header h3 i {
+  color: #64748b;
+  font-size: 1.1rem;
+}
+
+.config-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.config-close:hover {
+  transform: translateY(-1px);
+  border-color: #e2e8f0;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.10);
+}
+
+/* Sección de usuario - tarjeta estilo topbar */
+.config-user {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #e5e7eb;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.config-user:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.10);
+}
+
+.config-user .user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #fff;
+  font-size: 20px;
+  margin: 0 auto 12px;
+}
+
+.config-user .user-info {
+  text-align: center;
+}
+
+.config-user .user-name {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.config-user .user-email {
+  display: block;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Menú de configuración - estilo botones topbar */
+.config-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.config-section h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 4px;
+}
+
+/* Botones estilo topbar - btn-secondary */
+.config-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  border-radius: 16px;
+  padding: 0 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: #f8fafc;
+  color: #334155;
+  border-color: #e5e7eb;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  width: 100%;
+}
+
+.config-option:hover {
+  background: #eef2ff;
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.10);
+}
+
+/* (rest omitted in backup for brevity) */

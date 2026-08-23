@@ -1,0 +1,52 @@
+{
+  "name": "inventario-baupi",
+  "version": "1.2.5",
+  "description": "Sistema de inventario creado por lau",
+  "main": "main.js",
+  "author": "lau",
+  "license": "ISC",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.mia.inventario",
+    "productName": "Inventario stockapp",
+    "files": [
+      "**/*",
+      "!dist/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist"
+    },
+    "extraResources": [
+      {
+        "from": ".env",
+        "to": ".env"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/Logoapp2.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.1",
+    "electron": "^30.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.7",
+    "better-sqlite3": "^12.4.1",
+    "dotenv": "^17.4.2",
+    "pg": "^8.23.0",
+    "ws": "^8.21.1",
+    "xlsx": "^0.18.5"
+  }
+}

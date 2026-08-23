@@ -1,0 +1,41 @@
+# Electron desktop build output & binaries
+dist/
+win-unpacked/
+*.exe
+*.asar
+*.blockmap
+
+# Git repository history
+.git/
+
+# Dependencies (Vercel installs dependencies cloud-side)
+node_modules/
+web/node_modules/
+
+# Next.js build and Turbopack local dev cache
+.next/
+web/.next/
+*.tsbuildinfo
+out/
+
+# Database files & backups
+*.db
+*.sqlite
+backups/
+backup_*.json
+
+# Electron source files not needed for Next.js Web deployment
+main.js
+renderer.js
+preload.js
+services/
+css/
+cssviejo/
+index.html
+splash.html
+Logoapp.ico
+
+# Environment local overrides
+.env
+.env.local
+.env*.local

@@ -1,0 +1,763 @@
+/* ================================================================
+   MÓDULO LIQUIDACIÓN DE EMPLEADOS — CSS
+   Siguiendo el mismo design system y estilos del módulo Máquinas
+   ================================================================ */
+
+/* ── Página principal ── */
+.emp-liq-page {
+  padding: 28px 32px;
+  max-width: 1400px;
+  animation: inventarioPageIn 0.35s ease;
+}
+
+/* ── Header ── */
+.emp-liq-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.emp-liq-header-left h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.emp-liq-header-left h1 i {
+  color: #3b82f6; /* Azul, correspondiente a Empleados */
+  font-size: 24px;
+}
+
+.emp-liq-header-left p {
+  color: #64748b;
+  font-size: 15px;
+}
+
+.emp-liq-header-right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Navigation for month */
+.emp-liq-month-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  padding: 6px 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.emp-liq-month-selector button {
+  background: #f1f5f9;
+  border: none;
+  color: #475569;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.emp-liq-month-selector button:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+.emp-liq-month-selector span {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 14px;
+  min-width: 110px;
+  text-align: center;
+}
+
+/* ── Tabs ── */
+.emp-liq-tabs {
+  display: flex;
+  gap: 6px;
+  background: #f1f5f9;
+  padding: 6px;
+  border-radius: 14px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.emp-liq-tab-btn {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.emp-liq-tab-btn:hover {
+  background: white;
+  color: #3b82f6;
+}
+
+.emp-liq-tab-btn.active {
+  background: white;
+  color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
+}
+
+.emp-liq-tab-btn i {
+  font-size: 13px;
+}
+
+/* ── Secciones de tab ── */
+.emp-liq-tab-section {
+  display: none;
+  animation: maquinasTabIn 0.25s ease;
+}
+
+.emp-liq-tab-section.active {
+  display: block;
+}
+
+@keyframes maquinasTabIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Toolbar ── */
+.emp-liq-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.emp-liq-search {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+  max-width: 420px;
+}
+
+.emp-liq-search i {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.emp-liq-search input {
+  width: 100%;
+  padding: 11px 16px 11px 40px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  background: white;
+  color: #334155;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.emp-liq-search input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.emp-liq-filter-select {
+  padding: 11px 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  background: white;
+  color: #334155;
+  outline: none;
+  cursor: pointer;
+  min-width: 180px;
+  transition: all 0.2s ease;
+}
+
+.emp-liq-filter-select:focus {
+  border-color: #3b82f6;
+}
+
+/* ── Tabla ── */
+.emp-liq-table-wrapper {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.emp-liq-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 1000px;
+}
+
+.emp-liq-table thead {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.emp-liq-table thead th {
+  padding: 14px 16px;
+  text-align: left;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.emp-liq-table tbody tr {
+  border-bottom: 1px solid #f8fafc;
+  transition: background 0.15s;
+}
+
+.emp-liq-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.emp-liq-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.emp-liq-table tbody td {
+  padding: 14px 16px;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.emp-liq-table .emp-name {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.emp-liq-table .emp-cargo {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Badges */
+.emp-liq-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.emp-liq-badge.activo { background: #dcfce7; color: #166534; }
+.emp-liq-badge.inactivo { background: #fee2e2; color: #991b1b; }
+.emp-liq-badge.liquidado { background: #e0f2fe; color: #075985; }
+.emp-liq-badge.pendiente { background: #fef9c3; color: #854d0e; }
+
+/* Buttons */
+.btn-emp-liq-action {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.btn-emp-liq-action.config { background: #eff6ff; color: #3b82f6; }
+.btn-emp-liq-action.config:hover { background: #3b82f6; color: white; }
+
+.btn-emp-liq-action.liquidar { background: #f0fdf4; color: #16a34a; }
+.btn-emp-liq-action.liquidar:hover { background: #16a34a; color: white; }
+
+.btn-emp-liq-primary {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-emp-liq-primary:hover {
+  background: #2563eb;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.btn-emp-liq-secondary {
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-emp-liq-secondary:hover {
+  background: #e2e8f0;
+}
+
+/* Modals */
+.emp-liq-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.emp-liq-modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.emp-liq-modal-content {
+  background: white;
+  width: 100%;
+  max-width: 580px;
+  border-radius: 20px;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+  overflow: hidden;
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+.emp-liq-modal.active .emp-liq-modal-content {
+  transform: scale(1);
+}
+
+.emp-liq-modal-header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  padding: 20px 24px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.emp-liq-modal-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.emp-liq-modal-header h2 i {
+  color: #3b82f6;
+}
+
+.emp-liq-modal-header .btn-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.emp-liq-modal-header .btn-close:hover {
+  color: white;
+}
+
+.emp-liq-modal-body {
+  padding: 24px;
+}
+
+.emp-liq-modal-footer {
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Forms in Modal */
+.emp-liq-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.emp-liq-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.emp-liq-form-group.full {
+  grid-column: span 2;
+}
+
+.emp-liq-form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.emp-liq-form-group input, 
+.emp-liq-form-group select,
+.emp-liq-form-group textarea {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
+  background: #f8fafc;
+  color: #1e293b;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.emp-liq-form-group input:focus,
+.emp-liq-form-group select:focus {
+  border-color: #3b82f6;
+  background: white;
+}
+
+/* Statistics Tab */
+.emp-liq-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.emp-liq-kpi-card {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.emp-liq-kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.emp-liq-kpi-icon.blue { background: #eff6ff; color: #3b82f6; }
+.emp-liq-kpi-icon.green { background: #f0fdf4; color: #16a34a; }
+.emp-liq-kpi-icon.yellow { background: #fefce8; color: #ca8a04; }
+.emp-liq-kpi-icon.purple { background: #faf5ff; color: #7c3aed; }
+
+.emp-liq-kpi-info h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.emp-liq-kpi-info p {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.emp-liq-charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.emp-liq-chart-card {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.emp-liq-chart-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emp-liq-chart-card h3 i {
+  color: #3b82f6;
+}
+
+/* Rentabilidad styling like Maquinas */
+.emp-liq-profit-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
+  padding: 12px 20px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 12px;
+  color: #475569;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.emp-liq-profit-header :first-child { text-align: left; }
+.emp-liq-profit-header :not(:first-child) { text-align: right; }
+
+.emp-liq-profit-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
+  padding: 16px 20px;
+  background: white;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.emp-liq-profit-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.emp-liq-profit-row :first-child { text-align: left; }
+.emp-liq-profit-row :not(:first-child) { text-align: right; font-weight: 600; }
+
+.emp-liq-profit-name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.emp-liq-profit-cargo {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.emp-liq-profit-amount {
+  font-size: 14px;
+}
+
+.emp-liq-profit-amount.income { color: #16a34a; }
+.emp-liq-profit-amount.expense { color: #ef4444; }
+.emp-liq-profit-amount.net.positive { color: #16a34a; font-weight: 700; }
+.emp-liq-profit-amount.net.negative { color: #ef4444; font-weight: 700; }
+
+/* Empty state */
+.emp-liq-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+  gap: 12px;
+}
+
+.emp-liq-empty i {
+  font-size: 40px;
+  color: #cbd5e1;
+}
+
+.emp-liq-empty p {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Toast */
+.emp-liq-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1e293b;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  display: none;
+  z-index: 1100;
+  animation: toastIn 0.3s ease;
+}
+
+.emp-liq-toast.show {
+  display: block;
+}
+
+.emp-liq-toast.success {
+  border-left: 4px solid #16a34a;
+}
+
+.emp-liq-toast.error {
+  border-left: 4px solid #ef4444;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── MODO OSCURO (Dark theme) ── */
+body.dark-theme .emp-liq-month-selector {
+  background: #1e293b;
+  border-color: #334155;
+}
+body.dark-theme .emp-liq-month-selector span {
+  color: #f8fafc;
+}
+body.dark-theme .emp-liq-month-selector button {
+  background: #334155;
+  color: #cbd5e1;
+}
+body.dark-theme .emp-liq-month-selector button:hover {
+  background: #3b82f6;
+  color: white;
+}
+body.dark-theme .emp-liq-tabs {
+  background: #0f172a;
+}
+body.dark-theme .emp-liq-tab-btn {
+  color: #94a3b8;
+}
+body.dark-theme .emp-liq-tab-btn:hover {
+  background: #1e293b;
+  color: #3b82f6;
+}
+body.dark-theme .emp-liq-tab-btn.active {
+  background: #1e293b;
+  color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+body.dark-theme .emp-liq-search input {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+body.dark-theme .emp-liq-filter-select {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+body.dark-theme .emp-liq-table-wrapper {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+body.dark-theme .emp-liq-table tbody tr {
+  border-bottom-color: #334155;
+}
+body.dark-theme .emp-liq-table tbody tr:hover {
+  background: #243242;
+}
+body.dark-theme .emp-liq-table tbody td {
+  color: #cbd5e1;
+}
+body.dark-theme .emp-liq-table .emp-name {
+  color: #f8fafc;
+}
+body.dark-theme .emp-liq-modal-content {
+  background: #1e293b;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+}
+body.dark-theme .emp-liq-modal-footer {
+  background: #1a2332;
+  border-top-color: #334155;
+}
+body.dark-theme .emp-liq-form-group label {
+  color: #cbd5e1;
+}
+body.dark-theme .emp-liq-form-group input,
+body.dark-theme .emp-liq-form-group select,
+body.dark-theme .emp-liq-form-group textarea {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
+}
+body.dark-theme .emp-liq-form-group input:focus,
+body.dark-theme .emp-liq-form-group select:focus {
+  border-color: #3b82f6;
+  background: #1e293b;
+}
+body.dark-theme .emp-liq-kpi-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+body.dark-theme .emp-liq-kpi-info p {
+  color: #f8fafc;
+}
+body.dark-theme .emp-liq-chart-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+body.dark-theme .emp-liq-chart-card h3 {
+  color: #f8fafc;
+}
+body.dark-theme .emp-liq-profit-header {
+  background: #0f172a;
+  color: #94a3b8;
+}
+body.dark-theme .emp-liq-profit-row {
+  background: #1e293b;
+  border-color: #334155;
+}
+body.dark-theme .emp-liq-profit-name {
+  color: #f8fafc;
+}
+body.dark-theme .btn-emp-liq-secondary {
+  background: #334155;
+  color: #cbd5e1;
+}
+body.dark-theme .btn-emp-liq-secondary:hover {
+  background: #475569;
+}
