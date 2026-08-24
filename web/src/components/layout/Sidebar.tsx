@@ -20,6 +20,7 @@ import {
   Store,
 } from 'lucide-react';
 import { NAVIGATION_ITEMS } from '@/lib/constants';
+import { useUserRole } from '@/lib/hooks/useUserRole';
 
 const ICON_MAP: Record<string, React.ReactNode> = {
   PieChart: <PieChart className="w-5 h-5" />,
@@ -43,9 +44,16 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const pathname = usePathname();
+  const { isAdmin } = useUserRole();
 
-  const coreItems = NAVIGATION_ITEMS.filter((i) => i.category === 'core');
-  const operationsItems = NAVIGATION_ITEMS.filter((i) => i.category === 'operations');
+  const isItemAllowed = (href: string) => {
+    if (isAdmin) return true;
+    const restricted = ['/', '/finanzas', '/informes', '/historial', '/empleados-liquidacion'];
+    return !restricted.includes(href);
+  };
+
+  const coreItems = NAVIGATION_ITEMS.filter((i) => i.category === 'core' && isItemAllowed(i.href));
+  const operationsItems = NAVIGATION_ITEMS.filter((i) => i.category === 'operations' && isItemAllowed(i.href));
 
   return (
     <>

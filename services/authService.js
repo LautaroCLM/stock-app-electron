@@ -63,7 +63,8 @@ async function fetchUserProfile(supabase, authUser) {
       .maybeSingle();
 
     if (profileData) {
-      const role = profileData.cargo || profileData.role || profileData.rol || 'administrador';
+      const rawRole = (profileData.role || profileData.rol || 'empleado').toLowerCase();
+      const role = rawRole === 'admin' || rawRole === 'master admin' || rawRole === 'administrador' ? 'admin' : 'empleado';
       const company = {
         id: profileData.company_id || 'default-company',
         nombre: profileData.company_name || 'La Perla Desarrolladora S.A.'
@@ -72,7 +73,7 @@ async function fetchUserProfile(supabase, authUser) {
         id: authUser.id,
         nombre: profileData.nombre || profileData.name || authUser.user_metadata?.full_name || authUser.email.split('@')[0],
         email: authUser.email,
-        cargo: profileData.cargo || 'Master Admin',
+        cargo: profileData.cargo || (role === 'admin' ? 'Master Admin' : 'Empleado'),
         rol: role,
         role: role,
         avatar_url: profileData.avatar_url || null,
@@ -94,17 +95,32 @@ async function fetchUserProfile(supabase, authUser) {
     id: authUser.id,
     nombre: authUser.user_metadata?.full_name || authUser.email.split('@')[0] || 'Usuario Administrador',
     email: authUser.email,
-    rol: 'administrador',
-    role: 'administrador',
+    cargo: 'Master Admin',
+    rol: 'admin',
+    role: 'admin',
     company_id: defaultCompany.id,
     empresa: defaultCompany.nombre,
     company: defaultCompany
   };
 }
 
+function getCurrentProfile() {
+  const stored = readStoredSession();
+  return stored?.profile || null;
+}
+
+function isCurrentAdmin() {
+  const profile = getCurrentProfile();
+  if (!profile) return true;
+  const role = (profile.role || profile.rol || 'admin').toLowerCase();
+  return role === 'admin';
+}
+
 async function signIn({ email, password }) {
+  console.log('[AUTH TRACE 6] authService signIn started for email:', email);
   const supabase = getSupabaseClient();
   if (!supabase) {
+    console.error('[AUTH TRACE 7] Supabase client is null or not configured!');
     return {
       success: false,
       message: 'Supabase no está configurado en las variables de entorno.'
@@ -114,6 +130,11 @@ async function signIn({ email, password }) {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      console.warn('[AUTH TRACE 7] Supabase Auth error response:', {
+        message: error.message,
+        status: error.status,
+        code: error.code
+      });
       let friendlyMessage = error.message;
       if (error.message.toLowerCase().includes('invalid login credentials')) {
         friendlyMessage = 'Credenciales incorrectas. Verificá tu correo y contraseña.';
@@ -123,6 +144,7 @@ async function signIn({ email, password }) {
       return { success: false, message: friendlyMessage };
     }
 
+    console.log('[AUTH TRACE 7] Supabase Auth success response for user ID:', data?.user?.id);
     const authUser = data.user;
     const session = data.session;
     const profile = await fetchUserProfile(supabase, authUser);
@@ -141,7 +163,7 @@ async function signIn({ email, password }) {
       session
     };
   } catch (err) {
-    console.error('[AuthService] Error en signIn:', err);
+    console.error('[AUTH TRACE 7] Exception during Supabase Auth signIn:', err.message || err);
     return {
       success: false,
       message: err.message || 'Error de red al conectar con Supabase Auth.'
@@ -500,5 +522,7 @@ module.exports = {
   updateProfile,
   getCompanyUsers,
   startPresenceTracking,
-  stopPresenceTracking
+  stopPresenceTracking,
+  getCurrentProfile,
+  isCurrentAdmin
 };

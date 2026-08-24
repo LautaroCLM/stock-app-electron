@@ -20,6 +20,7 @@ const supabaseEmployeeService = require('./supabaseEmployeeService');
 const supabaseBudgetService = require('./supabaseBudgetService');
 const supabaseRemitoService = require('./supabaseRemitoService');
 const supabaseAtmosfericoService = require('./supabaseAtmosfericoService');
+const supabaseAjusteService = require('./supabaseAjusteService');
 
 const POLL_INTERVAL_MS = 5000;
 
@@ -234,15 +235,10 @@ class SyncManager {
             result = await supabaseExpenseService.deleteExpense(payload.id);
           }
         } else if (entity === 'ajustes_caja') {
-          const client = require('./supabaseClient').getSupabaseClient();
-          if (!client) {
-            result = { success: false, error: 'Supabase no disponible.' };
-          } else if (action === 'INSERT' || action === 'UPDATE') {
-            const { error } = await client.from('ajustes_caja').upsert([payload]);
-            result = error ? { success: false, error: error.message } : { success: true };
+          if (action === 'INSERT' || action === 'UPDATE') {
+            result = await supabaseAjusteService.addAjuste(payload);
           } else if (action === 'DELETE') {
-            const { error } = await client.from('ajustes_caja').delete().eq('id', payload.id);
-            result = error ? { success: false, error: error.message } : { success: true };
+            result = await supabaseAjusteService.deleteAjuste(payload.id);
           }
         } else if (entity === 'municipio_ordenes') {
           if (action === 'INSERT' || action === 'UPDATE') {

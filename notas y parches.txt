@@ -18,6 +18,9 @@ Cierre de caja diario ####
 
 
 
+
+
+
 ESTO YA ESTA!!!####
 -------------
 Mejorar por completo los informes
@@ -38,3 +41,8 @@ Resumen registros
 
 Graficos utiles
 
+
+
+nuevos parches para la app
+- arreglar AJUSTE DE CAJA (app)✅
+- arreglar AJUSTE DE CAJA (web)

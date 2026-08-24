@@ -12,6 +12,7 @@ import {
 } from '@/types/history';
 import { historyWebService } from '@/lib/services/historyWebService';
 import { supabase } from '@/lib/supabase/client';
+import { AdminGuard } from '@/components/auth/AdminGuard';
 
 import { HistorialHeader } from '@/components/historial/HistorialHeader';
 import { HistorialTicketsSection } from '@/components/historial/HistorialTicketsSection';
@@ -134,85 +135,78 @@ export default function HistorialPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Encabezado y Barra de Filtros / Pestañas */}
-      <HistorialHeader
-        documentType={documentType}
-        setDocumentType={setDocumentType}
-        activePeriod={activePeriod}
-        setActivePeriod={setActivePeriod}
-        customDate={customDate}
-        setCustomDate={setCustomDate}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        paymentMethod={paymentMethod}
-        setPaymentMethod={setPaymentMethod}
-        onSearch={handleSearch}
-        onReset={handleReset}
-        isLoading={isLoading}
-      />
+    <AdminGuard>
+      <div className="space-y-6">
+        {/* Encabezado y Filtros */}
+        <HistorialHeader
+          documentType={documentType}
+          setDocumentType={setDocumentType}
+          activePeriod={activePeriod}
+          setActivePeriod={setActivePeriod}
+          customDate={customDate}
+          setCustomDate={setCustomDate}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          paymentMethod={paymentMethod}
+          setPaymentMethod={setPaymentMethod}
+          onSearch={handleSearch}
+          onReset={handleReset}
+          isLoading={isLoading}
+        />
 
-      {/* ESTADO DE ERROR */}
-      {error && (
-        <div className="p-4 bg-red-950/50 border border-red-800 rounded-2xl flex items-center justify-between gap-4 text-red-200 text-xs font-medium">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+        {/* Feedback de error */}
+        {error ? (
+          <div className="p-4 bg-red-950/40 border border-red-800/80 rounded-2xl flex items-center space-x-3 text-red-300 text-xs">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-400" />
             <span>{error}</span>
           </div>
-          <button
-            type="button"
-            onClick={() => fetchHistory(true)}
-            className="px-3 py-1.5 bg-red-900/60 hover:bg-red-800 text-white rounded-xl transition-colors font-semibold"
-          >
-            Reintentar
-          </button>
-        </div>
-      )}
+        ) : null}
 
-      {/* ESTADO DE CARGA O TABLAS DINÁMICAS */}
-      {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-3 bg-slate-900/50 rounded-3xl border border-slate-800">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-          <p className="text-xs font-medium">Cargando datos de historial desde Supabase...</p>
-        </div>
-      ) : (
-        <>
-          {documentType === 'ventas' && (
-            <HistorialTicketsSection
-              paginatedResult={salesResult}
-              onPageChange={setPage}
-              onSelectRecord={handleOpenDetail}
-              isLoading={isLoading}
-            />
-          )}
+        {/* Estado de carga O Tablas Dinámicas */}
+        {isLoading ? (
+          <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-3 bg-slate-900/50 rounded-3xl border border-slate-800">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            <p className="text-xs font-medium">Cargando datos de historial desde Supabase...</p>
+          </div>
+        ) : (
+          <>
+            {documentType === 'ventas' && (
+              <HistorialTicketsSection
+                paginatedResult={salesResult}
+                onPageChange={setPage}
+                onSelectRecord={handleOpenDetail}
+                isLoading={isLoading}
+              />
+            )}
 
-          {documentType === 'presupuestos' && (
-            <HistorialPresupuestosSection
-              paginatedResult={presupuestosResult}
-              onPageChange={setPage}
-              onSelectRecord={handleOpenDetail}
-              isLoading={isLoading}
-            />
-          )}
+            {documentType === 'presupuestos' && (
+              <HistorialPresupuestosSection
+                paginatedResult={presupuestosResult}
+                onPageChange={setPage}
+                onSelectRecord={handleOpenDetail}
+                isLoading={isLoading}
+              />
+            )}
 
-          {documentType === 'remitos' && (
-            <HistorialRemitosSection
-              paginatedResult={remitosResult}
-              onPageChange={setPage}
-              onSelectRecord={handleOpenDetail}
-              isLoading={isLoading}
-            />
-          )}
-        </>
-      )}
+            {documentType === 'remitos' && (
+              <HistorialRemitosSection
+                paginatedResult={remitosResult}
+                onPageChange={setPage}
+                onSelectRecord={handleOpenDetail}
+                isLoading={isLoading}
+              />
+            )}
+          </>
+        )}
 
-      {/* Modal de Detalle Interactivo y Reimpresión */}
-      <HistoryDetailModal
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-        documentType={documentType}
-        record={selectedRecord}
-      />
-    </div>
+        {/* Modal de Detalle Interactivo y Reimpresión */}
+        <HistoryDetailModal
+          isOpen={isDetailModalOpen}
+          onClose={() => setIsDetailModalOpen(false)}
+          documentType={documentType}
+          record={selectedRecord}
+        />
+      </div>
+    </AdminGuard>
   );
 }

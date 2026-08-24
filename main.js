@@ -24,6 +24,7 @@ const authService = require('./services/authService');
 const realtimeManager = require('./services/realtimeManager');
 const supabaseAtmosfericoService = require('./services/supabaseAtmosfericoService');
 const supabaseTicketService = require('./services/supabaseTicketService');
+const supabaseAjusteService = require('./services/supabaseAjusteService');
 
 
 
@@ -697,7 +698,10 @@ app.on('window-all-closed', () => {
 
 // Supabase Auth Handlers
 ipcMain.handle('auth-sign-in', async (event, credentials) => {
-  return authService.signIn(credentials);
+  console.log('[AUTH TRACE 5] main IPC auth-sign-in received email:', credentials?.email);
+  const res = await authService.signIn(credentials);
+  console.log('[AUTH TRACE 5] main IPC authService result:', res?.success ? 'SUCCESS' : `ERROR (${res?.message})`);
+  return res;
 });
 
 ipcMain.handle('auth-sign-out', async () => {
@@ -1675,21 +1679,29 @@ ipcMain.handle('get-sales-summary', (event, { period }) => {
       query = "WHERE date(fecha) = date('now', 'localtime')";
       break;
     case 'week':
-      query = "WHERE strftime('%W', fecha) = strftime('%W', 'now', 'localtime')";
+      query = "WHERE strftime('%Y-%W', fecha) = strftime('%Y-%W', 'now', 'localtime')";
       break;
     case 'month':
-      query = "WHERE strftime('%m', fecha) = strftime('%m', 'now', 'localtime')";
+      query = "WHERE strftime('%Y-%m', fecha) = strftime('%Y-%m', 'now', 'localtime')";
       break;
     case 'year':
       query = "WHERE strftime('%Y', fecha) = strftime('%Y', 'now', 'localtime')";
       break;
   }
-  const row = db.prepare(`SELECT SUM(total) AS total FROM ventas ${query}`).get();
+  const excludeAnnulledClause = "id NOT IN (SELECT venta_id FROM ajustes_caja WHERE venta_id IS NOT NULL AND tipo = 'Venta anulada')";
+  const whereClause = query 
+    ? `${query} AND (tipo IS NULL OR tipo = 'Venta') AND ${excludeAnnulledClause}`
+    : `WHERE (tipo IS NULL OR tipo = 'Venta') AND ${excludeAnnulledClause}`;
+  const row = db.prepare(`SELECT COALESCE(SUM(total), 0) AS total FROM tickets ${whereClause}`).get();
   return row?.total || 0;
 });
 
 // IPC handler unificado de Finanzas (P&L + Flujo de Caja Real + Métricas)
 ipcMain.handle('get-finance-metrics', (event, { period = 'day', fecha = null }) => {
+  if (!authService.isCurrentAdmin()) {
+    console.warn('[SECURITY IPC] Intento no autorizado de acceder a get-finance-metrics');
+    return { success: false, error: 'Acceso denegado. Se requieren permisos de administrador.' };
+  }
   try {
     let whereClause = "";
     let params = [];
@@ -1720,8 +1732,18 @@ ipcMain.handle('get-finance-metrics', (event, { period = 'day', fecha = null }) 
       }
     }
 
+    const excludeAnnulledClause = "id NOT IN (SELECT venta_id FROM ajustes_caja WHERE venta_id IS NOT NULL AND tipo = 'Venta anulada')";
+
+    const ticketsWhere = whereClause 
+      ? `${whereClause} AND (tipo IS NULL OR tipo = 'Venta') AND ${excludeAnnulledClause}`
+      : `WHERE (tipo IS NULL OR tipo = 'Venta') AND ${excludeAnnulledClause}`;
+
+    const ventasContadoWhere = whereClause 
+      ? `${whereClause} AND (metodo_pago IS NULL OR metodo_pago != 'Cuenta Corriente') AND (tipo IS NULL OR tipo = 'Venta') AND ${excludeAnnulledClause}`
+      : `WHERE (metodo_pago IS NULL OR metodo_pago != 'Cuenta Corriente') AND (tipo IS NULL OR tipo = 'Venta') AND ${excludeAnnulledClause}`;
+
     // 1. RESULTADO OPERATIVO / P&L (Devengado)
-    const ventasDev = db.prepare(`SELECT COALESCE(SUM(total), 0) AS val FROM ventas ${whereClause}`).get(...params)?.val || 0;
+    const ventasDev = db.prepare(`SELECT COALESCE(SUM(total), 0) AS val FROM tickets ${ticketsWhere}`).get(...params)?.val || 0;
     const muniDev = db.prepare(`SELECT COALESCE(SUM(total), 0) AS val FROM municipio_ordenes ${whereClause}`).get(...params)?.val || 0;
     const atmosDev = db.prepare(`SELECT COALESCE(SUM(monto), 0) AS val FROM atmos_ordenes ${whereClause}`).get(...params)?.val || 0;
     const ingresosDevengados = ventasDev + muniDev + atmosDev;
@@ -1739,8 +1761,7 @@ ipcMain.handle('get-finance-metrics', (event, { period = 'day', fecha = null }) 
     const resultadoOperativo = ingresosDevengados - egresosDevengados;
 
     // 2. FLUJO DE CAJA REAL (Efectivo Entrado / Salido)
-    const ventasContadoWhere = whereClause ? `${whereClause} AND (metodo_pago IS NULL OR metodo_pago != 'Cuenta Corriente')` : "WHERE (metodo_pago IS NULL OR metodo_pago != 'Cuenta Corriente')";
-    const ventasContado = db.prepare(`SELECT COALESCE(SUM(total), 0) AS val FROM ventas ${ventasContadoWhere}`).get(...params)?.val || 0;
+    const ventasContado = db.prepare(`SELECT COALESCE(SUM(total), 0) AS val FROM tickets ${ventasContadoWhere}`).get(...params)?.val || 0;
     const cobrosCliente = db.prepare(`SELECT COALESCE(SUM(monto), 0) AS val FROM pagos_cliente ${whereClause}`).get(...params)?.val || 0;
     const cobrosMuni = db.prepare(`SELECT COALESCE(SUM(monto), 0) AS val FROM municipio_pagos ${whereClause}`).get(...params)?.val || 0;
     const cobrosAtmos = db.prepare(`SELECT COALESCE(SUM(monto), 0) AS val FROM atmos_pagos ${whereClause}`).get(...params)?.val || 0;
@@ -1751,21 +1772,17 @@ ipcMain.handle('get-finance-metrics', (event, { period = 'day', fecha = null }) 
     const pagosProveedores = db.prepare(`SELECT COALESCE(SUM(monto), 0) AS val FROM pagos_proveedor ${whereClause}`).get(...params)?.val || 0;
     const egresosCaja = gastosPagados + pagosProveedores;
 
-    const ajustesRow = db.prepare(`
-      SELECT COALESCE(SUM(CASE 
-        WHEN tipo IN ('INGRESO', 'Ingreso') THEN monto 
-        WHEN tipo IN ('EGRESO', 'Egreso', 'Retiro', 'Venta anulada') THEN -monto 
-        ELSE 0 
-      END), 0) AS val 
-      FROM ajustes_caja ${whereClause}
-    `).get(...params);
+    const ajustesWhere = whereClause 
+      ? `${whereClause} AND (tipo IS NULL OR tipo != 'Venta anulada' OR venta_id IS NULL)`
+      : "WHERE (tipo IS NULL OR tipo != 'Venta anulada' OR venta_id IS NULL)";
+    const ajustesRow = db.prepare(`SELECT COALESCE(SUM(monto), 0) AS val FROM ajustes_caja ${ajustesWhere}`).get(...params);
     const ajustesCaja = ajustesRow?.val || 0;
 
     const flujoCajaReal = ingresosCaja - egresosCaja + ajustesCaja;
 
     // 3. CANTIDAD DE COMPROBANTES Y LÍNEAS
-    const cantComprobantes = db.prepare(`SELECT COUNT(*) AS val FROM tickets ${whereClause}`).get(...params)?.val || 0;
-    const cantVentasLineas = db.prepare(`SELECT COUNT(*) AS val FROM ventas ${whereClause}`).get(...params)?.val || 0;
+    const cantComprobantes = db.prepare(`SELECT COUNT(*) AS val FROM tickets ${ticketsWhere}`).get(...params)?.val || 0;
+    const cantVentasLineas = db.prepare(`SELECT COUNT(*) AS val FROM tickets ${ticketsWhere}`).get(...params)?.val || 0;
 
     return {
       success: true,
@@ -1815,8 +1832,10 @@ ipcMain.handle('get-sales-by-day', (event, yearMonth) => {
   }
   const rows = db.prepare(`
     SELECT strftime('%d', fecha) AS dia, SUM(total) AS total
-    FROM ventas
+    FROM tickets
     WHERE strftime('%Y-%m', fecha) = ?
+      AND (tipo IS NULL OR tipo = 'Venta')
+      AND id NOT IN (SELECT venta_id FROM ajustes_caja WHERE venta_id IS NOT NULL AND tipo = 'Venta anulada')
     GROUP BY dia
     ORDER BY dia
   `).all(targetMonth);
@@ -1831,8 +1850,10 @@ ipcMain.handle('get-sales-by-date', (event, fecha) => {
   try {
     const row = db.prepare(`
       SELECT SUM(total) AS total
-      FROM ventas
+      FROM tickets
       WHERE date(fecha) = date(?)
+        AND (tipo IS NULL OR tipo = 'Venta')
+        AND id NOT IN (SELECT venta_id FROM ajustes_caja WHERE venta_id IS NOT NULL AND tipo = 'Venta anulada')
     `).get(fecha);
     return row?.total || 0;
   } catch (err) {
@@ -1842,7 +1863,12 @@ ipcMain.handle('get-sales-by-date', (event, fecha) => {
 });
 
 
+
 ipcMain.handle('get-historial-by-date', (event, fecha) => {
+  if (!authService.isCurrentAdmin()) {
+    console.warn('[SECURITY IPC] Intento no autorizado de acceder a get-historial-by-date');
+    return [];
+  }
   try {
     const rows = db.prepare(`
       SELECT id, accion, detalle, fecha FROM historial
@@ -1912,19 +1938,45 @@ ipcMain.handle('save-ajuste', (event, data) => {
       }
     }
 
+    const finalFecha = fecha || new Date().toISOString().split('T')[0];
+    const finalTipo = tipo || '';
+    const finalMotivo = motivo || '';
+    const finalMonto = Number(monto) || 0;
+    const finalObservacion = observacion || '';
+    const finalVentaId = venta_id || null;
+
     const stmt = db.prepare(`
       INSERT INTO ajustes_caja (fecha, tipo, motivo, monto, observacion, venta_id)
       VALUES (?, ?, ?, ?, ?, ?)
     `);
     const info = stmt.run(
-      fecha || new Date().toISOString().split('T')[0],
-      tipo || '',
-      motivo || '',
-      Number(monto) || 0,
-      observacion || '',
-      venta_id || null
+      finalFecha,
+      finalTipo,
+      finalMotivo,
+      finalMonto,
+      finalObservacion,
+      finalVentaId
     );
-    return { success: true, id: info.lastInsertRowid };
+
+    const newId = info.lastInsertRowid;
+    const payload = {
+      id: newId,
+      fecha: finalFecha,
+      tipo: finalTipo,
+      motivo: finalMotivo,
+      monto: finalMonto,
+      observacion: finalObservacion,
+      venta_id: finalVentaId
+    };
+
+    handleDualWrite(
+      supabaseAjusteService.addAjuste(payload),
+      'ajustes_caja',
+      'INSERT',
+      payload
+    );
+
+    return { success: true, id: newId };
   } catch (err) {
     console.error('Error save-ajuste:', err);
     return { success: false, error: err.message };
@@ -1942,7 +1994,16 @@ ipcMain.handle('get-ajustes', () => {
 
 ipcMain.handle('delete-ajuste', (event, id) => {
   try {
-    db.prepare('DELETE FROM ajustes_caja WHERE id = ?').run(id);
+    const idNum = Number(id);
+    db.prepare('DELETE FROM ajustes_caja WHERE id = ?').run(idNum);
+
+    handleDualWrite(
+      supabaseAjusteService.deleteAjuste(idNum),
+      'ajustes_caja',
+      'DELETE',
+      { id: idNum }
+    );
+
     return { success: true };
   } catch (err) {
     console.error('Error delete-ajuste:', err);
@@ -2012,6 +2073,10 @@ ipcMain.handle('get-image-path', (event, imageName) => {
 });
 
 ipcMain.handle('get-historial-by-range', (event, fechaInicio, fechaFin) => {
+  if (!authService.isCurrentAdmin()) {
+    console.warn('[SECURITY IPC] Intento no autorizado de acceder a get-historial-by-range');
+    return [];
+  }
   try {
     const rows = db.prepare(`
       SELECT id, accion, detalle, fecha FROM historial
@@ -2864,13 +2929,19 @@ ipcMain.handle('atmos-delete-order', (event, id) => {
 });
 
 ipcMain.handle('muni-get-month-breakdown', (event, { month, year }) => {
+  if (!authService.isCurrentAdmin()) {
+    return { success: false, error: 'Acceso denegado.' };
+  }
   try {
     const yearMonth = `${year}-${String(month).padStart(2, '0')}`;
+    const excludeAnnulledClause = "id NOT IN (SELECT venta_id FROM ajustes_caja WHERE venta_id IS NOT NULL AND tipo = 'Venta anulada')";
 
     const normal = db.prepare(`
       SELECT SUM(total) as total, COUNT(*) as cant 
-      FROM ventas 
+      FROM tickets 
       WHERE strftime('%Y-%m', fecha) = ?
+        AND (tipo IS NULL OR tipo = 'Venta')
+        AND ${excludeAnnulledClause}
     `).get(yearMonth);
 
     const muni = db.prepare(`
@@ -2910,11 +2981,12 @@ ipcMain.handle('muni-get-month-breakdown', (event, { month, year }) => {
     const atmosCountPendientes = atmos?.cant_pendientes || 0;
     const atmosCountCobradas = atmos?.cant_cobradas || 0;
 
-    // Obtener total de ajustes del mes
+    // Obtener total de ajustes del mes (excluyendo 'Venta anulada' para evitar doble resta)
     const aj = db.prepare(`
       SELECT SUM(monto) as total
       FROM ajustes_caja 
       WHERE strftime('%Y-%m', fecha) = ?
+        AND (tipo IS NULL OR tipo != 'Venta anulada' OR venta_id IS NULL)
     `).get(yearMonth);
     const totalAjustes = aj?.total || 0;
 
@@ -2940,13 +3012,19 @@ ipcMain.handle('muni-get-month-breakdown', (event, { month, year }) => {
 });
 
 ipcMain.handle('muni-get-day-breakdown', (event, { day, month, year }) => {
+  if (!authService.isCurrentAdmin()) {
+    return { success: false, error: 'Acceso denegado.' };
+  }
   try {
     const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const excludeAnnulledClause = "id NOT IN (SELECT venta_id FROM ajustes_caja WHERE venta_id IS NOT NULL AND tipo = 'Venta anulada')";
 
     const normal = db.prepare(`
       SELECT SUM(total) as total, COUNT(*) as cant 
-      FROM ventas 
+      FROM tickets 
       WHERE date(fecha) = ?
+        AND (tipo IS NULL OR tipo = 'Venta')
+        AND ${excludeAnnulledClause}
     `).get(dateStr);
 
     const muni = db.prepare(`
@@ -2986,11 +3064,12 @@ ipcMain.handle('muni-get-day-breakdown', (event, { day, month, year }) => {
     const atmosCountPendientes = atmos?.cant_pendientes || 0;
     const atmosCountCobradas = atmos?.cant_cobradas || 0;
 
-    // Obtener total de ajustes del día
+    // Obtener total de ajustes del día (excluyendo 'Venta anulada' para evitar doble resta)
     const aj = db.prepare(`
       SELECT SUM(monto) as total
       FROM ajustes_caja 
       WHERE date(fecha) = ?
+        AND (tipo IS NULL OR tipo != 'Venta anulada' OR venta_id IS NULL)
     `).get(dateStr);
     const totalAjustes = aj?.total || 0;
 
@@ -3033,21 +3112,27 @@ ipcMain.handle('maq-get-rentabilidad', () => {
 // =====================================================================
 
 ipcMain.handle('emp-liq-get-employees', (event, mes) => {
+  if (!authService.isCurrentAdmin()) return [];
   try { return employeeService.getPayrollEmployees(mes); }
   catch (err) { console.error('Error en emp-liq-get-employees:', err); return []; }
 });
 
 ipcMain.handle('emp-liq-save-config', (event, config) => {
+  if (!authService.isCurrentAdmin()) return { success: false, error: 'Acceso denegado.' };
   try { return employeeService.savePayrollConfig(config); }
   catch (err) { console.error('Error en emp-liq-save-config:', err); return { success: false, error: err.message }; }
 });
 
 ipcMain.handle('emp-liq-save-liquidation', (event, liq) => {
+  if (!authService.isCurrentAdmin()) return { success: false, error: 'Acceso denegado.' };
   try { return employeeService.savePayroll(liq); }
   catch (err) { console.error('Error en emp-liq-save-liquidation:', err); return { success: false, error: err.message }; }
 });
 
 ipcMain.handle('emp-liq-get-stats', (event, mes) => {
+  if (!authService.isCurrentAdmin()) {
+    return { totalSueldos: 0, totalGenerado: 0, masRentable: 'Sin datos', masHoras: 'Sin datos', chartData: [] };
+  }
   try {
     const saved = db.prepare(`
       SELECT l.*, e.nombre, e.apellido, c.costo_mensual

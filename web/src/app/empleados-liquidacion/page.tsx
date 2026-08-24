@@ -22,6 +22,7 @@ import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { formatCurrency } from '@/lib/utils';
+import { AdminGuard } from '@/components/auth/AdminGuard';
 import { Receipt, UserCheck, Plus, RefreshCw, Radio, DollarSign, Calendar, Settings } from 'lucide-react';
 
 export default function EmpleadosLiquidacionPage() {
@@ -132,7 +133,8 @@ export default function EmpleadosLiquidacionPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <AdminGuard>
+      <div className="space-y-6">
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -340,5 +342,6 @@ export default function EmpleadosLiquidacionPage() {
       <ToastNotification toast={payrollManager.toast} onClose={payrollManager.hideToast} />
       <ToastNotification toast={attendanceManager.toast} onClose={attendanceManager.hideToast} />
     </div>
+  </AdminGuard>
   );
 }

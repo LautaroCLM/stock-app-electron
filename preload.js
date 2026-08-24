@@ -149,7 +149,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   closeSplash: () => ipcRenderer.send('close-splash'),
 
   // Autenticación con Supabase Auth
-  authSignIn: (credentials) => ipcRenderer.invoke('auth-sign-in', credentials),
+  authSignIn: (credentials) => {
+    console.log('[AUTH TRACE 4] preload IPC invoked with email:', credentials?.email);
+    return ipcRenderer.invoke('auth-sign-in', credentials);
+  },
   authSignOut: () => ipcRenderer.invoke('auth-sign-out'),
   authGetSession: () => ipcRenderer.invoke('auth-get-session'),
   authGetProfile: () => ipcRenderer.invoke('auth-get-profile'),

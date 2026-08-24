@@ -1187,8 +1187,8 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 <!-- Modal para Nuevo Ajuste -->
-<div id="modalNuevoAjuste" class="gastos-modal-modern">
-  <div class="modal-content">
+<div id="modalNuevoAjuste" class="modal">
+  <div class="modal-content gastos-modal-modern">
     <div class="modal-header">
       <h3 id="ajusteModalTitle"><i class="fas fa-cash-register"></i> Registrar Ajuste de Caja</h3>
       <button class="btn-close-modal" id="btnCerrarAjusteModal"><i class="fas fa-times"></i></button>
@@ -1230,21 +1230,48 @@ document.addEventListener('DOMContentLoaded', () => {
           <label for="ajusteMotivo">Motivo <span class="required">*</span></label>
           <input type="text" id="ajusteMotivo" placeholder="Motivo del ajuste" required>
         </div>
+
+        <!-- Selector de Operación Asociada -->
         <div class="form-group" style="margin-top: 15px;">
-          <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
-            <input type="checkbox" id="ajusteAsociarCheck" style="width: 16px; height: 16px;">
-            Asociar este ajuste a una venta
-          </label>
+          <label style="font-weight: 600; margin-bottom: 8px; display: block;">¿A qué operación corresponde este ajuste?</label>
+          <div style="display: flex; gap: 20px; align-items: center;">
+            <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 500;">
+              <input type="radio" name="ajusteOperacionTipo" value="ninguna" checked style="width: 16px; height: 16px;">
+              Ninguna
+            </label>
+            <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 500;">
+              <input type="radio" name="ajusteOperacionTipo" value="venta" style="width: 16px; height: 16px;">
+              Venta
+            </label>
+            <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 500;">
+              <input type="radio" name="ajusteOperacionTipo" value="gasto" style="width: 16px; height: 16px;">
+              Gasto
+            </label>
+          </div>
         </div>
-        <div id="ajusteVentaBusquedaContainer" style="margin-top: 10px; display: none;">
+
+        <!-- Buscador / Selección de Venta -->
+        <div id="ajusteVentaBusquedaContainer" style="margin-top: 12px; display: none; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: rgba(241, 245, 249, 0.5);">
           <div class="form-group">
-            <label for="ajusteVentaSearchInput">Buscar Venta</label>
-            <input type="text" id="ajusteVentaSearchInput" placeholder="Buscar venta por Nº de ticket, cliente o total...">
-            <div id="ajusteVentaSearchResults" class="search-results-dropdown" style="max-height: 150px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 5px; display: none; background: var(--bg-card, white); z-index: 10;"></div>
-            <div id="ajusteVentaSeleccionada" style="margin-top: 8px; font-weight: 600; color: #3b82f6; display: none; padding: 6px 12px; background: rgba(59, 130, 246, 0.1); border-radius: 6px;"></div>
+            <label for="ajusteVentaSearchInput" style="font-size: 13px; font-weight: 600;">Seleccionar Venta Reciente (o buscar por ticket, cliente o total)</label>
+            <input type="text" id="ajusteVentaSearchInput" placeholder="Filtrar por ticket #, cliente o total..." style="margin-top: 4px;">
+            <div id="ajusteVentaSearchResults" style="max-height: 160px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 6px; background: var(--bg-card, white);"></div>
+            <div id="ajusteVentaSeleccionada" style="margin-top: 8px; font-weight: 600; color: #2563eb; display: none; padding: 8px 12px; background: rgba(37, 99, 235, 0.1); border-radius: 6px; border: 1px solid rgba(37, 99, 235, 0.2);"></div>
             <input type="hidden" id="ajusteVentaId" value="">
           </div>
         </div>
+
+        <!-- Buscador / Selección de Gasto -->
+        <div id="ajusteGastoBusquedaContainer" style="margin-top: 12px; display: none; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: rgba(241, 245, 249, 0.5);">
+          <div class="form-group">
+            <label for="ajusteGastoSearchInput" style="font-size: 13px; font-weight: 600;">Seleccionar Gasto Reciente (o buscar por concepto o monto)</label>
+            <input type="text" id="ajusteGastoSearchInput" placeholder="Filtrar por concepto o monto..." style="margin-top: 4px;">
+            <div id="ajusteGastoSearchResults" style="max-height: 160px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 6px; background: var(--bg-card, white);"></div>
+            <div id="ajusteGastoSeleccionado" style="margin-top: 8px; font-weight: 600; color: #7c3aed; display: none; padding: 8px 12px; background: rgba(124, 58, 237, 0.1); border-radius: 6px; border: 1px solid rgba(124, 58, 237, 0.2);"></div>
+            <input type="hidden" id="ajusteGastoInfo" value="">
+          </div>
+        </div>
+
         <div class="form-group" style="margin-top: 15px;">
           <label for="ajusteObservacion">Observaciones (Opcional)</label>
           <textarea id="ajusteObservacion" placeholder="Detalles adicionales..." rows="3"></textarea>
@@ -1257,6 +1284,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </form>
   </div>
 </div>
+
 `,
     'gastos': `
 <div class="gastos-page">
@@ -5316,6 +5344,15 @@ document.addEventListener('DOMContentLoaded', () => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const page = link.dataset.page;
+
+      const restrictedPages = ['dashboard', 'informes', 'historial', 'empleados-liquidacion'];
+      const rawRole = (window.currentUserProfile?.role || window.currentUserProfile?.rol || 'empleado').toLowerCase();
+      const isAdmin = rawRole === 'admin' || rawRole === 'master admin' || rawRole === 'administrador';
+
+      if (restrictedPages.includes(page) && !isAdmin) {
+        alert('Acceso denegado. Se requieren permisos de administrador para este módulo.');
+        return;
+      }
 
       // Si es la misma página, no hacer nada
       if (content.dataset.currentPage === page) return;
@@ -14745,6 +14782,7 @@ function initGastos() {
 function initAjustesCaja() {
   let allAjustes = [];
   let allVentasParaAjuste = [];
+  let allGastosParaAjuste = [];
 
   // DOM Elements
   const TableBody = document.getElementById('ajustesTableBody');
@@ -14759,13 +14797,21 @@ function initAjustesCaja() {
   const txtBalance = document.getElementById('txtBalanceAjustes');
   const txtCantidad = document.getElementById('txtCantAjustes');
 
-  // Elements for association
-  const asociarCheck = document.getElementById('ajusteAsociarCheck');
-  const busquedaContainer = document.getElementById('ajusteVentaBusquedaContainer');
-  const searchInput = document.getElementById('ajusteVentaSearchInput');
-  const resultsContainer = document.getElementById('ajusteVentaSearchResults');
-  const seleccionadaContainer = document.getElementById('ajusteVentaSeleccionada');
+  // Operation radios & containers
+  const operacionRadios = document.querySelectorAll('input[name="ajusteOperacionTipo"]');
+  const ventaContainer = document.getElementById('ajusteVentaBusquedaContainer');
+  const ventaSearchInput = document.getElementById('ajusteVentaSearchInput');
+  const ventaResultsContainer = document.getElementById('ajusteVentaSearchResults');
+  const ventaSeleccionadaContainer = document.getElementById('ajusteVentaSeleccionada');
   const ventaIdInput = document.getElementById('ajusteVentaId');
+
+  const gastoContainer = document.getElementById('ajusteGastoBusquedaContainer');
+  const gastoSearchInput = document.getElementById('ajusteGastoSearchInput');
+  const gastoResultsContainer = document.getElementById('ajusteGastoSearchResults');
+  const gastoSeleccionadoContainer = document.getElementById('ajusteGastoSeleccionado');
+  const gastoInfoInput = document.getElementById('ajusteGastoInfo');
+
+  const ajusteTipoSelect = document.getElementById('ajusteTipo');
 
   async function cargarAjustes() {
     try {
@@ -14781,9 +14827,59 @@ function initAjustesCaja() {
     try {
       const tickets = await window.electronAPI.getTickets();
       allVentasParaAjuste = (tickets || []).filter(t => (t.tipo || 'Venta') === 'Venta');
+      renderListaVentas(allVentasParaAjuste.slice(0, 10));
     } catch (err) {
       console.error('Error cargando ventas para buscador:', err);
     }
+  }
+
+  async function cargarGastosParaAjuste() {
+    try {
+      const gastos = await window.electronAPI.getGastos();
+      allGastosParaAjuste = gastos || [];
+      renderListaGastos(allGastosParaAjuste.slice(0, 10));
+    } catch (err) {
+      console.error('Error cargando gastos para buscador:', err);
+    }
+  }
+
+  function renderListaVentas(list) {
+    if (!ventaResultsContainer) return;
+    if (!list || list.length === 0) {
+      ventaResultsContainer.innerHTML = '<div style="padding: 10px; color: var(--muted); text-align: center;">No se encontraron ventas</div>';
+      return;
+    }
+
+    ventaResultsContainer.innerHTML = list.map(t => {
+      const dateFormatted = t.fecha ? (t.fecha.includes('T') ? t.fecha.split('T')[0] : t.fecha.split(' ')[0]).split('-').reverse().join('/') : '-';
+      const clienteStr = t.cliente ? ` | Cliente: ${t.cliente}` : '';
+      const totalStr = formatearMonedaArgentina(t.total || 0);
+      const desc = `Ticket #${t.id} — ${dateFormatted}${clienteStr} — $${totalStr}`;
+      return `
+        <div class="search-result-item venta-item" data-id="${t.id}" data-text="${desc}" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #e2e8f0; transition: background 0.15s;">
+          ${desc}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderListaGastos(list) {
+    if (!gastoResultsContainer) return;
+    if (!list || list.length === 0) {
+      gastoResultsContainer.innerHTML = '<div style="padding: 10px; color: var(--muted); text-align: center;">No se encontraron gastos</div>';
+      return;
+    }
+
+    gastoResultsContainer.innerHTML = list.map(g => {
+      const dateFormatted = g.fecha ? (g.fecha.includes('T') ? g.fecha.split('T')[0] : g.fecha.split(' ')[0]).split('-').reverse().join('/') : '-';
+      const montoStr = formatearMonedaArgentina(g.monto || 0);
+      const desc = `Gasto #${g.id} — ${dateFormatted} — ${g.concepto || 'Sin concepto'} — $${montoStr}`;
+      return `
+        <div class="search-result-item gasto-item" data-id="${g.id}" data-concepto="${g.concepto || ''}" data-text="${desc}" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #e2e8f0; transition: background 0.15s;">
+          ${desc}
+        </div>
+      `;
+    }).join('');
   }
 
   function renderAjustes() {
@@ -14856,42 +14952,51 @@ function initAjustesCaja() {
     if (txtCantidad) txtCantidad.textContent = allAjustes.length;
   }
 
-  // Toggle sale association inputs
-  if (asociarCheck) {
-    asociarCheck.addEventListener('change', () => {
-      if (asociarCheck.checked) {
-        if (busquedaContainer) busquedaContainer.style.display = 'block';
+  function limpiarSeleccionesOperacion() {
+    if (ventaSearchInput) ventaSearchInput.value = '';
+    if (ventaIdInput) ventaIdInput.value = '';
+    if (ventaSeleccionadaContainer) {
+      ventaSeleccionadaContainer.textContent = '';
+      ventaSeleccionadaContainer.style.display = 'none';
+    }
+
+    if (gastoSearchInput) gastoSearchInput.value = '';
+    if (gastoInfoInput) gastoInfoInput.value = '';
+    if (gastoSeleccionadoContainer) {
+      gastoSeleccionadoContainer.textContent = '';
+      gastoSeleccionadoContainer.style.display = 'none';
+    }
+  }
+
+  // Toggle operation type radios
+  operacionRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      const val = radio.value;
+      limpiarSeleccionesOperacion();
+
+      if (val === 'venta') {
+        if (ventaContainer) ventaContainer.style.display = 'block';
+        if (gastoContainer) gastoContainer.style.display = 'none';
         cargarVentasParaAjuste();
+      } else if (val === 'gasto') {
+        if (gastoContainer) gastoContainer.style.display = 'block';
+        if (ventaContainer) ventaContainer.style.display = 'none';
+        cargarGastosParaAjuste();
       } else {
-        if (busquedaContainer) busquedaContainer.style.display = 'none';
-        limpiarBuscadorVentas();
+        if (ventaContainer) ventaContainer.style.display = 'none';
+        if (gastoContainer) gastoContainer.style.display = 'none';
       }
     });
-  }
+  });
 
-  function limpiarBuscadorVentas() {
-    if (searchInput) searchInput.value = '';
-    if (ventaIdInput) ventaIdInput.value = '';
-    if (resultsContainer) {
-      resultsContainer.innerHTML = '';
-      resultsContainer.style.display = 'none';
-    }
-    if (seleccionadaContainer) {
-      seleccionadaContainer.textContent = '';
-      seleccionadaContainer.style.display = 'none';
-    }
-  }
-
-  // Live search for sales
-  if (searchInput) {
-    searchInput.addEventListener('input', () => {
-      const q = searchInput.value.toLowerCase().trim();
+  // Filter sales list
+  if (ventaSearchInput) {
+    ventaSearchInput.addEventListener('input', () => {
+      const q = ventaSearchInput.value.toLowerCase().trim();
       if (!q) {
-        resultsContainer.innerHTML = '';
-        resultsContainer.style.display = 'none';
+        renderListaVentas(allVentasParaAjuste.slice(0, 10));
         return;
       }
-
       const matches = allVentasParaAjuste.filter(t => {
         const ticketNo = String(t.id).toLowerCase();
         const cliente = (t.cliente || '').toLowerCase();
@@ -14899,38 +15004,67 @@ function initAjustesCaja() {
         const fecha = t.fecha ? t.fecha.toLowerCase() : '';
         return ticketNo.includes(q) || cliente.includes(q) || total.includes(q) || fecha.includes(q);
       }).slice(0, 10);
+      renderListaVentas(matches);
+    });
+  }
 
-      if (matches.length === 0) {
-        resultsContainer.innerHTML = '<div style="padding: 8px; color: var(--muted); text-align: center;">No se encontraron ventas</div>';
-        resultsContainer.style.display = 'block';
+  // Filter expenses list
+  if (gastoSearchInput) {
+    gastoSearchInput.addEventListener('input', () => {
+      const q = gastoSearchInput.value.toLowerCase().trim();
+      if (!q) {
+        renderListaGastos(allGastosParaAjuste.slice(0, 10));
         return;
       }
-
-      resultsContainer.innerHTML = matches.map(t => {
-        const dateFormatted = t.fecha ? t.fecha.split('T')[0].split('-').reverse().join('/') : '';
-        const clienteStr = t.cliente ? ` | Cliente: ${t.cliente}` : '';
-        const desc = `Ticket #${t.id} - ${dateFormatted}${clienteStr} - $${formatearMonedaArgentina(t.total)}`;
-        return `
-          <div class="search-result-item" data-id="${t.id}" data-text="${desc}" style="padding: 8px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.2s;">
-            ${desc}
-          </div>
-        `;
-      }).join('');
-      resultsContainer.style.display = 'block';
+      const matches = allGastosParaAjuste.filter(g => {
+        const idStr = String(g.id).toLowerCase();
+        const concepto = (g.concepto || '').toLowerCase();
+        const monto = String(g.monto).toLowerCase();
+        const fecha = g.fecha ? g.fecha.toLowerCase() : '';
+        return idStr.includes(q) || concepto.includes(q) || monto.includes(q) || fecha.includes(q);
+      }).slice(0, 10);
+      renderListaGastos(matches);
     });
+  }
 
-    // Click on search result item
-    resultsContainer.addEventListener('click', (e) => {
-      const item = e.target.closest('.search-result-item');
-      if (item) {
-        const ticketId = item.dataset.id;
-        const text = item.dataset.text;
-        
-        ventaIdInput.value = ticketId;
-        seleccionadaContainer.textContent = `Seleccionada: ${text}`;
-        seleccionadaContainer.style.display = 'block';
-        resultsContainer.style.display = 'none';
-        searchInput.value = '';
+  // Click on sale item
+  ventaResultsContainer?.addEventListener('click', (e) => {
+    const item = e.target.closest('.venta-item');
+    if (item) {
+      const ticketId = item.dataset.id;
+      const text = item.dataset.text;
+      if (ventaIdInput) ventaIdInput.value = ticketId;
+      if (ventaSeleccionadaContainer) {
+        ventaSeleccionadaContainer.textContent = `Venta Seleccionada: ${text}`;
+        ventaSeleccionadaContainer.style.display = 'block';
+      }
+    }
+  });
+
+  // Click on expense item
+  gastoResultsContainer?.addEventListener('click', (e) => {
+    const item = e.target.closest('.gasto-item');
+    if (item) {
+      const id = item.dataset.id;
+      const concepto = item.dataset.concepto;
+      const text = item.dataset.text;
+      if (gastoInfoInput) gastoInfoInput.value = `[Gasto #${id}: ${concepto}]`;
+      if (gastoSeleccionadoContainer) {
+        gastoSeleccionadoContainer.textContent = `Gasto Seleccionado: ${text}`;
+        gastoSeleccionadoContainer.style.display = 'block';
+      }
+    }
+  });
+
+  // If "Venta anulada" is selected in tipo, automatically switch radio to "venta"
+  if (ajusteTipoSelect) {
+    ajusteTipoSelect.addEventListener('change', () => {
+      if (ajusteTipoSelect.value === 'Venta anulada') {
+        const ventaRadio = document.querySelector('input[name="ajusteOperacionTipo"][value="venta"]');
+        if (ventaRadio && !ventaRadio.checked) {
+          ventaRadio.checked = true;
+          ventaRadio.dispatchEvent(new Event('change'));
+        }
       }
     });
   }
@@ -14939,8 +15073,11 @@ function initAjustesCaja() {
   if (btnNuevoAjuste) {
     btnNuevoAjuste.addEventListener('click', () => {
       formAjuste.reset();
-      limpiarBuscadorVentas();
-      if (busquedaContainer) busquedaContainer.style.display = 'none';
+      limpiarSeleccionesOperacion();
+      const ningunaRadio = document.querySelector('input[name="ajusteOperacionTipo"][value="ninguna"]');
+      if (ningunaRadio) ningunaRadio.checked = true;
+      if (ventaContainer) ventaContainer.style.display = 'none';
+      if (gastoContainer) gastoContainer.style.display = 'none';
       document.getElementById('ajusteFecha').value = new Date().toISOString().split('T')[0];
       modalNuevoAjuste.classList.add('active');
     });
@@ -14960,8 +15097,15 @@ function initAjustesCaja() {
       let rawMonto = parseFloat(document.getElementById('ajusteMonto').value) || 0;
       const finalMonto = efecto === 'Egreso' ? -Math.abs(rawMonto) : Math.abs(rawMonto);
 
-      const asociar = asociarCheck ? asociarCheck.checked : false;
-      const ventaIdVal = (asociar && ventaIdInput.value) ? parseInt(ventaIdInput.value) : null;
+      const operacionTipo = document.querySelector('input[name="ajusteOperacionTipo"]:checked')?.value || 'ninguna';
+      const ventaIdVal = (operacionTipo === 'venta' && ventaIdInput.value) ? parseInt(ventaIdInput.value) : null;
+      
+      let rawObservacion = document.getElementById('ajusteObservacion').value.trim();
+      if (operacionTipo === 'gasto' && gastoInfoInput && gastoInfoInput.value) {
+        rawObservacion = rawObservacion 
+          ? `${rawObservacion} ${gastoInfoInput.value}`
+          : gastoInfoInput.value;
+      }
 
       const ajusteData = {
         tipo: document.getElementById('ajusteTipo').value,
@@ -14973,7 +15117,7 @@ function initAjustesCaja() {
           const now = new Date();
           return `${chosenDate} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
         })(),
-        observacion: document.getElementById('ajusteObservacion').value.trim(),
+        observacion: rawObservacion,
         venta_id: ventaIdVal
       };
 
@@ -15027,6 +15171,7 @@ function initAjustesCaja() {
 
   cargarAjustes();
 }
+
 
 function actualizarFinanzasGastos() {
   if (document.getElementById('totalVentas') && typeof window.__updateFinanzasChart === 'function') {
@@ -16987,8 +17132,25 @@ async function initAuthSession() {
     if (!profile) return;
     window.currentUserProfile = profile;
 
+    const rawRole = (profile.role || profile.rol || 'empleado').toLowerCase();
+    const isAdmin = rawRole === 'admin' || rawRole === 'master admin' || rawRole === 'administrador';
+    profile.role = isAdmin ? 'admin' : 'empleado';
+    profile.rol = profile.role;
+
+    // Ocultar o mostrar ítems del sidebar según rol
+    const restrictedPages = ['dashboard', 'informes', 'historial', 'empleados-liquidacion'];
+    restrictedPages.forEach(p => {
+      const link = document.querySelector(`.sidebar a[data-page="${p}"]`);
+      if (link) {
+        const parentLi = link.closest('li');
+        if (parentLi) {
+          parentLi.style.display = isAdmin ? 'block' : 'none';
+        }
+      }
+    });
+
     const nameText = profile.nombre || profile.name || 'Usuario';
-    const roleText = profile.cargo || profile.empresa || profile.empresa_nombre || profile.rol || 'Master Admin';
+    const roleText = profile.cargo || (isAdmin ? 'Master Admin' : 'Empleado');
     const avatarUrl = profile.avatar_url;
 
     if (topbarUserName) {
@@ -17018,6 +17180,7 @@ async function initAuthSession() {
   }
 
   function hideLoginOverlay() {
+    console.log('[AUTH TRACE 9] hideLoginOverlay called, removing active class from authOverlay');
     if (authOverlay) authOverlay.classList.remove('active');
   }
 
@@ -17056,48 +17219,65 @@ async function initAuthSession() {
   }
 
   // 2. Submit de Formulario de Login
-  if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideError();
+  async function performLogin(e) {
+    if (e) e.preventDefault();
+    console.log('[AUTH TRACE 3] performLogin executed with email:', emailInput?.value?.trim());
+    hideError();
 
-      const email = emailInput?.value?.trim();
-      const password = passInput?.value;
+    const email = emailInput?.value?.trim();
+    const password = passInput?.value;
 
-      if (!email) {
-        showError('Por favor, ingresá tu correo electrónico.');
-        return;
+    if (!email) {
+      console.warn('[AUTH TRACE 3] performLogin stopped: Email field is empty');
+      showError('Por favor, ingresá tu correo electrónico.');
+      return;
+    }
+    if (!password) {
+      console.warn('[AUTH TRACE 3] performLogin stopped: Password field is empty');
+      showError('Por favor, ingresá tu contraseña.');
+      return;
+    }
+
+    if (btnSubmit && btnText && btnSpinner) {
+      btnSubmit.disabled = true;
+      btnText.style.display = 'none';
+      btnSpinner.style.display = 'inline-block';
+    }
+
+    try {
+      console.log('[AUTH TRACE 3] Invoking window.electronAPI.authSignIn...');
+      const res = await window.electronAPI.authSignIn({ email, password });
+      console.log('[AUTH TRACE 8] renderer response received from IPC:', res);
+      if (res && res.success && res.profile) {
+        updateUIWithProfile(res.profile);
+        hideLoginOverlay();
+        if (passInput) passInput.value = '';
+      } else {
+        console.warn('[AUTH TRACE 8] authSignIn returned unsuccessful:', res?.message);
+        showError((res && res.message) || 'Credenciales incorrectas. Verificá tu correo y contraseña.');
       }
-      if (!password) {
-        showError('Por favor, ingresá tu contraseña.');
-        return;
-      }
-
+    } catch (err) {
+      console.error('[AUTH TRACE 8] renderer caught exception during authSignIn:', err);
+      showError('Error de red al conectar con el servidor de autenticación Supabase.');
+    } finally {
       if (btnSubmit && btnText && btnSpinner) {
-        btnSubmit.disabled = true;
-        btnText.style.display = 'none';
-        btnSpinner.style.display = 'inline-block';
+        btnSubmit.disabled = false;
+        btnText.style.display = 'inline-block';
+        btnSpinner.style.display = 'none';
       }
+    }
+  }
 
-      try {
-        const res = await window.electronAPI.authSignIn({ email, password });
-        if (res && res.success && res.profile) {
-          updateUIWithProfile(res.profile);
-          hideLoginOverlay();
-          if (passInput) passInput.value = '';
-        } else {
-          showError((res && res.message) || 'Credenciales incorrectas. Verificá tu correo y contraseña.');
-        }
-      } catch (err) {
-        console.error('[Auth] Error al iniciar sesión:', err);
-        showError('Error de red al conectar con el servidor de autenticación Supabase.');
-      } finally {
-        if (btnSubmit && btnText && btnSpinner) {
-          btnSubmit.disabled = false;
-          btnText.style.display = 'inline-block';
-          btnSpinner.style.display = 'none';
-        }
-      }
+  if (loginForm) {
+    loginForm.addEventListener('submit', (e) => {
+      console.log('[AUTH TRACE 2] SUBMIT event triggered on #authLoginForm');
+      performLogin(e);
+    });
+  }
+  if (btnSubmit) {
+    btnSubmit.addEventListener('click', (e) => {
+      console.log('[AUTH TRACE 1] CLICK event triggered on #btnAuthLogin');
+      performLogin(e);
     });
   }
 

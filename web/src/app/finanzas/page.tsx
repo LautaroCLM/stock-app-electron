@@ -21,6 +21,7 @@ import { DesktopFinanceMetrics, PeriodFilter } from '@/types/finance';
 import { financeWebService } from '@/lib/services/financeWebService';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { supabase } from '@/lib/supabase/client';
+import { AdminGuard } from '@/components/auth/AdminGuard';
 
 const NOMBRES_MESES = [
   'Enero',
@@ -161,7 +162,8 @@ export default function FinanzasPage() {
   }, [metrics?.salesByDay]);
 
   return (
-    <div className="space-y-6">
+    <AdminGuard>
+      <div className="space-y-6">
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -595,5 +597,6 @@ export default function FinanzasPage() {
         )}
       </div>
     </div>
-  );
+  </AdminGuard>
+);
 }

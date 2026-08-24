@@ -6,6 +6,7 @@ import { PeriodFilter } from '@/types/finance';
 import { FullReportMetrics } from '@/types/report';
 import { reportWebService } from '@/lib/services/reportWebService';
 import { supabase } from '@/lib/supabase/client';
+import { AdminGuard } from '@/components/auth/AdminGuard';
 
 import { InformesHeader } from '@/components/informes/InformesHeader';
 import { InformesKPIGrid } from '@/components/informes/InformesKPIGrid';
@@ -73,82 +74,68 @@ export default function InformesPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* 1. Encabezado y Filtros de Informes */}
-      <InformesHeader
-        activePeriod={activePeriod}
-        setActivePeriod={(p) => {
-          setActivePeriod(p);
-          setCustomDate('');
-        }}
-        customDate={customDate}
-        setCustomDate={setCustomDate}
-        onSearch={handleSearch}
-        onReset={handleResetDate}
-        periodLabel={metrics?.periodLabel || 'Cargando...'}
-        isLoading={isLoading}
-      />
+    <AdminGuard>
+      <div className="space-y-6">
+        {/* 1. Encabezado y Filtros de Informes */}
+        <InformesHeader
+          activePeriod={activePeriod}
+          setActivePeriod={(p) => {
+            setActivePeriod(p);
+            setCustomDate('');
+          }}
+          customDate={customDate}
+          setCustomDate={setCustomDate}
+          onSearch={handleSearch}
+          onReset={handleResetDate}
+          periodLabel={metrics?.periodLabel || 'Cargando...'}
+          isLoading={isLoading}
+        />
 
-      {/* ESTADO DE ERROR */}
-      {error && (
-        <div className="p-4 bg-red-950/50 border border-red-800 rounded-2xl flex items-center justify-between gap-4 text-red-200 text-xs font-medium">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+        {/* 2. Feedback de Error */}
+        {error ? (
+          <div className="p-4 bg-red-950/40 border border-red-800/80 rounded-2xl flex items-center space-x-3 text-red-300 text-xs">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-400" />
             <span>{error}</span>
           </div>
-          <button
-            type="button"
-            onClick={() => fetchReportMetrics(true)}
-            className="px-3 py-1.5 bg-red-900/60 hover:bg-red-800 text-white rounded-xl transition-colors font-semibold"
-          >
-            Reintentar
-          </button>
-        </div>
-      )}
+        ) : null}
 
-      {/* ESTADO DE CARGA */}
-      {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-3 bg-slate-900/50 rounded-3xl border border-slate-800">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-          <p className="text-xs font-medium">Generando informes en tiempo real desde Supabase...</p>
-        </div>
-      ) : metrics ? (
-        <>
-          {/* 2. KPIs principales (Producto estrella, Menos vendidos, Categoría top) */}
-          <InformesKPIGrid
-            topProduct={metrics.topProduct}
-            bottomProduct={metrics.bottomProduct}
-            topCategory={metrics.topCategory}
-          />
-
-          {/* 3. Resumen registros (Entraron, Borrados, Vendidos, Stock actual) */}
-          <InformesSummaryGrid
-            productsEnteredCount={metrics.productsEnteredCount}
-            productsDeletedCount={metrics.productsDeletedCount}
-            totalUnitsSoldCount={metrics.totalUnitsSoldCount}
-            currentTotalStock={metrics.currentTotalStock}
-          />
-
-          {/* 4. Gráficos (Ventas por categoría, Métodos de pago) */}
-          <InformesCharts
-            categoryBreakdown={metrics.categoryBreakdown}
-            paymentMethodBreakdown={metrics.paymentMethodBreakdown}
-          />
-
-          {/* 5. Tablas (Más vendidos, Menos vendidos, Por reponer + Histórico Detallado de Ventas) */}
-          <InformesTables
-            mostSoldProducts={metrics.mostSoldProducts}
-            leastSoldProducts={metrics.leastSoldProducts}
-            lowStockProducts={metrics.lowStockProducts}
-            detailedSales={metrics.detailedSales}
-          />
-        </>
-      ) : (
-        <div className="py-16 text-center text-slate-400 space-y-2 bg-slate-900/50 rounded-3xl border border-slate-800">
-          <p className="text-sm font-semibold">No se encontraron datos para el período seleccionado.</p>
-          <p className="text-xs text-slate-500">Selecciona otro rango de fechas para consultar los informes.</p>
-        </div>
-      )}
-    </div>
+        {/* 3. Cargando o Contenido */}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 space-y-3">
+            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+            <p className="text-xs text-slate-400 font-medium">Generando informes avanzados desde Supabase...</p>
+          </div>
+        ) : metrics ? (
+          <>
+            <InformesKPIGrid
+              topProduct={metrics.topProduct}
+              bottomProduct={metrics.bottomProduct}
+              topCategory={metrics.topCategory}
+            />
+            <InformesSummaryGrid
+              productsEnteredCount={metrics.productsEnteredCount}
+              productsDeletedCount={metrics.productsDeletedCount}
+              totalUnitsSoldCount={metrics.totalUnitsSoldCount}
+              currentTotalStock={metrics.currentTotalStock}
+            />
+            <InformesCharts
+              categoryBreakdown={metrics.categoryBreakdown}
+              paymentMethodBreakdown={metrics.paymentMethodBreakdown}
+            />
+            <InformesTables
+              mostSoldProducts={metrics.mostSoldProducts}
+              leastSoldProducts={metrics.leastSoldProducts}
+              lowStockProducts={metrics.lowStockProducts}
+              detailedSales={metrics.detailedSales}
+            />
+          </>
+        ) : (
+          <div className="py-16 text-center text-slate-400 space-y-2 bg-slate-900/50 rounded-3xl border border-slate-800">
+            <p className="text-sm font-semibold">No se encontraron datos para el período seleccionado.</p>
+            <p className="text-xs text-slate-500">Selecciona otro rango de fechas para consultar los informes.</p>
+          </div>
+        )}
+      </div>
+    </AdminGuard>
   );
 }
