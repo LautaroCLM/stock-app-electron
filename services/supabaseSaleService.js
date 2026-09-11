@@ -167,6 +167,16 @@ const supabaseSaleService = {
         return { success: false, error: error.message };
       }
 
+      if (!data) {
+        return { success: false, error: 'La RPC no devolvió respuesta de confirmación.' };
+      }
+
+      if (data.success === false || data.error) {
+        const errorMsg = data.error || 'Error en procesar_venta_multiproducto';
+        console.error('[SupabaseSaleService] RPC procesar_venta_multiproducto rechazó la venta:', errorMsg);
+        return { success: false, error: errorMsg };
+      }
+
       console.log('[SupabaseSaleService] Venta atómica procesada con éxito en Supabase:', data);
       return { success: true, data };
     } catch (err) {

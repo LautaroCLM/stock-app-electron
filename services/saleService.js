@@ -14,9 +14,10 @@ const supabaseProductService = require('./supabaseProductService');
  * @param {import('better-sqlite3').Database} db - Instancia de la base de datos local SQLite.
  * @param {function(string, string): void} [registrarAccion] - Función opcional de auditoría de main.js.
  * @param {object} [syncManager=null] - Instancia de SyncManager para encolado offline.
+ * @param {object} [ticketService=null] - Instancia de TicketService para réplica local de tickets.
  * @returns {object} Objeto con los métodos del servicio de ventas.
  */
-function createSaleService(db, registrarAccion, syncManager = null) {
+function createSaleService(db, registrarAccion, syncManager = null, ticketService = null) {
   if (!db) {
     throw new Error('[SaleService] Instancia de base de datos requerida.');
   }
@@ -138,9 +139,11 @@ function createSaleService(db, registrarAccion, syncManager = null) {
           cliente: 'Consumidor Final'
         });
 
-        if (!result.success) {
-          return { success: false, error: result.error };
+        if (!result || !result.success) {
+          return { success: false, error: result?.error || 'Error al procesar la venta en Supabase.' };
         }
+
+        const ticketId = result.data?.ticket_id || result.data?.id || null;
 
         try {
           for (const item of payloadItems) {
@@ -152,6 +155,20 @@ function createSaleService(db, registrarAccion, syncManager = null) {
               metodo_pago
             );
           }
+
+          if (ticketService && ticketId) {
+            ticketService.upsertTicket({
+              id: ticketId,
+              fecha: new Date().toISOString(),
+              metodo_pago,
+              total: totalFinalVenta,
+              productos: payloadItems,
+              tipo: 'Venta',
+              subtotal: subtotalVenta,
+              cliente: 'Consumidor Final'
+            });
+            console.log(`[SaleService] Ticket ${ticketId} replicado en SQLite local sin Dual Write.`);
+          }
         } catch (e) {
           console.warn('[SaleService] No se pudo actualizar el caché SQLite local:', e.message);
         }
@@ -160,7 +177,7 @@ function createSaleService(db, registrarAccion, syncManager = null) {
           registrarAccion('Venta (Online)', `Venta atómica procesada en Supabase por $${totalFinalVenta.toFixed(2)}`);
         }
 
-        return { success: true, total: totalFinalVenta };
+        return { success: true, total: totalFinalVenta, ticket_id: ticketId };
       }
 
       // 🟢 Modo LOCAL: Venta local en SQLite tradicional

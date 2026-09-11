@@ -326,14 +326,19 @@ db.prepare(`
     fecha TEXT NOT NULL,
     expediente TEXT,
     orden_compra TEXT,
+    fecha_estimada_cobro TEXT,
+    observaciones TEXT,
     total REAL DEFAULT 0,
     saldo_pendiente REAL DEFAULT 0,
     estado TEXT DEFAULT 'Pendiente',
-    observaciones TEXT,
-    fecha_estimada_cobro TEXT,
+    productos TEXT,
     created_at TEXT DEFAULT (datetime('now', 'localtime'))
   )
 `).run();
+
+try {
+  db.prepare("ALTER TABLE municipio_ordenes ADD COLUMN productos TEXT").run();
+} catch (err) {}
 
 db.prepare(`
   CREATE TABLE IF NOT EXISTS municipio_orden_items (
@@ -354,81 +359,13 @@ db.prepare(`
     orden_id INTEGER NOT NULL,
     fecha TEXT NOT NULL,
     monto REAL DEFAULT 0,
-    metodo_pago TEXT NOT NULL,
+    metodo_pago TEXT DEFAULT 'Transferencia',
     observaciones TEXT,
     created_at TEXT DEFAULT (datetime('now', 'localtime')),
     FOREIGN KEY (orden_id) REFERENCES municipio_ordenes(id) ON DELETE CASCADE
   )
 `).run();
 
-db.prepare(`
-  CREATE TABLE IF NOT EXISTS atmos_ordenes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fecha TEXT NOT NULL,
-    cliente TEXT NOT NULL,
-    direccion TEXT NOT NULL,
-    telefono TEXT,
-    tipo_servicio TEXT NOT NULL,
-    descripcion TEXT,
-    monto REAL DEFAULT 0,
-    saldo_pendiente REAL DEFAULT 0,
-    estado TEXT DEFAULT 'Pendiente',
-    observaciones TEXT,
-    fecha_estimada_cobro TEXT,
-    created_at TEXT DEFAULT (datetime('now', 'localtime'))
-  )
-`).run();
-
-db.prepare(`
-  CREATE TABLE IF NOT EXISTS atmos_pagos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    orden_id INTEGER NOT NULL,
-    fecha TEXT NOT NULL,
-    monto REAL DEFAULT 0,
-    metodo_pago TEXT NOT NULL,
-    observaciones TEXT,
-    created_at TEXT DEFAULT (datetime('now', 'localtime')),
-    FOREIGN KEY (orden_id) REFERENCES atmos_ordenes(id) ON DELETE CASCADE
-  )
-`).run();
-
-
-// ====================
-// Módulo Municipio - Tablas
-// ====================
-db.prepare(`
-  CREATE TABLE IF NOT EXISTS municipio_ordenes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fecha TEXT NOT NULL,
-    expediente TEXT,
-    orden_compra TEXT,
-    fecha_estimada_cobro TEXT,
-    observaciones TEXT,
-    total REAL DEFAULT 0,
-    saldo_pendiente REAL DEFAULT 0,
-    estado TEXT DEFAULT 'Pendiente',
-    productos TEXT,
-    created_at TEXT DEFAULT (datetime('now', 'localtime'))
-  )
-`).run();
-
-db.prepare(`
-  CREATE TABLE IF NOT EXISTS municipio_pagos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    orden_id INTEGER NOT NULL,
-    fecha TEXT NOT NULL,
-    monto REAL DEFAULT 0,
-    metodo_pago TEXT DEFAULT 'Transferencia',
-    observaciones TEXT,
-    created_at TEXT DEFAULT (datetime('now', 'localtime')),
-        FOREIGN KEY (orden_id) REFERENCES municipio_ordenes(id) ON DELETE CASCADE
-  )
-`).run();
-
-
-// ====================
-// Módulo Atmosférico - Tablas
-// ====================
 db.prepare(`
   CREATE TABLE IF NOT EXISTS atmos_ordenes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -502,12 +439,10 @@ function registrarAccion(accion, detalle = '') {
   }
 }
 
-// Fase 0.2 — Sincronización (instanciado e inicializado de forma pasiva)
+// Fase 0.2 — Sincronización (instanciación)
 const syncStatus = createSyncStatus(db);
 const offlineQueue = createOfflineQueue(db);
 const syncManager = new SyncManager(db, syncStatus, offlineQueue);
-console.log('[MAIN] Llamando a syncManager.initialize()');
-syncManager.initialize();
 
 // Fase 0.1 — Servicios (instanciados aquí para tener acceso a db, registrarAccion y syncManager para encolado offline)
 const productService = createProductService(db, registrarAccion, syncManager);
@@ -517,14 +452,17 @@ const budgetService = createBudgetService(db, syncManager);
 const remitoService = createRemitoService(db, syncManager);
 const ticketService = createTicketService(db, syncManager);
 const supplierService = createSupplierService(db, registrarAccion, syncManager);
-const saleService = createSaleService(db, registrarAccion, syncManager);
+const saleService = createSaleService(db, registrarAccion, syncManager, ticketService);
 const clientService = createClientService(db, registrarAccion, syncManager);
 const municipioService = createMunicipioService(db, registrarAccion, syncManager);
 const machineService = createMachineService(db, registrarAccion, syncManager);
 const employeeService = createEmployeeService(db, registrarAccion, syncManager);
 
-// Inyectar referencias de servicios locales a SyncManager para el proceso de Pull Sync (UPSERT)
+// Inyectar referencias de servicios locales a SyncManager ANTES de inicializarlo para el proceso de Pull Sync
 syncManager.setLocalServices({ productService, categoryService, supplierService, saleService, ticketService, clientService, expenseService, municipioService, machineService, employeeService, budgetService, remitoService });
+
+console.log('[MAIN] Llamando a syncManager.initialize() con servicios locales inyectados');
+syncManager.initialize();
 
 // Función de utilidad Dual Write para IPC handlers directos en main.js
 function handleDualWrite(promise, entity, action, payload) {
@@ -639,13 +577,14 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
-  // Inicializar Supabase Realtime para Productos en el Main Process
+  // Inicializar Supabase Realtime y SyncManager window en el Main Process
   try {
     realtimeManager.setMainWindow(mainWindow);
     realtimeManager.setDatabase(db);
     realtimeManager.init();
+    syncManager.setMainWindow(mainWindow);
   } catch (rtErr) {
-    console.warn('[main] Error al inicializar realtimeManager:', rtErr.message);
+    console.warn('[main] Error al inicializar realtimeManager / syncManager window:', rtErr.message);
   }
 
   // Control de cierre del splash con fade out desde el renderer
@@ -914,12 +853,15 @@ db.prepare(`
   )
 `).run();
 
-// Intentar agregar columnas de descuento y subtotal si no existen
+// Intentar agregar columnas de descuento, subtotal y cliente si no existen
 try {
   db.prepare("ALTER TABLE tickets ADD COLUMN descuento REAL DEFAULT 0").run();
 } catch (err) {}
 try {
   db.prepare("ALTER TABLE tickets ADD COLUMN subtotal REAL DEFAULT 0").run();
+} catch (err) {}
+try {
+  db.prepare("ALTER TABLE tickets ADD COLUMN cliente TEXT").run();
 } catch (err) {}
 
 // Guardar ticket

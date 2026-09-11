@@ -45,11 +45,22 @@ function createProductService(db, registrarAccion, syncManager = null) {
    */
   async function getProducts() {
     if (CONFIG.APP_MODE === 'ONLINE') {
-      console.log('[ProductService] Modo ONLINE activo: obteniendo productos desde Supabase.');
-      return await supabaseProductService.getProducts();
+      console.log('[ProductService] Modo ONLINE activo: obteniendo productos desde Supabase...');
+      try {
+        const products = await supabaseProductService.getProducts();
+        if (Array.isArray(products) && products.length > 0) {
+          // Mantener SQLite sincronizado localmente (sin dual write ni loop)
+          for (const p of products) {
+            upsertProduct(p);
+          }
+          return products;
+        }
+      } catch (err) {
+        console.warn('[ProductService] Error al obtener productos desde Supabase, recurriendo a SQLite local:', err.message);
+      }
     }
 
-    console.log('[ProductService] Modo LOCAL activo: obteniendo productos desde SQLite.');
+    console.log('[ProductService] Obteniendo productos desde SQLite local.');
     const products = db.prepare('SELECT * FROM productos ORDER BY id DESC').all();
     console.log(`[ProductService] getProducts: ${products.length} productos.`);
     return products;
@@ -182,22 +193,25 @@ function createProductService(db, registrarAccion, syncManager = null) {
       product.id
     );
 
-    if (info.changes > 0) {
-      if (typeof registrarAccion === 'function') {
-        registrarAccion(
-          'Editar producto',
-          `Producto: ${product.nombre} (${product.codigo}) - Precio venta: $${product.precio}, Precio costo: $${product.precio_costo}`
-        );
-      }
+    // Si el producto no existía en SQLite local (común en modo ONLINE al cargar desde Supabase), lo persistimos localmente
+    if (info.changes === 0) {
+      upsertProduct(product);
+    }
 
-      // Dual Write asíncrono a Supabase (no bloqueante)
-      handleDualWrite(
-        supabaseProductService.updateProduct(product),
-        'productos',
-        'UPDATE',
-        product
+    if (typeof registrarAccion === 'function') {
+      registrarAccion(
+        'Editar producto',
+        `Producto: ${product.nombre} (${product.codigo}) - Precio venta: $${product.precio}, Precio costo: $${product.precio_costo}`
       );
     }
+
+    // Dual Write asíncrono a Supabase (no bloqueante): se envía SIEMPRE, sin depender del estado previo de SQLite
+    handleDualWrite(
+      supabaseProductService.updateProduct(product),
+      'productos',
+      'UPDATE',
+      product
+    );
 
     return { success: true };
   }

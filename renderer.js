@@ -9287,28 +9287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (resultado && resultado.success) {
-          // 🟢 GUARDAR EL TICKET
-          try {
-            await window.electronAPI.saveTicket({
-              fecha: new Date().toISOString(),
-              metodo_pago: metodoPago,
-              total: totalFinalCalculado,
-              subtotal: subtotal,
-              descuento: descuentoCalculado,
-              productos: window.__carritoGlobal.map(p => ({
-                id: p.id,
-                nombre: p.nombre,
-                cantidad: p.cantidad,
-                precio: p.precio
-              })),
-              tipo: 'Venta'
-            });
-            console.log('Ticket guardado correctamente');
-          } catch (ticketErr) {
-            console.error('Error guardando ticket:', ticketErr);
-          }
-
-          imprimirTicket(metodoPago, totalFinalCalculado, subtotal);
+          imprimirTicket(metodoPago, totalFinalCalculado, subtotal, false, resultado.ticket_id);
           mostrarVentaConfirmada(metodoPago, totalFinalCalculado);
 
           // Vaciar carrito y resetear estado de ajustes/descuentos
@@ -9367,7 +9346,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    function imprimirTicket(metodoPago = '', totalFinal = 0, totalOriginal = 0, esManual = false) {
+    function imprimirTicket(metodoPago = '', totalFinal = 0, totalOriginal = 0, esManual = false, ticketId = null) {
       try {
         const fecha = new Date().toLocaleString();
         // ⚠️ Capturar snapshot del carrito SINCRÓNICAMENTE antes de cualquier async,
@@ -9558,7 +9537,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             <div class="fecha">
               Fecha: ${fecha}<br>
-              Ticket N°: ${Math.floor(Math.random() * 10000)}
+              Ticket N°: ${ticketId || Math.floor(Math.random() * 10000)}
             </div>
             
             <div class="tipo-ticket">
