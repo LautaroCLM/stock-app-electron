@@ -18,6 +18,17 @@ function createTicketService(db, syncManager = null) {
     throw new Error('[TicketService] Instancia de base de datos requerida.');
   }
 
+  // Asegurar migración de columna client_transaction_id en SQLite local
+  try {
+    const existingCols = new Set(db.prepare("PRAGMA table_info(tickets)").all().map(c => c.name));
+    if (!existingCols.has('client_transaction_id')) {
+      db.prepare("ALTER TABLE tickets ADD COLUMN client_transaction_id TEXT").run();
+      console.log('[TicketService] Columna client_transaction_id agregada a tickets en SQLite.');
+    }
+  } catch (migErr) {
+    console.warn('[TicketService] Error verificando esquema de tickets:', migErr.message);
+  }
+
   function handleDualWrite(promise, entity, action, payload) {
     promise
       .then(res => {
@@ -43,18 +54,68 @@ function createTicketService(db, syncManager = null) {
    */
   function getTickets() {
     const rows = db.prepare(`
-      SELECT t.id, t.fecha, t.metodo_pago, t.total, t.productos, t.tipo, t.descuento, t.subtotal, t.cliente,
+      SELECT t.id, t.fecha, t.metodo_pago, t.total, t.productos, t.tipo, t.descuento, t.subtotal, t.cliente, t.client_transaction_id,
              (SELECT COUNT(*) FROM ajustes_caja a WHERE a.venta_id = t.id AND a.tipo = 'Venta anulada') > 0 AS anulado
       FROM tickets t
       ORDER BY datetime(t.fecha) DESC
     `).all();
 
-    return rows.map(t => ({
-      ...t,
-      productos: JSON.parse(t.productos || '[]'),
-      descuento: t.descuento || 0,
-      subtotal: t.subtotal || 0
-    }));
+    let productosMap = null;
+    try {
+      const prods = db.prepare('SELECT id, nombre, precio FROM productos').all();
+      productosMap = new Map(prods.map(p => [Number(p.id), p]));
+    } catch (e) {
+      console.warn('[TicketService] Error al obtener catálogo de productos para enriquecimiento:', e.message);
+    }
+
+    return rows.map(t => {
+      let rawProds = [];
+      try {
+        rawProds = typeof t.productos === 'string' ? JSON.parse(t.productos || '[]') : (t.productos || []);
+      } catch (e) {
+        rawProds = [];
+      }
+
+      const enrichedProductos = Array.isArray(rawProds) ? rawProds.map(item => {
+        if (!item || typeof item !== 'object') return item;
+
+        const prodId = item.producto_id !== undefined ? Number(item.producto_id) : (item.id !== undefined ? Number(item.id) : null);
+        const prodDb = prodId && productosMap ? productosMap.get(prodId) : null;
+
+        // 1. Nombre: conservar item.nombre si existe; de lo contrario buscar en productosMap; fallback: "Producto #ID"
+        const nombreResuelto = item.nombre || (prodDb ? prodDb.nombre : (prodId ? `Producto #${prodId}` : 'Producto Desconocido'));
+
+        // 2. Precio: conservar item.precio si existe; calcular de total/cantidad; fallback a catálogo o 0
+        let precioResuelto = 0;
+        if (item.precio !== undefined && item.precio !== null && !isNaN(Number(item.precio))) {
+          precioResuelto = Number(item.precio);
+        } else if (item.total !== undefined && item.cantidad !== undefined && Number(item.cantidad) > 0) {
+          precioResuelto = Number(item.total) / Number(item.cantidad);
+        } else if (prodDb && prodDb.precio !== undefined) {
+          precioResuelto = Number(prodDb.precio);
+        }
+
+        const cantidadResuelta = item.cantidad !== undefined ? Number(item.cantidad) : 1;
+        const totalResuelto = item.total !== undefined ? Number(item.total) : (precioResuelto * cantidadResuelta);
+
+        return {
+          ...item,
+          id: prodId || item.id,
+          producto_id: prodId || item.producto_id,
+          nombre: nombreResuelto,
+          precio: precioResuelto,
+          cantidad: cantidadResuelta,
+          total: totalResuelto
+        };
+      }) : [];
+
+      return {
+        ...t,
+        productos: enrichedProductos,
+        descuento: t.descuento || 0,
+        subtotal: t.subtotal || 0
+      };
+    });
   }
 
   // ── saveTicket ────────────────────────────────────────────────────────────
@@ -71,10 +132,11 @@ function createTicketService(db, syncManager = null) {
     const tipo = data.tipo || 'Venta';
     const descuento = data.descuento || 0;
     const subtotal = data.subtotal || 0;
+    const clientTransactionId = data.client_transaction_id || null;
 
     const info = db.prepare(`
-      INSERT INTO tickets (fecha, metodo_pago, total, productos, tipo, descuento, subtotal)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO tickets (fecha, metodo_pago, total, productos, tipo, descuento, subtotal, client_transaction_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       fecha,
       metodoPago,
@@ -82,7 +144,8 @@ function createTicketService(db, syncManager = null) {
       JSON.stringify(productos),
       tipo,
       descuento,
-      subtotal
+      subtotal,
+      clientTransactionId
     );
 
     const ticketId = info.lastInsertRowid;
@@ -95,7 +158,8 @@ function createTicketService(db, syncManager = null) {
       productos,
       tipo,
       descuento,
-      subtotal
+      subtotal,
+      client_transaction_id: clientTransactionId
     };
 
     // Dual Write asíncrono hacia Supabase (no bloqueante)
@@ -143,9 +207,68 @@ function createTicketService(db, syncManager = null) {
       productosStr = JSON.stringify(ticket.productos || []);
     }
 
+    const clientTxId = ticket.client_transaction_id || null;
+
+    if (clientTxId) {
+      try {
+        const existingLocal = db.prepare(`
+          SELECT id FROM tickets WHERE client_transaction_id = ?
+        `).get(clientTxId);
+
+        if (existingLocal && Number(existingLocal.id) !== Number(ticket.id)) {
+          const localId = Number(existingLocal.id);
+          const remoteId = Number(ticket.id);
+
+          db.transaction(() => {
+            // 1. Re-vincular cualquier referencia en ajustes_caja si existía con el ID local
+            try {
+              db.prepare('UPDATE ajustes_caja SET venta_id = ? WHERE venta_id = ?').run(remoteId, localId);
+            } catch (e) {}
+
+            // 2. Eliminar la fila del ticket local temporal
+            db.prepare('DELETE FROM tickets WHERE id = ?').run(localId);
+
+            // 3. Insertar/Actualizar la fila definitiva con ID remoto
+            const stmt = db.prepare(`
+              INSERT INTO tickets (id, fecha, metodo_pago, total, productos, tipo, descuento, subtotal, cliente, client_transaction_id)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              ON CONFLICT(id) DO UPDATE SET
+                fecha = excluded.fecha,
+                metodo_pago = excluded.metodo_pago,
+                total = excluded.total,
+                productos = excluded.productos,
+                tipo = excluded.tipo,
+                descuento = excluded.descuento,
+                subtotal = excluded.subtotal,
+                cliente = excluded.cliente,
+                client_transaction_id = excluded.client_transaction_id
+            `);
+
+            stmt.run(
+              remoteId,
+              ticket.fecha || new Date().toISOString(),
+              ticket.metodo_pago || '-',
+              ticket.total !== undefined ? Number(ticket.total) : 0,
+              productosStr,
+              ticket.tipo || 'Venta',
+              ticket.descuento !== undefined ? Number(ticket.descuento) : 0,
+              ticket.subtotal !== undefined ? Number(ticket.subtotal) : 0,
+              ticket.cliente !== undefined ? ticket.cliente : null,
+              clientTxId
+            );
+          })();
+
+          console.log(`[TicketService] 🔄 Reconciliación de ticket offline completada: Local #${localId} ➔ Remoto #${remoteId} (UUID: ${clientTxId})`);
+          return { success: true, id: remoteId, reconciledFrom: localId };
+        }
+      } catch (recErr) {
+        console.warn('[TicketService] Error en verificación de reconciliación de ticket:', recErr.message);
+      }
+    }
+
     const stmt = db.prepare(`
-      INSERT INTO tickets (id, fecha, metodo_pago, total, productos, tipo, descuento, subtotal, cliente)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO tickets (id, fecha, metodo_pago, total, productos, tipo, descuento, subtotal, cliente, client_transaction_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         fecha = excluded.fecha,
         metodo_pago = excluded.metodo_pago,
@@ -154,7 +277,8 @@ function createTicketService(db, syncManager = null) {
         tipo = excluded.tipo,
         descuento = excluded.descuento,
         subtotal = excluded.subtotal,
-        cliente = excluded.cliente
+        cliente = excluded.cliente,
+        client_transaction_id = excluded.client_transaction_id
     `);
 
     stmt.run(
@@ -166,7 +290,8 @@ function createTicketService(db, syncManager = null) {
       ticket.tipo || 'Venta',
       ticket.descuento !== undefined ? Number(ticket.descuento) : 0,
       ticket.subtotal !== undefined ? Number(ticket.subtotal) : 0,
-      ticket.cliente !== undefined ? ticket.cliente : null
+      ticket.cliente !== undefined ? ticket.cliente : null,
+      clientTxId
     );
 
     return { success: true, id: Number(ticket.id) };

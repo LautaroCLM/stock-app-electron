@@ -183,16 +183,21 @@ export const saleWebService = {
 
       payloadItems.push({
         producto_id: Number(product.id),
+        nombre: product.nombre || product.name || `Producto #${product.id}`,
+        precio: Number(product.precio || product.price || (quantity ? itemTotal / quantity : 0)),
         cantidad: Number(quantity || 1),
         total: Number(itemTotal || 0),
       });
     }
 
-    // 4. Invocación ATÓMICA a la RPC 'procesar_venta_multiproducto' en Supabase
+    // 4. Invocación ATÓMICA e IDEMPOTENTE a la RPC 'procesar_venta_multiproducto' en Supabase
+    const clientTransactionId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : null;
+
     const { data, error } = await supabase.rpc('procesar_venta_multiproducto', {
       p_items: payloadItems,
       p_metodo_pago: paymentMethod || 'Efectivo',
       p_cliente: 'Consumidor Final',
+      p_client_transaction_id: clientTransactionId
     });
 
     const formatStockError = (rawMsg: string): string | null => {
@@ -214,6 +219,9 @@ export const saleWebService = {
       if (friendlyError) {
         throw new Error(friendlyError);
       }
+      if (error.message.includes('tickets_pkey')) {
+        throw new Error('Error de desfasaje de ID en la base de datos (tickets_pkey). Por favor ejecuta el parche SQL en Supabase.');
+      }
       throw new Error(`Error en Supabase: ${error.message}`);
     }
 
@@ -224,6 +232,9 @@ export const saleWebService = {
         const friendlyError = formatStockError(String(errorMsg));
         if (friendlyError) {
           throw new Error(friendlyError);
+        }
+        if (String(errorMsg).includes('tickets_pkey')) {
+          throw new Error('Error de desfasaje de ID en la base de datos (tickets_pkey). Por favor ejecuta el parche SQL en Supabase.');
         }
         throw new Error(errorMsg);
       }

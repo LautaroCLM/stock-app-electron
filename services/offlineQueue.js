@@ -79,8 +79,46 @@ class OfflineQueue {
   addOperation(operation) {
     const entity = operation.entity || operation.table || 'unknown';
     const action = operation.action || 'INSERT';
-    const payload = JSON.stringify(operation.payload || operation.data || {});
+    const payloadObj = operation.payload || operation.data || {};
+    const payload = JSON.stringify(payloadObj);
     const createdAt = operation.timestamp || new Date().toISOString();
+
+    // Deduplicación para operaciones UPDATE/UPDATE_STOCK en entidades (excepto ventas_cart)
+    if ((action === 'UPDATE' || action === 'UPDATE_STOCK') && entity !== 'ventas_cart' && payloadObj.id) {
+      try {
+        const pendingOps = this.db.prepare(`
+          SELECT id, payload FROM offline_queue
+          WHERE entity = ? AND (action = 'UPDATE' OR action = 'UPDATE_STOCK') AND (status IS NULL OR status = 'PENDING') AND (processed = 0 OR processed IS NULL)
+        `).all(entity);
+
+        for (const op of pendingOps) {
+          try {
+            const p = JSON.parse(op.payload || '{}');
+            if (String(p.id) === String(payloadObj.id)) {
+              console.log(`[OfflineQueue] 🔄 Reemplazando actualización pendiente duplicada para ${entity} ID ${p.id} (Fila ID offline_queue: ${op.id})`);
+              this.db.prepare(`
+                UPDATE offline_queue
+                SET payload = ?, created_at = ?
+                WHERE id = ?
+              `).run(payload, createdAt, op.id);
+
+              return {
+                id: op.id,
+                entity,
+                action,
+                payload: payloadObj,
+                created_at: createdAt,
+                processed: 0,
+                retry_count: 0,
+                status: 'PENDING'
+              };
+            }
+          } catch (e) {}
+        }
+      } catch (dedupErr) {
+        console.warn('[OfflineQueue] Error comprobando deduplicación de UPDATE:', dedupErr.message);
+      }
+    }
 
     const stmt = this.db.prepare(`
       INSERT INTO offline_queue (entity, action, payload, created_at, processed, retry_count, status)
@@ -92,7 +130,7 @@ class OfflineQueue {
       id: info.lastInsertRowid,
       entity,
       action,
-      payload: JSON.parse(payload),
+      payload: payloadObj,
       created_at: createdAt,
       processed: 0,
       retry_count: 0,

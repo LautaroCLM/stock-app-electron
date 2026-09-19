@@ -45,7 +45,7 @@ function createProductService(db, registrarAccion, syncManager = null) {
    */
   async function getProducts() {
     if (CONFIG.APP_MODE === 'ONLINE') {
-      console.log('[ProductService] Modo ONLINE activo: obteniendo productos desde Supabase...');
+      console.log('[ProductService] Modo ONLINE configurado: consultando productos desde Supabase...');
       try {
         const products = await supabaseProductService.getProducts();
         if (Array.isArray(products) && products.length > 0) {
@@ -56,7 +56,7 @@ function createProductService(db, registrarAccion, syncManager = null) {
           return products;
         }
       } catch (err) {
-        console.warn('[ProductService] Error al obtener productos desde Supabase, recurriendo a SQLite local:', err.message);
+        console.warn('[ProductService] Supabase no disponible (offline), recurriendo a SQLite local:', err.message);
       }
     }
 

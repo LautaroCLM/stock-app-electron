@@ -83,6 +83,7 @@ const supabaseTicketService = {
       };
 
       if (ticket.id) payload.id = Number(ticket.id);
+      if (ticket.client_transaction_id) payload.client_transaction_id = ticket.client_transaction_id;
 
       const { error } = await client
         .from('tickets')

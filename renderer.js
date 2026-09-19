@@ -9288,7 +9288,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (resultado && resultado.success) {
           imprimirTicket(metodoPago, totalFinalCalculado, subtotal, false, resultado.ticket_id);
-          mostrarVentaConfirmada(metodoPago, totalFinalCalculado);
+          mostrarVentaConfirmada(metodoPago, totalFinalCalculado, Boolean(resultado.offline));
 
           // Vaciar carrito y resetear estado de ajustes/descuentos
           window.__carritoGlobal.length = 0;
@@ -9323,6 +9323,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error en registrarVenta:', err);
         if (err.message && err.message.includes('STOCK_INSUFICIENTE')) {
           alert(`⚠️ No se pudo procesar la venta por Stock Insuficiente:\n\n${err.message}\n\nNota: Otro puesto de venta o cajero pudo haber vendido el stock disponible. Tu carrito se mantiene intacto para que ajustes las cantidades e intentes nuevamente.`);
+        } else if (err.message && err.message.includes('tickets_pkey')) {
+          alert(`⚠️ Error de desfasaje en la secuencia de IDs (tickets_pkey).\n\nSe ha generado el parche de solución "database/patch_20260918_fix_tickets_sequences.sql". Por favor ejecútalo en el Editor SQL de Supabase para resincronizar los contadores.`);
         } else {
           alert(`Error registrando la venta: ${err.message}`);
         }
@@ -12012,12 +12014,16 @@ document.addEventListener('DOMContentLoaded', () => {
 // 🔧 Fix de botón de imprimir presupuesto
 
 
-function mostrarVentaConfirmada(metodo, total) {
+function mostrarVentaConfirmada(metodo, total, isOffline = false) {
   const modal = document.getElementById('modalVentaConfirmada');
   const mensaje = document.getElementById('mensajeVenta');
   const btnCerrar = document.getElementById('btnCerrarVenta');
 
-  mensaje.textContent = `Venta realizada con ${metodo}. Total: $${total.toFixed(2)}`;
+  if (isOffline) {
+    mensaje.textContent = `📦 Venta registrada (MODO OFFLINE) con ${metodo}. Total: $${total.toFixed(2)}. Se sincronizará al recuperar Internet.`;
+  } else {
+    mensaje.textContent = `Venta realizada con ${metodo}. Total: $${total.toFixed(2)}`;
+  }
 
   modal.classList.add('active');
 

@@ -8,6 +8,7 @@
 const CONFIG = require('./config');
 const supabaseSaleService = require('./supabaseSaleService');
 const supabaseProductService = require('./supabaseProductService');
+const crypto = require('crypto');
 
 /**
  * Fábrica del servicio de Ventas.
@@ -20,6 +21,17 @@ const supabaseProductService = require('./supabaseProductService');
 function createSaleService(db, registrarAccion, syncManager = null, ticketService = null) {
   if (!db) {
     throw new Error('[SaleService] Instancia de base de datos requerida.');
+  }
+
+  // Asegurar migración de columna client_transaction_id en SQLite local
+  try {
+    const existingCols = new Set(db.prepare("PRAGMA table_info(ventas)").all().map(c => c.name));
+    if (!existingCols.has('client_transaction_id')) {
+      db.prepare("ALTER TABLE ventas ADD COLUMN client_transaction_id TEXT").run();
+      console.log('[SaleService] Columna client_transaction_id agregada a ventas en SQLite.');
+    }
+  } catch (migErr) {
+    console.warn('[SaleService] Error verificando esquema de ventas:', migErr.message);
   }
 
   function handleDualWrite(promise, entity, action, payload) {
@@ -65,8 +77,10 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
    * @param {Array<object>} [params.carritoCompleto=null] - Lista de productos si es venta de carrito.
    * @returns {{ success: boolean, total?: number, error?: string }}
    */
-  async function sellProduct({ id, cantidad, metodo_pago = 'Efectivo', carritoCompleto = null, ajuste = null }) {
+  async function sellProduct({ id, cantidad, metodo_pago = 'Efectivo', carritoCompleto = null, ajuste = null, client_transaction_id = null }) {
     try {
+      const clientTransactionId = client_transaction_id || (carritoCompleto && carritoCompleto._client_transaction_id) || crypto.randomUUID();
+
       // 🟢 Modo ONLINE: Venta atómica directa en Supabase vía RPC
       if (CONFIG.APP_MODE === 'ONLINE') {
         let itemsInput = [];
@@ -84,12 +98,27 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
         const validItems = [];
 
         for (const item of itemsInput) {
-          const pPrecio = Number(item.precio || 0);
+          const pId = Number(item.id || item.producto_id);
+          let pNombre = item.nombre || null;
+          let pPrecio = Number(item.precio || 0);
           const pCantidad = Number(item.cantidad || 1);
+
+          if (!pNombre || pPrecio === 0) {
+            try {
+              const dbProd = db.prepare('SELECT nombre, precio FROM productos WHERE id = ?').get(pId);
+              if (dbProd) {
+                if (!pNombre) pNombre = dbProd.nombre;
+                if (!pPrecio || pPrecio === 0) pPrecio = Number(dbProd.precio || 0);
+              }
+            } catch (e) {}
+          }
+
           const itemSubtotal = pPrecio * pCantidad;
           subtotalVenta += itemSubtotal;
           validItems.push({
-            producto_id: Number(item.id),
+            producto_id: pId,
+            nombre: pNombre || `Producto #${pId}`,
+            precio: pPrecio,
             cantidad: pCantidad,
             itemSubtotal
           });
@@ -128,6 +157,8 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
 
           payloadItems.push({
             producto_id: item.producto_id,
+            nombre: item.nombre,
+            precio: item.precio || (item.cantidad ? Math.round((totalItem / item.cantidad) * 100) / 100 : 0),
             cantidad: item.cantidad,
             total: totalItem
           });
@@ -136,10 +167,100 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
         const result = await supabaseSaleService.processCartSaleAtomic({
           items: payloadItems,
           metodo_pago,
-          cliente: 'Consumidor Final'
+          cliente: 'Consumidor Final',
+          client_transaction_id: clientTransactionId
         });
 
         if (!result || !result.success) {
+          const isNetErr = Boolean(
+            result?.isNetworkError ||
+            (result?.error && (
+              result.error.includes('fetch failed') ||
+              result.error.includes('Failed to fetch') ||
+              result.error.includes('network')
+            ))
+          );
+
+          if (isNetErr) {
+            console.warn('[SaleService] ⚠️ Conexión remota no disponible (fetch failed). Ejecutando fallback atómico a venta OFFLINE en SQLite local...');
+
+            // 1. Validar stock local antes de la transacción
+            for (const item of payloadItems) {
+              const dbProd = db.prepare('SELECT id, nombre, stock FROM productos WHERE id = ?').get(item.producto_id);
+              if (!dbProd) {
+                return { success: false, error: `Producto #${item.producto_id} no existe en la base local.` };
+              }
+              if (dbProd.stock < item.cantidad) {
+                return { success: false, error: `STOCK_INSUFICIENTE: ${dbProd.nombre} (Stock local: ${dbProd.stock}, Solicitado: ${item.cantidad})` };
+              }
+            }
+
+            // 2. Ejecutar transacción atómica en SQLite local
+            try {
+              const runOfflineSaleTransaction = db.transaction(() => {
+                const insertVenta = db.prepare(`
+                  INSERT INTO ventas (producto_id, cantidad, total, metodo_pago, cliente, client_transaction_id)
+                  VALUES (?, ?, ?, ?, ?, ?)
+                `);
+                const updateStock = db.prepare('UPDATE productos SET stock = stock - ? WHERE id = ?');
+
+                for (const item of payloadItems) {
+                  insertVenta.run(item.producto_id, item.cantidad, item.total, metodo_pago, 'Consumidor Final', clientTransactionId);
+                  updateStock.run(item.cantidad, item.producto_id);
+                }
+
+                const descuentoMonto = subtotalVenta > totalFinalVenta ? (subtotalVenta - totalFinalVenta) : 0;
+                const insertTicket = db.prepare(`
+                  INSERT INTO tickets (fecha, metodo_pago, total, productos, tipo, descuento, subtotal, cliente, client_transaction_id)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `);
+                const ticketInfo = insertTicket.run(
+                  new Date().toISOString(),
+                  metodo_pago,
+                  totalFinalVenta,
+                  JSON.stringify(payloadItems),
+                  'Venta',
+                  descuentoMonto,
+                  subtotalVenta,
+                  'Consumidor Final',
+                  clientTransactionId
+                );
+                const localTicketId = ticketInfo.lastInsertRowid;
+
+                if (syncManager && syncManager.offlineQueue) {
+                  syncManager.offlineQueue.addOperation({
+                    entity: 'ventas_cart',
+                    action: 'PROCESS_ATOMIC',
+                    payload: {
+                      client_transaction_id: clientTransactionId,
+                      items: payloadItems,
+                      metodo_pago,
+                      cliente: 'Consumidor Final',
+                      subtotal: subtotalVenta,
+                      total: totalFinalVenta,
+                      ajuste,
+                      local_ticket_id: localTicketId
+                    }
+                  });
+                }
+
+                return localTicketId;
+              });
+
+              const localTicketId = runOfflineSaleTransaction();
+              console.log(`[SaleService] 📦 Venta OFFLINE guardada exitosamente en SQLite (Ticket #${localTicketId}, UUID: ${clientTransactionId}). Encolada para sincronización.`);
+
+              if (typeof registrarAccion === 'function') {
+                registrarAccion('Venta (Offline)', `Venta local por $${totalFinalVenta.toFixed(2)} (UUID: ${clientTransactionId})`);
+              }
+
+              return { success: true, offline: true, total: totalFinalVenta, ticket_id: localTicketId };
+            } catch (txErr) {
+              console.error('[SaleService] Error en transacción SQLite de venta offline:', txErr.message);
+              return { success: false, error: `Error registrando venta offline local: ${txErr.message}` };
+            }
+          }
+
           return { success: false, error: result?.error || 'Error al procesar la venta en Supabase.' };
         }
 
@@ -148,17 +269,19 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
         try {
           for (const item of payloadItems) {
             db.prepare('UPDATE productos SET stock = stock - ? WHERE id = ?').run(item.cantidad, item.producto_id);
-            db.prepare('INSERT INTO ventas (producto_id, cantidad, total, metodo_pago) VALUES (?, ?, ?, ?)').run(
+            db.prepare('INSERT INTO ventas (producto_id, cantidad, total, metodo_pago, client_transaction_id) VALUES (?, ?, ?, ?, ?)').run(
               item.producto_id,
               item.cantidad,
               item.total,
-              metodo_pago
+              metodo_pago,
+              clientTransactionId
             );
           }
 
           if (ticketService && ticketId) {
             ticketService.upsertTicket({
               id: ticketId,
+              client_transaction_id: clientTransactionId,
               fecha: new Date().toISOString(),
               metodo_pago,
               total: totalFinalVenta,
@@ -224,8 +347,8 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
         const productosVendidos = [];
 
         const insertVenta = db.prepare(`
-          INSERT INTO ventas (producto_id, cantidad, total, metodo_pago)
-          VALUES (?, ?, ?, ?)
+          INSERT INTO ventas (producto_id, cantidad, total, metodo_pago, client_transaction_id)
+          VALUES (?, ?, ?, ?, ?)
         `);
         const updateStock = db.prepare('UPDATE productos SET stock = stock - ? WHERE id = ?');
 
@@ -247,7 +370,7 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
           totalVentaAcumulado += totalItem;
           productosVendidos.push(`${product.nombre} (${item.cantidad}u)`);
 
-          const info = insertVenta.run(item.id, item.cantidad, totalItem, metodo_pago);
+          const info = insertVenta.run(item.id, item.cantidad, totalItem, metodo_pago, clientTransactionId);
           const ventaId = info.lastInsertRowid;
 
           updateStock.run(item.cantidad, item.id);
@@ -262,7 +385,8 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
               cantidad: item.cantidad,
               total: totalItem,
               metodo_pago,
-              cliente: 'Consumidor Final'
+              cliente: 'Consumidor Final',
+              client_transaction_id: clientTransactionId
             }),
             'ventas',
             'INSERT',
@@ -272,7 +396,8 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
               cantidad: item.cantidad,
               total: totalItem,
               metodo_pago,
-              cliente: 'Consumidor Final'
+              cliente: 'Consumidor Final',
+              client_transaction_id: clientTransactionId
             }
           );
 
@@ -318,9 +443,9 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
       }
 
       const info = db.prepare(`
-        INSERT INTO ventas (producto_id, cantidad, total, metodo_pago)
-        VALUES (?, ?, ?, ?)
-      `).run(id, cantidad, total, metodo_pago);
+        INSERT INTO ventas (producto_id, cantidad, total, metodo_pago, client_transaction_id)
+        VALUES (?, ?, ?, ?, ?)
+      `).run(id, cantidad, total, metodo_pago, clientTransactionId);
 
       const ventaId = info.lastInsertRowid;
       db.prepare('UPDATE productos SET stock = stock - ? WHERE id = ?').run(cantidad, id);
@@ -341,7 +466,8 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
           cantidad: cantidad,
           total: total,
           metodo_pago,
-          cliente: 'Consumidor Final'
+          cliente: 'Consumidor Final',
+          client_transaction_id: clientTransactionId
         }),
         'ventas',
         'INSERT',
@@ -351,7 +477,8 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
           cantidad: cantidad,
           total: total,
           metodo_pago,
-          cliente: 'Consumidor Final'
+          cliente: 'Consumidor Final',
+          client_transaction_id: clientTransactionId
         }
       );
 
@@ -389,26 +516,76 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
       return { success: false, error: 'ID de venta requerido para UPSERT.' };
     }
 
+    const prodId = venta.producto_id ? Number(venta.producto_id) : null;
+    const clientTxId = venta.client_transaction_id || null;
+
+    if (clientTxId) {
+      try {
+        const existingLocal = db.prepare(`
+          SELECT id FROM ventas
+          WHERE client_transaction_id = ? AND (producto_id = ? OR (producto_id IS NULL AND ? IS NULL))
+        `).get(clientTxId, prodId, prodId);
+
+        if (existingLocal && Number(existingLocal.id) !== Number(venta.id)) {
+          const localId = Number(existingLocal.id);
+          const remoteId = Number(venta.id);
+
+          db.transaction(() => {
+            db.prepare('DELETE FROM ventas WHERE id = ?').run(localId);
+            const stmt = db.prepare(`
+              INSERT INTO ventas (id, producto_id, cantidad, total, metodo_pago, cliente, fecha, client_transaction_id)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+              ON CONFLICT(id) DO UPDATE SET
+                producto_id = excluded.producto_id,
+                cantidad = excluded.cantidad,
+                total = excluded.total,
+                metodo_pago = excluded.metodo_pago,
+                cliente = excluded.cliente,
+                fecha = excluded.fecha,
+                client_transaction_id = excluded.client_transaction_id
+            `);
+            stmt.run(
+              remoteId,
+              prodId,
+              venta.cantidad !== undefined ? Number(venta.cantidad) : 1,
+              venta.total !== undefined ? Number(venta.total) : 0,
+              venta.metodo_pago || 'Efectivo',
+              venta.cliente || 'Consumidor Final',
+              venta.fecha || new Date().toISOString(),
+              clientTxId
+            );
+          })();
+
+          console.log(`[SaleService] 🔄 Reconciliación de venta offline completada: Local #${localId} ➔ Remoto #${remoteId} (UUID: ${clientTxId})`);
+          return { success: true, id: remoteId, reconciledFrom: localId };
+        }
+      } catch (recErr) {
+        console.warn('[SaleService] Error en verificación de reconciliación de ventas:', recErr.message);
+      }
+    }
+
     const stmt = db.prepare(`
-      INSERT INTO ventas (id, producto_id, cantidad, total, metodo_pago, cliente, fecha)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO ventas (id, producto_id, cantidad, total, metodo_pago, cliente, fecha, client_transaction_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         producto_id = excluded.producto_id,
         cantidad = excluded.cantidad,
         total = excluded.total,
         metodo_pago = excluded.metodo_pago,
         cliente = excluded.cliente,
-        fecha = excluded.fecha
+        fecha = excluded.fecha,
+        client_transaction_id = excluded.client_transaction_id
     `);
 
     stmt.run(
       Number(venta.id),
-      venta.producto_id ? Number(venta.producto_id) : null,
+      prodId,
       venta.cantidad !== undefined ? Number(venta.cantidad) : 1,
       venta.total !== undefined ? Number(venta.total) : 0,
       venta.metodo_pago || 'Efectivo',
       venta.cliente || 'Consumidor Final',
-      venta.fecha || new Date().toISOString()
+      venta.fecha || new Date().toISOString(),
+      clientTxId
     );
 
     return { success: true, id: Number(venta.id) };

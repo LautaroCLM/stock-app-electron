@@ -73,6 +73,7 @@ const supabaseSaleService = {
       };
 
       if (venta.id) payload.id = Number(venta.id);
+      if (venta.client_transaction_id) payload.client_transaction_id = venta.client_transaction_id;
 
       const { error } = await client
         .from('ventas')
@@ -135,9 +136,10 @@ const supabaseSaleService = {
    * @param {Array<{ producto_id: number, cantidad: number, total: number }>} params.items - Arreglo de ítems vendidos con su total asignado.
    * @param {string} [params.metodo_pago='Efectivo'] - Método de pago.
    * @param {string} [params.cliente='Consumidor Final'] - Nombre del cliente.
+   * @param {string} [params.client_transaction_id=null] - UUID v4 global de operación de venta.
    * @returns {Promise<{ success: boolean, data?: any, error?: string }>}
    */
-  async processCartSaleAtomic({ items, metodo_pago = 'Efectivo', cliente = 'Consumidor Final' }) {
+  async processCartSaleAtomic({ items, metodo_pago = 'Efectivo', cliente = 'Consumidor Final', client_transaction_id = null }) {
     if (!Array.isArray(items) || items.length === 0) {
       return { success: false, error: 'El carrito no contiene productos para procesar.' };
     }
@@ -150,21 +152,40 @@ const supabaseSaleService = {
     if (!client) return { success: false, error: 'Cliente Supabase no disponible.' };
 
     try {
-      const payloadItems = items.map(item => ({
-        producto_id: Number(item.producto_id || item.id),
-        cantidad: Number(item.cantidad || 1),
-        total: Number(item.total || 0)
-      }));
+      const payloadItems = items.map(item => {
+        const mapped = {
+          producto_id: Number(item.producto_id || item.id),
+          cantidad: Number(item.cantidad || 1),
+          total: Number(item.total || 0)
+        };
+        if (item.nombre) mapped.nombre = item.nombre;
+        if (item.precio !== undefined && item.precio !== null) mapped.precio = Number(item.precio);
+        return mapped;
+      });
 
-      const { data, error } = await client.rpc('procesar_venta_multiproducto', {
+      const rpcParams = {
         p_items: payloadItems,
         p_metodo_pago: metodo_pago || 'Efectivo',
         p_cliente: cliente || 'Consumidor Final'
-      });
+      };
+      if (client_transaction_id) {
+        rpcParams.p_client_transaction_id = client_transaction_id;
+      }
+
+      const { data, error } = await client.rpc('procesar_venta_multiproducto', rpcParams);
 
       if (error) {
         console.error('[SupabaseSaleService] Error en RPC procesar_venta_multiproducto:', error.message);
-        return { success: false, error: error.message };
+        const isNetworkError = Boolean(
+          error.message && (
+            error.message.includes('fetch failed') ||
+            error.message.includes('Failed to fetch') ||
+            error.message.includes('network') ||
+            error.message.includes('ECONNRESET') ||
+            error.message.includes('ETIMEDOUT')
+          )
+        );
+        return { success: false, isNetworkError, error: error.message };
       }
 
       if (!data) {
@@ -181,7 +202,18 @@ const supabaseSaleService = {
       return { success: true, data };
     } catch (err) {
       console.error('[SupabaseSaleService] Excepción en processCartSaleAtomic:', err.message);
-      return { success: false, error: err.message };
+      const isNetworkError = Boolean(
+        err.message && (
+          err.message.includes('fetch failed') ||
+          err.message.includes('Failed to fetch') ||
+          err.message.includes('network') ||
+          err.message.includes('ECONNRESET') ||
+          err.message.includes('ETIMEDOUT') ||
+          err.message.includes('ENOTFOUND') ||
+          err.message.includes('ECONNREFUSED')
+        )
+      );
+      return { success: false, isNetworkError, error: err.message };
     }
   }
 };

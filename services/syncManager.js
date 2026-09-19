@@ -314,6 +314,16 @@ class SyncManager {
           } else if (action === 'DELETE') {
             result = await supabaseSaleService.deleteSale(payload.id);
           }
+        } else if (entity === 'ventas_cart') {
+          if (action === 'PROCESS_ATOMIC') {
+            console.log(`[SyncManager] 🛒 Procesando sincronización de venta atómica offline (UUID: ${payload.client_transaction_id})...`);
+            result = await supabaseSaleService.processCartSaleAtomic({
+              items: payload.items,
+              metodo_pago: payload.metodo_pago || 'Efectivo',
+              cliente: payload.cliente || 'Consumidor Final',
+              client_transaction_id: payload.client_transaction_id
+            });
+          }
         } else if (entity === 'tickets') {
           if (action === 'INSERT' || action === 'UPDATE') {
             result = await supabaseTicketService.addTicket(payload);
