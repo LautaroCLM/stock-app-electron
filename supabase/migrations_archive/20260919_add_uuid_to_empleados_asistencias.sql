@@ -1,0 +1,3 @@
+-- DEPRECATED: This file has been split into 2 separate migration files for safe production deployment:
+-- 1. 20260919_01_add_nullable_uuid_columns.sql  (Run BEFORE Coordinated Backfill)
+-- 2. 20260919_02_add_uuid_constraints.sql        (Run AFTER Coordinated Backfill verification)

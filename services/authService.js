@@ -116,6 +116,89 @@ function isCurrentAdmin() {
   return role === 'admin';
 }
 
+function isNetworkError(error) {
+  if (!error) return false;
+  const msg = (typeof error === 'string' ? error : (error.message || String(error || ''))).toLowerCase();
+
+  return (
+    msg.includes('fetch failed') ||
+    msg.includes('econnreset') ||
+    msg.includes('etimedout') ||
+    msg.includes('enotfound') ||
+    msg.includes('econnrefused') ||
+    msg.includes('socket hang up') ||
+    msg.includes('network') ||
+    msg.includes('getaddrinfo') ||
+    msg.includes('failed to fetch') ||
+    msg.includes('offline') ||
+    msg.includes('auth sub-system is offline') ||
+    msg.includes('error de conexión') ||
+    msg.includes('connection refused')
+  );
+}
+
+let refreshPromise = null;
+
+async function refreshStoredSession(refreshToken) {
+  if (!refreshToken) {
+    return { success: false, isNetwork: false, error: 'No hay refresh_token disponible.' };
+  }
+
+  if (refreshPromise) {
+    console.log('[AuthService] Reutilizando solicitud de renovación en curso...');
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const supabase = getSupabaseClient();
+      if (!supabase) {
+        return { success: false, isNetwork: false, error: 'Cliente de Supabase no configurado.' };
+      }
+
+      console.log('[AuthService] Intentando renovar token de sesión con Supabase Auth...');
+      const { data, error } = await supabase.auth.refreshSession({ refresh_token: refreshToken });
+
+      if (error) {
+        const isNet = isNetworkError(error);
+        console.warn(`[AuthService] Falló renovación de sesión (${isNet ? 'Error de Red' : 'Error de Autenticación'}):`, error.message);
+        return {
+          success: false,
+          isNetwork: isNet,
+          error: error.message
+        };
+      }
+
+      if (!data || !data.session || !data.user) {
+        return {
+          success: false,
+          isNetwork: false,
+          error: 'Respuesta de renovación incompleta de Supabase.'
+        };
+      }
+
+      console.log('[AuthService] ¡Sesión renovada con éxito en Supabase Auth!');
+      return {
+        success: true,
+        session: data.session,
+        user: data.user
+      };
+    } catch (err) {
+      const isNet = isNetworkError(err);
+      console.error(`[AuthService] Excepción durante renovación de sesión (${isNet ? 'Error de Red' : 'Error General'}):`, err.message || err);
+      return {
+        success: false,
+        isNetwork: isNet,
+        error: err.message || 'Error en renovación de sesión.'
+      };
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 async function signIn({ email, password }) {
   console.log('[AUTH TRACE 6] authService signIn started for email:', email);
   const supabase = getSupabaseClient();
@@ -156,6 +239,17 @@ async function signIn({ email, password }) {
       updatedAt: new Date().toISOString()
     });
 
+    if (session?.access_token && session?.refresh_token) {
+      try {
+        await supabase.auth.setSession({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token
+        });
+      } catch (setErr) {
+        console.warn('[AuthService] No se pudo fijar sesión en cliente Supabase tras login:', setErr.message);
+      }
+    }
+
     return {
       success: true,
       user: authUser,
@@ -185,56 +279,125 @@ async function signOut() {
 }
 
 async function getSession() {
-  const supabase = getSupabaseClient();
-  if (!supabase) {
-    clearStoredSession();
-    return {
-      session: null,
-      user: null,
-      profile: null,
-      error: 'Supabase Auth no está configurado en las variables de entorno.'
-    };
-  }
-
   const stored = readStoredSession();
+
   if (!stored || !stored.session || !stored.session.access_token) {
     return { session: null, user: null, profile: null };
   }
 
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    // Si Supabase no está configurado, retornar la sesión local almacenada para uso offline
+    return {
+      session: stored.session,
+      user: stored.user || null,
+      profile: stored.profile || null,
+      offline: true
+    };
+  }
+
   try {
+    // 1. Validar el access_token actual con Supabase online
     const { data, error } = await supabase.auth.getUser(stored.session.access_token);
-    if (error || !data || !data.user) {
-      console.warn('[AuthService] Token de sesión expirado o inválido:', error?.message);
-      clearStoredSession();
+
+    if (!error && data && data.user) {
+      const currentProfile = (await fetchUserProfile(supabase, data.user)) || stored.profile;
+      const updatedData = {
+        session: stored.session,
+        user: data.user,
+        profile: currentProfile,
+        updatedAt: new Date().toISOString()
+      };
+      writeStoredSession(updatedData);
+
       return {
-        session: null,
-        user: null,
-        profile: null,
-        error: 'Sesión expirada o inválida. Por favor, iniciá sesión nuevamente.'
+        session: stored.session,
+        user: data.user,
+        profile: currentProfile
       };
     }
 
-    const currentProfile = await fetchUserProfile(supabase, data.user);
-    writeStoredSession({
-      session: stored.session,
-      user: data.user,
-      profile: currentProfile,
-      updatedAt: new Date().toISOString()
-    });
+    // 2. Si ocurrió un error de red durante la validación, PRESERVAR la sesión local
+    if (error && isNetworkError(error)) {
+      console.warn('[AuthService] Error de red al validar token con Supabase. Preservando sesión local para modo offline:', error.message);
+      return {
+        session: stored.session,
+        user: stored.user || null,
+        profile: stored.profile || null,
+        offline: true
+      };
+    }
 
-    return {
-      session: stored.session,
-      user: data.user,
-      profile: currentProfile
-    };
-  } catch (err) {
-    console.error('[AuthService] Error al verificar sesión con Supabase online:', err.message);
+    // 3. El access_token expiró o es inválido: Intentar renovación con refresh_token
+    console.warn('[AuthService] Token de acceso expirado o no reconocido. Intentando renovación con refresh_token...');
+    if (stored.session.refresh_token) {
+      const refreshRes = await refreshStoredSession(stored.session.refresh_token);
+
+      if (refreshRes.success && refreshRes.session) {
+        try {
+          await supabase.auth.setSession({
+            access_token: refreshRes.session.access_token,
+            refresh_token: refreshRes.session.refresh_token
+          });
+        } catch (setErr) {
+          console.warn('[AuthService] No se pudo actualizar setSession en Supabase tras refresh:', setErr.message);
+        }
+
+        const newProfile = (await fetchUserProfile(supabase, refreshRes.user)) || stored.profile;
+        const newStoredData = {
+          session: refreshRes.session,
+          user: refreshRes.user,
+          profile: newProfile,
+          updatedAt: new Date().toISOString()
+        };
+        writeStoredSession(newStoredData);
+
+        return {
+          session: refreshRes.session,
+          user: refreshRes.user,
+          profile: newProfile
+        };
+      }
+
+      // Si la renovación falló por un error de red (no por revocación), mantener la sesión local
+      if (refreshRes.isNetwork) {
+        console.warn('[AuthService] Error de red durante la renovación de sesión. Preservando sesión local para modo offline.');
+        return {
+          session: stored.session,
+          user: stored.user || null,
+          profile: stored.profile || null,
+          offline: true
+        };
+      }
+    }
+
+    // 4. Si el token está revocado/inválido de forma permanente y falló la renovación
+    console.warn('[AuthService] Sesión de usuario revocada o inválida de forma permanente. Solicitando inicio de sesión.');
     clearStoredSession();
     return {
       session: null,
       user: null,
       profile: null,
-      error: 'Error de conexión con el servidor de autenticación Supabase.'
+      error: 'Sesión expirada o revocada. Por favor, iniciá sesión nuevamente.'
+    };
+  } catch (err) {
+    if (isNetworkError(err)) {
+      console.warn('[AuthService] Excepción de red verificando sesión. Preservando sesión local para modo offline:', err.message);
+      return {
+        session: stored.session,
+        user: stored.user || null,
+        profile: stored.profile || null,
+        offline: true
+      };
+    }
+
+    console.error('[AuthService] Error al verificar sesión con Supabase online:', err.message || err);
+    clearStoredSession();
+    return {
+      session: null,
+      user: null,
+      profile: null,
+      error: 'Error de autenticación.'
     };
   }
 }

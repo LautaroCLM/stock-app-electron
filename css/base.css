@@ -95,3 +95,76 @@ body.orange-theme .toolbar .btn-primary {
 
 /* Inputs/outline focus que usen color primario */
 *:focus{outline-color:var(--app-primary)}
+
+/* Indicador visual permanente del estado de conexión */
+.connection-status-badge {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 1100;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  user-select: none;
+  pointer-events: none;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.connection-status-badge.online {
+  background-color: #059669;
+  color: #ffffff;
+  border-color: #047857;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
+}
+
+.connection-status-badge.online .status-dot {
+  background-color: #34d399;
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.7);
+}
+
+.connection-status-badge.offline {
+  background-color: #d97706;
+  color: #ffffff;
+  border-color: #b45309;
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3);
+}
+
+.connection-status-badge.offline .status-dot {
+  background-color: #fbbf24;
+  box-shadow: 0 0 6px rgba(251, 191, 36, 0.8);
+}
+
+.connection-status-badge .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.connection-status-badge .status-text {
+  line-height: 1;
+}
+
+@media (max-width: 600px) {
+  .connection-status-badge {
+    bottom: 12px;
+    right: 12px;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    gap: 6px;
+  }
+  .connection-status-badge .status-dot {
+    width: 7px;
+    height: 7px;
+  }
+}

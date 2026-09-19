@@ -13,7 +13,7 @@
 
 'use strict';
 
-const VALID_STATUSES = ['OFFLINE', 'ONLINE', 'SYNCING', 'ERROR'];
+const VALID_STATUSES = ['OFFLINE', 'ONLINE', 'SYNCING', 'ERROR', 'PARTIAL_ERROR'];
 
 class SyncStatus {
   /**

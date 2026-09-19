@@ -2,9 +2,11 @@
 //
 // Servicio para el módulo de Empleados, Horarios, Asistencias y Liquidaciones.
 // Encapsula las operaciones de datos en SQLite local e integra Dual Write a Supabase.
+// Fase 1B.1 — Identidad lógica UUID desacoplada, detección explícita de conflictos y migración ordenada.
 
 'use strict';
 
+const crypto = require('crypto');
 const supabaseEmployeeService = require('./supabaseEmployeeService');
 
 /**
@@ -17,6 +19,61 @@ const supabaseEmployeeService = require('./supabaseEmployeeService');
 function createEmployeeService(db, registrarAccion, syncManager = null) {
   if (!db) {
     throw new Error('[EmployeeService] Instancia de base de datos requerida.');
+  }
+
+  // ── MIGRACION Y BACKFILL DE UUID EN SQLITE LOCAL ──────────────────────────
+  // Orden seguro de migración: 1) Agregar columnas -> 2) Backfill -> 3) Crear Índices UNIQUE
+  try {
+    const empCols = new Set(db.prepare("PRAGMA table_info(empleados)").all().map(c => c.name));
+    if (!empCols.has('uuid')) {
+      db.prepare("ALTER TABLE empleados ADD COLUMN uuid TEXT").run();
+      console.log('[EmployeeService] Columna uuid agregada a empleados en SQLite.');
+    }
+
+    const attCols = new Set(db.prepare("PRAGMA table_info(asistencias)").all().map(c => c.name));
+    if (!attCols.has('uuid')) {
+      db.prepare("ALTER TABLE asistencias ADD COLUMN uuid TEXT").run();
+      console.log('[EmployeeService] Columna uuid agregada a asistencias en SQLite.');
+    }
+    if (!attCols.has('empleado_uuid')) {
+      db.prepare("ALTER TABLE asistencias ADD COLUMN empleado_uuid TEXT").run();
+      console.log('[EmployeeService] Columna empleado_uuid agregada a asistencias en SQLite.');
+    }
+
+    // 2) Backfill de UUIDs en empleados sin UUID
+    const unbackfilledEmps = db.prepare("SELECT id FROM empleados WHERE uuid IS NULL OR uuid = ''").all();
+    if (unbackfilledEmps.length > 0) {
+      const updateEmpStmt = db.prepare("UPDATE empleados SET uuid = ? WHERE id = ?");
+      for (const row of unbackfilledEmps) {
+        updateEmpStmt.run(crypto.randomUUID(), row.id);
+      }
+      console.log(`[EmployeeService] Backfill UUID completado para ${unbackfilledEmps.length} empleados.`);
+    }
+
+    // Backfill de UUIDs en asistencias sin UUID
+    const unbackfilledAtts = db.prepare("SELECT id FROM asistencias WHERE uuid IS NULL OR uuid = ''").all();
+    if (unbackfilledAtts.length > 0) {
+      const updateAttStmt = db.prepare("UPDATE asistencias SET uuid = ? WHERE id = ?");
+      for (const row of unbackfilledAtts) {
+        updateAttStmt.run(crypto.randomUUID(), row.id);
+      }
+      console.log(`[EmployeeService] Backfill UUID completado para ${unbackfilledAtts.length} asistencias.`);
+    }
+
+    // Backfill de empleado_uuid en asistencias
+    db.prepare(`
+      UPDATE asistencias
+      SET empleado_uuid = (SELECT uuid FROM empleados WHERE id = asistencias.empleado_id)
+      WHERE empleado_uuid IS NULL OR empleado_uuid = ''
+    `).run();
+
+    // 3) Crear índices UNIQUE e índices de búsqueda una vez completado el backfill
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_empleados_uuid ON empleados(uuid)").run();
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_asistencias_uuid ON asistencias(uuid)").run();
+    db.prepare("CREATE INDEX IF NOT EXISTS idx_asistencias_empleado_uuid ON asistencias(empleado_uuid)").run();
+
+  } catch (migErr) {
+    console.warn('[EmployeeService] Error en verificación de esquema / backfill UUID:', migErr.message);
   }
 
   function handleDualWrite(promise, entity, action, payload) {
@@ -52,22 +109,26 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
       return { success: false, error: 'Nombre, apellido y DNI son obligatorios.' };
     }
 
-    const exists = db.prepare('SELECT id FROM empleados WHERE dni = ?').get(emp.dni);
+    const dniClean = emp.dni.trim();
+    const exists = db.prepare('SELECT id FROM empleados WHERE dni = ?').get(dniClean);
     if (exists) {
       return { success: false, error: 'Ya existe un empleado registrado con ese DNI.' };
     }
 
+    const empUuid = emp.uuid || crypto.randomUUID();
+
     const stmt = db.prepare(`
       INSERT INTO empleados (
-        nombre, apellido, dni, telefono, email, direccion,
+        uuid, nombre, apellido, dni, telefono, email, direccion,
         fecha_nacimiento, cargo, fecha_ingreso, estado, observaciones
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const info = stmt.run(
+      empUuid,
       emp.nombre.trim(),
       emp.apellido.trim(),
-      emp.dni.trim(),
+      dniClean,
       emp.telefono || '',
       emp.email || '',
       emp.direccion || '',
@@ -86,9 +147,10 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
 
     const payload = {
       id: empId,
+      uuid: empUuid,
       nombre: emp.nombre.trim(),
       apellido: emp.apellido.trim(),
-      dni: emp.dni.trim(),
+      dni: dniClean,
       telefono: emp.telefono || '',
       email: emp.email || '',
       direccion: emp.direccion || '',
@@ -106,29 +168,39 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
       payload
     );
 
-    return { success: true, id: empId };
+    return { success: true, id: empId, uuid: empUuid };
   }
 
   function updateEmployee(emp) {
-    if (!emp || !emp.id) return { success: false, error: 'ID de empleado requerido.' };
+    if (!emp || (!emp.id && !emp.uuid)) return { success: false, error: 'ID o UUID de empleado requerido.' };
 
-    const exists = db.prepare('SELECT id FROM empleados WHERE dni = ? AND id != ?').get(emp.dni, emp.id);
-    if (exists) {
+    const existing = db.prepare('SELECT id, uuid FROM empleados WHERE id = ? OR uuid = ?').get(emp.id, emp.uuid);
+    if (!existing) {
+      return { success: false, error: 'Empleado no encontrado para actualizar.' };
+    }
+
+    const empId = existing.id;
+    const empUuid = emp.uuid || existing.uuid || crypto.randomUUID();
+    const dniClean = emp.dni ? emp.dni.trim() : '';
+
+    const dniExists = db.prepare('SELECT id FROM empleados WHERE dni = ? AND id != ?').get(dniClean, empId);
+    if (dniExists) {
       return { success: false, error: 'El DNI ingresado ya está asignado a otro empleado.' };
     }
 
     const stmt = db.prepare(`
       UPDATE empleados SET
-        nombre = ?, apellido = ?, dni = ?, telefono = ?, email = ?,
+        uuid = ?, nombre = ?, apellido = ?, dni = ?, telefono = ?, email = ?,
         direccion = ?, fecha_nacimiento = ?, cargo = ?, fecha_ingreso = ?,
         estado = ?, observaciones = ?
       WHERE id = ?
     `);
 
     stmt.run(
-      emp.nombre.trim(),
-      emp.apellido.trim(),
-      emp.dni.trim(),
+      empUuid,
+      emp.nombre ? emp.nombre.trim() : '',
+      emp.apellido ? emp.apellido.trim() : '',
+      dniClean,
       emp.telefono || '',
       emp.email || '',
       emp.direccion || '',
@@ -137,18 +209,19 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
       emp.fecha_ingreso || null,
       emp.estado || 'Activo',
       emp.observaciones || '',
-      emp.id
+      empId
     );
 
     if (typeof registrarAccion === 'function') {
-      registrarAccion('Editar empleado', `Empleado ID: ${emp.id}, Nombre: ${emp.nombre} ${emp.apellido}`);
+      registrarAccion('Editar empleado', `Empleado ID: ${empId}, Nombre: ${emp.nombre} ${emp.apellido}`);
     }
 
     const payload = {
-      id: Number(emp.id),
-      nombre: emp.nombre.trim(),
-      apellido: emp.apellido.trim(),
-      dni: emp.dni.trim(),
+      id: Number(empId),
+      uuid: empUuid,
+      nombre: emp.nombre ? emp.nombre.trim() : '',
+      apellido: emp.apellido ? emp.apellido.trim() : '',
+      dni: dniClean,
       telefono: emp.telefono || '',
       email: emp.email || '',
       direccion: emp.direccion || '',
@@ -166,65 +239,126 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
       payload
     );
 
-    return { success: true };
+    return { success: true, id: empId, uuid: empUuid };
   }
 
-  function deleteEmployee(id) {
-    if (!id) return { success: false, error: 'ID de empleado requerido.' };
+  function deleteEmployee(idOrUuid) {
+    if (!idOrUuid) return { success: false, error: 'ID o UUID de empleado requerido.' };
 
-    const emp = db.prepare('SELECT nombre, apellido FROM empleados WHERE id = ?').get(id);
-    db.prepare('DELETE FROM empleados WHERE id = ?').run(id);
+    const emp = db.prepare('SELECT id, uuid, nombre, apellido FROM empleados WHERE id = ? OR uuid = ?').get(idOrUuid, idOrUuid);
+    if (!emp) return { success: false, error: 'Empleado no encontrado.' };
 
-    if (typeof registrarAccion === 'function' && emp) {
-      registrarAccion('Eliminar empleado', `Empleado ID: ${id}, Nombre: ${emp.nombre} ${emp.apellido}`);
+    db.prepare('DELETE FROM empleados WHERE id = ?').run(emp.id);
+
+    if (typeof registrarAccion === 'function') {
+      registrarAccion('Eliminar empleado', `Empleado ID: ${emp.id}, Nombre: ${emp.nombre} ${emp.apellido}`);
     }
 
     handleDualWrite(
-      supabaseEmployeeService.deleteEmployee(id),
+      supabaseEmployeeService.deleteEmployee(emp.uuid || emp.id),
       'empleados',
       'DELETE',
-      { id: Number(id) }
+      { id: Number(emp.id), uuid: emp.uuid }
     );
 
     return { success: true };
   }
 
   function upsertEmployee(emp) {
-    if (!emp || !emp.id) return { success: false, error: 'ID de empleado requerido.' };
+    if (!emp || (!emp.id && !emp.uuid && !emp.dni)) {
+      return { success: false, error: 'Identificador de empleado requerido.' };
+    }
 
-    const stmt = db.prepare(`
-      INSERT INTO empleados (id, nombre, apellido, dni, telefono, email, direccion, fecha_nacimiento, cargo, fecha_ingreso, estado, observaciones)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        nombre = excluded.nombre,
-        apellido = excluded.apellido,
-        dni = excluded.dni,
-        telefono = excluded.telefono,
-        email = excluded.email,
-        direccion = excluded.direccion,
-        fecha_nacimiento = excluded.fecha_nacimiento,
-        cargo = excluded.cargo,
-        fecha_ingreso = excluded.fecha_ingreso,
-        estado = excluded.estado,
-        observaciones = excluded.observaciones
-    `);
+    const empUuid = emp.uuid || null;
+    const dniClean = emp.dni ? String(emp.dni).trim() : null;
 
-    stmt.run(
-      Number(emp.id),
-      emp.nombre || '',
-      emp.apellido || '',
-      emp.dni || '',
-      emp.telefono || '',
-      emp.email || '',
-      emp.direccion || '',
-      emp.fecha_nacimiento || null,
-      emp.cargo || 'Empleado',
-      emp.fecha_ingreso || null,
-      emp.estado || 'Activo',
-      emp.observaciones || ''
-    );
+    // Estrategia de Reconciliación con Detección Explícita de Conflictos:
+    // 1. Buscar coincidencia exacta por UUID
+    // 2. Buscar coincidencia por DNI
+    let existingByUuid = null;
+    if (empUuid) {
+      existingByUuid = db.prepare('SELECT id, uuid, dni FROM empleados WHERE uuid = ?').get(empUuid);
+    }
 
-    return { success: true, id: Number(emp.id) };
+    let existingByDni = null;
+    if (dniClean) {
+      existingByDni = db.prepare('SELECT id, uuid, dni FROM empleados WHERE dni = ?').get(dniClean);
+    }
+
+    // DETECCION EXPLICITA DE CONFLICTO:
+    // Si coincide por DNI pero el empleado local YA tiene un UUID asignado diferente al UUID remoto proporcionado,
+    // NO resolver silenciosamente -> reportar conflicto explícito y lanzar excepción para detener sincronización de esta fila.
+    if (existingByDni && empUuid && existingByDni.uuid && existingByDni.uuid !== empUuid) {
+      const msg = `[ConflictDetected] Conflicto explícito de identidad UUID para DNI ${dniClean}: local (${existingByDni.uuid}) vs remoto (${empUuid})`;
+      console.error(msg);
+      throw new Error(msg);
+    }
+
+    const existing = existingByUuid || existingByDni || (emp.id ? db.prepare('SELECT id, uuid, dni FROM empleados WHERE id = ?').get(Number(emp.id)) : null);
+    const finalUuid = empUuid || existing?.uuid || crypto.randomUUID();
+
+    if (existing) {
+      // Actualizar registro local manteniendo su PK física (id) intacta
+      const stmt = db.prepare(`
+        UPDATE empleados SET
+          uuid = ?,
+          nombre = ?,
+          apellido = ?,
+          dni = ?,
+          telefono = ?,
+          email = ?,
+          direccion = ?,
+          fecha_nacimiento = ?,
+          cargo = ?,
+          fecha_ingreso = ?,
+          estado = ?,
+          observaciones = ?
+        WHERE id = ?
+      `);
+
+      stmt.run(
+        finalUuid,
+        emp.nombre || '',
+        emp.apellido || '',
+        dniClean || '',
+        emp.telefono || '',
+        emp.email || '',
+        emp.direccion || '',
+        emp.fecha_nacimiento || null,
+        emp.cargo || 'Empleado',
+        emp.fecha_ingreso || null,
+        emp.estado || 'Activo',
+        emp.observaciones || '',
+        existing.id
+      );
+
+      return { success: true, id: existing.id, uuid: finalUuid };
+    } else {
+      // Insertar nuevo empleado localmente
+      const stmt = db.prepare(`
+        INSERT INTO empleados (
+          uuid, nombre, apellido, dni, telefono, email, direccion,
+          fecha_nacimiento, cargo, fecha_ingreso, estado, observaciones
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const info = stmt.run(
+        finalUuid,
+        emp.nombre || '',
+        emp.apellido || '',
+        dniClean || '',
+        emp.telefono || '',
+        emp.email || '',
+        emp.direccion || '',
+        emp.fecha_nacimiento || null,
+        emp.cargo || 'Empleado',
+        emp.fecha_ingreso || null,
+        emp.estado || 'Activo',
+        emp.observaciones || ''
+      );
+
+      return { success: true, id: info.lastInsertRowid, uuid: finalUuid };
+    }
   }
 
   // ── ASISTENCIAS ────────────────────────────────────────────────────────────
@@ -255,39 +389,81 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
   }
 
   function saveAttendance(att) {
-    if (!att || !att.empleado_id || !att.fecha) {
+    if (!att || (!att.empleado_id && !att.empleado_uuid) || !att.fecha) {
       return { success: false, error: 'Empleado y fecha son obligatorios.' };
     }
 
-    const stmt = db.prepare(`
-      INSERT INTO asistencias (
-        empleado_id, fecha, hora_entrada, hora_salida, estado, observaciones
-      ) VALUES (?, ?, ?, ?, ?, ?)
-      ON CONFLICT(empleado_id, fecha) DO UPDATE SET
-        hora_entrada = excluded.hora_entrada,
-        hora_salida = excluded.hora_salida,
-        estado = excluded.estado,
-        observaciones = excluded.observaciones
-    `);
+    let emp = null;
+    if (att.empleado_id) {
+      emp = db.prepare('SELECT id, uuid FROM empleados WHERE id = ?').get(Number(att.empleado_id));
+    }
+    if (!emp && att.empleado_uuid) {
+      emp = db.prepare('SELECT id, uuid FROM empleados WHERE uuid = ?').get(att.empleado_uuid);
+    }
 
-    const info = stmt.run(
-      att.empleado_id,
-      att.fecha,
-      att.hora_entrada || null,
-      att.hora_salida || null,
-      att.estado || 'Presente',
-      att.observaciones || ''
-    );
+    if (!emp) {
+      return { success: false, error: 'Empleado no encontrado para registrar asistencia.' };
+    }
 
-    const attId = info.lastInsertRowid || db.prepare('SELECT id FROM asistencias WHERE empleado_id = ? AND fecha = ?').get(att.empleado_id, att.fecha)?.id;
+    const localEmpId = emp.id;
+    const empUuid = emp.uuid;
+    const attUuid = att.uuid || crypto.randomUUID();
+
+    let existingAtt = db.prepare('SELECT id FROM asistencias WHERE uuid = ?').get(attUuid);
+    if (!existingAtt) {
+      existingAtt = db.prepare('SELECT id FROM asistencias WHERE empleado_id = ? AND fecha = ?').get(localEmpId, att.fecha);
+    }
+
+    let attId = null;
+
+    if (existingAtt) {
+      attId = existingAtt.id;
+      db.prepare(`
+        UPDATE asistencias SET
+          uuid = ?,
+          empleado_uuid = ?,
+          hora_entrada = ?,
+          hora_salida = ?,
+          estado = ?,
+          observaciones = ?
+        WHERE id = ?
+      `).run(
+        attUuid,
+        empUuid,
+        att.hora_entrada || null,
+        att.hora_salida || null,
+        att.estado || 'Presente',
+        att.observaciones || '',
+        attId
+      );
+    } else {
+      const stmt = db.prepare(`
+        INSERT INTO asistencias (
+          uuid, empleado_id, empleado_uuid, fecha, hora_entrada, hora_salida, estado, observaciones
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      const info = stmt.run(
+        attUuid,
+        localEmpId,
+        empUuid,
+        att.fecha,
+        att.hora_entrada || null,
+        att.hora_salida || null,
+        att.estado || 'Presente',
+        att.observaciones || ''
+      );
+      attId = info.lastInsertRowid;
+    }
 
     if (typeof registrarAccion === 'function') {
-      registrarAccion('Registrar asistencia', `Empleado ID: ${att.empleado_id}, Fecha: ${att.fecha}, Estado: ${att.estado}`);
+      registrarAccion('Registrar asistencia', `Empleado ID: ${localEmpId}, Fecha: ${att.fecha}, Estado: ${att.estado}`);
     }
 
     const payload = {
       id: attId,
-      empleado_id: Number(att.empleado_id),
+      uuid: attUuid,
+      empleado_id: Number(localEmpId),
+      empleado_uuid: empUuid,
       fecha: att.fecha,
       hora_entrada: att.hora_entrada || null,
       hora_salida: att.hora_salida || null,
@@ -302,50 +478,98 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
       payload
     );
 
-    return { success: true, id: attId };
+    return { success: true, id: attId, uuid: attUuid };
   }
 
-  function deleteAttendance(id) {
-    if (!id) return { success: false, error: 'ID de asistencia requerido.' };
+  function deleteAttendance(idOrUuid) {
+    if (!idOrUuid) return { success: false, error: 'ID o UUID de asistencia requerido.' };
 
-    db.prepare('DELETE FROM asistencias WHERE id = ?').run(id);
+    const att = db.prepare('SELECT id, uuid FROM asistencias WHERE id = ? OR uuid = ?').get(idOrUuid, idOrUuid);
+    if (!att) return { success: false, error: 'Asistencia no encontrada.' };
+
+    db.prepare('DELETE FROM asistencias WHERE id = ?').run(att.id);
 
     handleDualWrite(
-      supabaseEmployeeService.deleteAttendance(id),
+      supabaseEmployeeService.deleteAttendance(att.uuid || att.id),
       'asistencias',
       'DELETE',
-      { id: Number(id) }
+      { id: Number(att.id), uuid: att.uuid }
     );
 
     return { success: true };
   }
 
   function upsertAttendance(att) {
-    if (!att || !att.id) return { success: false, error: 'ID de asistencia requerido.' };
+    if (!att || (!att.id && !att.uuid)) {
+      return { success: false, error: 'ID o UUID de asistencia requerido.' };
+    }
 
-    const stmt = db.prepare(`
-      INSERT INTO asistencias (id, empleado_id, fecha, hora_entrada, hora_salida, estado, observaciones)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        empleado_id = excluded.empleado_id,
-        fecha = excluded.fecha,
-        hora_entrada = excluded.hora_entrada,
-        hora_salida = excluded.hora_salida,
-        estado = excluded.estado,
-        observaciones = excluded.observaciones
-    `);
+    const attUuid = att.uuid || crypto.randomUUID();
 
-    stmt.run(
-      Number(att.id),
-      Number(att.empleado_id),
-      att.fecha,
-      att.hora_entrada || null,
-      att.hora_salida || null,
-      att.estado || 'Presente',
-      att.observaciones || ''
-    );
+    // Resolver empleado local
+    let emp = null;
+    if (att.empleado_uuid) {
+      emp = db.prepare('SELECT id, uuid FROM empleados WHERE uuid = ?').get(att.empleado_uuid);
+    }
+    if (!emp && att.empleado_id) {
+      emp = db.prepare('SELECT id, uuid FROM empleados WHERE id = ?').get(Number(att.empleado_id));
+    }
 
-    return { success: true, id: Number(att.id) };
+    if (!emp) {
+      console.warn(`[EmployeeService] Omitiendo upsert de asistencia: empleado no encontrado para UUID ${att.empleado_uuid} / ID ${att.empleado_id}`);
+      throw new Error(`Empleado no encontrado localmente para asistencia (UUID: ${att.empleado_uuid || 'N/A'}).`);
+    }
+
+    const localEmpId = emp.id;
+    const empUuid = emp.uuid;
+
+    // Identidad lógica de la asistencia: empleado_uuid + fecha
+    let existingAtt = db.prepare('SELECT id FROM asistencias WHERE uuid = ?').get(attUuid);
+    if (!existingAtt && att.fecha) {
+      existingAtt = db.prepare('SELECT id FROM asistencias WHERE empleado_id = ? AND fecha = ?').get(localEmpId, att.fecha);
+    }
+
+    if (existingAtt) {
+      db.prepare(`
+        UPDATE asistencias SET
+          uuid = ?,
+          empleado_uuid = ?,
+          hora_entrada = ?,
+          hora_salida = ?,
+          estado = ?,
+          observaciones = ?
+        WHERE id = ?
+      `).run(
+        attUuid,
+        empUuid,
+        att.hora_entrada || null,
+        att.hora_salida || null,
+        att.estado || 'Presente',
+        att.observaciones || '',
+        existingAtt.id
+      );
+
+      return { success: true, id: existingAtt.id, uuid: attUuid };
+    } else {
+      const stmt = db.prepare(`
+        INSERT INTO asistencias (
+          uuid, empleado_id, empleado_uuid, fecha, hora_entrada, hora_salida, estado, observaciones
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const info = stmt.run(
+        attUuid,
+        localEmpId,
+        empUuid,
+        att.fecha,
+        att.hora_entrada || null,
+        att.hora_salida || null,
+        att.estado || 'Presente',
+        att.observaciones || ''
+      );
+
+      return { success: true, id: info.lastInsertRowid, uuid: attUuid };
+    }
   }
 
   // ── CONFIGURACION LIQUIDACION ──────────────────────────────────────────────
@@ -414,7 +638,7 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
 
   function getPayrollEmployees(mes) {
     const employees = db.prepare(`
-      SELECT e.id, e.nombre, e.apellido, e.dni, e.cargo, e.estado,
+      SELECT e.id, e.uuid, e.nombre, e.apellido, e.dni, e.cargo, e.estado,
              COALESCE(c.valor_hora, 0) as valor_hora,
              COALESCE(c.costo_mensual, 0) as costo_mensual
       FROM empleados e

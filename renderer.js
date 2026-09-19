@@ -17686,6 +17686,31 @@ function initRealtimeListeners() {
   }
 }
 
+// Indicador visual permanente del estado de conexión de red
+function initConnectionStatusIndicator() {
+  const badge = document.getElementById('connectionStatusIndicator');
+  const textEl = document.getElementById('connectionStatusText');
+  if (!badge || !textEl) return;
+
+  function updateStatus() {
+    const isOnline = navigator.onLine;
+    if (isOnline) {
+      badge.classList.remove('offline');
+      badge.classList.add('online');
+      textEl.textContent = 'EN LÍNEA';
+    } else {
+      badge.classList.remove('online');
+      badge.classList.add('offline');
+      textEl.textContent = 'OFFLINE';
+    }
+  }
+
+  updateStatus();
+
+  window.addEventListener('online', updateStatus);
+  window.addEventListener('offline', updateStatus);
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     initAuthSession();
@@ -17693,6 +17718,7 @@ if (document.readyState === 'loading') {
     initCompanyUsersPresence();
     loadAndRenderCompanyUsers();
     initRealtimeListeners();
+    initConnectionStatusIndicator();
   });
 } else {
   initAuthSession();
@@ -17700,5 +17726,5 @@ if (document.readyState === 'loading') {
   initCompanyUsersPresence();
   loadAndRenderCompanyUsers();
   initRealtimeListeners();
+  initConnectionStatusIndicator();
 }
-

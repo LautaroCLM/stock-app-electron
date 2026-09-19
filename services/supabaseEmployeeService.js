@@ -3,6 +3,7 @@
 // Servicio de Lectura/Escritura del Módulo Empleados y Liquidaciones en Supabase.
 // Encapsula las operaciones contra las tablas 'empleados', 'asistencias',
 // 'empleado_liquidacion_config' y 'empleado_liquidaciones'.
+// Fase 1B.1 — Desacoplamiento estricto de FKs físicas (empleado_id) a favor de UUIDs.
 
 'use strict';
 
@@ -54,19 +55,26 @@ const supabaseEmployeeService = {
         observaciones: emp.observaciones || ''
       };
 
-      if (emp.id) payload.id = Number(emp.id);
+      if (emp.uuid) payload.uuid = emp.uuid;
 
-      const { error } = await client
+      const conflictTarget = emp.uuid ? 'uuid' : 'id';
+
+      const { data, error } = await client
         .from('empleados')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: conflictTarget })
+        .select('id, uuid');
 
       if (error) {
         console.error('[SupabaseEmployeeService] Error al guardar empleado:', error.message);
         return { success: false, error: error.message };
       }
 
-      console.log('[SupabaseEmployeeService] Empleado guardado en Supabase ID:', payload.id || 'N/A');
-      return { success: true };
+      const remoteRecord = Array.isArray(data) && data.length > 0 ? data[0] : null;
+      const remoteId = remoteRecord ? remoteRecord.id : null;
+      const remoteUuid = remoteRecord ? remoteRecord.uuid : payload.uuid;
+
+      console.log(`[SupabaseEmployeeService] Empleado guardado en Supabase -> Remote ID: ${remoteId}, UUID: ${remoteUuid}`);
+      return { success: true, id: remoteId, uuid: remoteUuid };
     } catch (err) {
       console.error('[SupabaseEmployeeService] Excepción al guardar empleado:', err.message);
       return { success: false, error: err.message };
@@ -77,28 +85,32 @@ const supabaseEmployeeService = {
     return this.addEmployee(emp);
   },
 
-  async deleteEmployee(id) {
-    if (!id) return { success: false, error: 'ID de empleado requerido.' };
+  async deleteEmployee(identifier) {
+    if (!identifier) return { success: false, error: 'ID o UUID de empleado requerido.' };
     if (!isSupabaseConfigured()) return { success: false, error: 'Supabase no configurado' };
 
     const client = getSupabaseClient();
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
-      const { error } = await client
-        .from('empleados')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('empleados').delete();
+      if (typeof identifier === 'string' && identifier.includes('-')) {
+        query = query.eq('uuid', identifier);
+      } else {
+        query = query.eq('id', Number(identifier));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseEmployeeService] Error al eliminar empleado ID ${id}:`, error.message);
+        console.error(`[SupabaseEmployeeService] Error al eliminar empleado (${identifier}):`, error.message);
         return { success: false, error: error.message };
       }
 
-      console.log(`[SupabaseEmployeeService] Empleado ID ${id} eliminado en Supabase.`);
+      console.log(`[SupabaseEmployeeService] Empleado (${identifier}) eliminado en Supabase.`);
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseEmployeeService] Excepción al eliminar empleado ID ${id}:`, err.message);
+      console.error(`[SupabaseEmployeeService] Excepción al eliminar empleado (${identifier}):`, err.message);
       return { success: false, error: err.message };
     }
   },
@@ -134,8 +146,38 @@ const supabaseEmployeeService = {
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
+      let remoteEmpleadoId = null;
+
+      // REGLA CRITICA: Resolver empleado_id remoto exclusivamente mediante empleado_uuid
+      if (att.empleado_uuid) {
+        const { data: empData, error: empErr } = await client
+          .from('empleados')
+          .select('id, uuid')
+          .eq('uuid', att.empleado_uuid)
+          .maybeSingle();
+
+        if (empErr) {
+          console.error(`[SupabaseEmployeeService] Error buscando empleado remoto por UUID ${att.empleado_uuid}:`, empErr.message);
+          return { success: false, error: `Error resolviendo empleado por UUID: ${empErr.message}` };
+        }
+
+        if (!empData || !empData.id) {
+          console.warn(`[SupabaseEmployeeService] Empleado remoto no encontrado para UUID ${att.empleado_uuid}. Deteniendo inserción de asistencia.`);
+          return { success: false, error: `Empleado remoto no existe para UUID ${att.empleado_uuid}.` };
+        }
+
+        remoteEmpleadoId = empData.id;
+      } else if (att.empleado_id) {
+        // Fallback únicamente si att no contenía UUID pero contenía empleado_id
+        remoteEmpleadoId = Number(att.empleado_id);
+      }
+
+      if (!remoteEmpleadoId) {
+        return { success: false, error: 'No se pudo resolver la clave foránea remota (empleado_id) para la asistencia.' };
+      }
+
       const payload = {
-        empleado_id: Number(att.empleado_id),
+        empleado_id: remoteEmpleadoId,
         fecha: att.fecha || new Date().toISOString().split('T')[0],
         hora_entrada: att.hora_entrada || null,
         hora_salida: att.hora_salida || null,
@@ -143,45 +185,56 @@ const supabaseEmployeeService = {
         observaciones: att.observaciones || ''
       };
 
-      if (att.id) payload.id = Number(att.id);
+      if (att.uuid) payload.uuid = att.uuid;
+      if (att.empleado_uuid) payload.empleado_uuid = att.empleado_uuid;
 
-      const { error } = await client
+      const conflictTarget = att.uuid ? 'uuid' : 'id';
+
+      const { data, error } = await client
         .from('asistencias')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: conflictTarget })
+        .select('id, uuid');
 
       if (error) {
         console.error('[SupabaseEmployeeService] Error al guardar asistencia:', error.message);
         return { success: false, error: error.message };
       }
 
-      return { success: true };
+      const remoteRecord = Array.isArray(data) && data.length > 0 ? data[0] : null;
+      console.log(`[SupabaseEmployeeService] Asistencia guardada en Supabase -> Remote ID: ${remoteRecord?.id || 'N/A'}, Remote empleado_id: ${remoteEmpleadoId}`);
+
+      return { success: true, id: remoteRecord?.id, uuid: remoteRecord?.uuid || payload.uuid };
     } catch (err) {
       console.error('[SupabaseEmployeeService] Excepción al guardar asistencia:', err.message);
       return { success: false, error: err.message };
     }
   },
 
-  async deleteAttendance(id) {
-    if (!id) return { success: false, error: 'ID de asistencia requerido.' };
+  async deleteAttendance(identifier) {
+    if (!identifier) return { success: false, error: 'ID o UUID de asistencia requerido.' };
     if (!isSupabaseConfigured()) return { success: false, error: 'Supabase no configurado' };
 
     const client = getSupabaseClient();
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
-      const { error } = await client
-        .from('asistencias')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('asistencias').delete();
+      if (typeof identifier === 'string' && identifier.includes('-')) {
+        query = query.eq('uuid', identifier);
+      } else {
+        query = query.eq('id', Number(identifier));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseEmployeeService] Error al eliminar asistencia ID ${id}:`, error.message);
+        console.error(`[SupabaseEmployeeService] Error al eliminar asistencia (${identifier}):`, error.message);
         return { success: false, error: error.message };
       }
 
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseEmployeeService] Excepción al eliminar asistencia ID ${id}:`, err.message);
+      console.error(`[SupabaseEmployeeService] Excepción al eliminar asistencia (${identifier}):`, err.message);
       return { success: false, error: err.message };
     }
   },

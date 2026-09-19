@@ -168,7 +168,7 @@ class SyncManager {
         await this.processQueue();
         console.log('[SyncManager] Cola local procesada. Ejecutando pullChanges()...');
         const pullRes = await this.pullChanges();
-        if (pullRes && pullRes.success) {
+        if (pullRes && (pullRes.success || pullRes.partial)) {
           this.notifySyncComplete(pullRes.changesPulled || 0);
         }
       } catch (err) {
@@ -196,7 +196,7 @@ class SyncManager {
           await this.processQueue();
           console.log('[SyncManager] Conexión recuperada. Ejecutando Pull de sincronización...');
           const pullRes = await this.pullChanges();
-          if (pullRes && pullRes.success) {
+          if (pullRes && (pullRes.success || pullRes.partial)) {
             this.notifySyncComplete(pullRes.changesPulled || 0);
           }
         }
@@ -615,6 +615,9 @@ class SyncManager {
     }
 
     let totalPulled = 0;
+    const failedEntities = [];
+    const skippedEntities = [];
+    let empleadosPullFailed = false;
 
     // Obtener IDs de operaciones pendientes (y en cuarentena) en offlineQueue para evitar sobrescribir datos locales
     const pendingOps = this.offlineQueue ? this.offlineQueue.getOperations(true) : [];
@@ -658,6 +661,7 @@ class SyncManager {
         }
       } catch (pErr) {
         console.error('[SyncManager] Error en pull de productos:', pErr.message);
+        failedEntities.push('productos');
       }
 
       // 2. Categorías
@@ -889,39 +893,59 @@ class SyncManager {
         }
       } catch (eErr) {
         console.error('[SyncManager] Error en pull de empleados:', eErr.message);
+        failedEntities.push('empleados');
+        empleadosPullFailed = true;
       }
 
-      // 23. Asistencias
-      try {
-        const attendances = await supabaseEmployeeService.getAllAttendances();
-        if (Array.isArray(attendances) && this.employeeService?.upsertAttendance) {
-          for (const att of attendances) this.employeeService.upsertAttendance(att);
-          totalPulled += attendances.length;
+      // 23. Asistencias (dependiente de empleados)
+      if (empleadosPullFailed) {
+        console.warn('[SyncManager] ⚠️ Pull de asistencias omitido por falla previa en empleados (dependencia).');
+        skippedEntities.push({ entity: 'asistencias', reason: 'dependencia de empleados' });
+      } else {
+        try {
+          const attendances = await supabaseEmployeeService.getAllAttendances();
+          if (Array.isArray(attendances) && this.employeeService?.upsertAttendance) {
+            for (const att of attendances) this.employeeService.upsertAttendance(att);
+            totalPulled += attendances.length;
+          }
+        } catch (attErr) {
+          console.error('[SyncManager] Error en pull de asistencias:', attErr.message);
+          failedEntities.push('asistencias');
         }
-      } catch (attErr) {
-        console.error('[SyncManager] Error en pull de asistencias:', attErr.message);
       }
 
-      // 24. Config Liquidación Empleados
-      try {
-        const payrollConfigs = await supabaseEmployeeService.getAllPayrollConfigs();
-        if (Array.isArray(payrollConfigs) && this.employeeService?.upsertPayrollConfig) {
-          for (const cfg of payrollConfigs) this.employeeService.upsertPayrollConfig(cfg);
-          totalPulled += payrollConfigs.length;
+      // 24. Config Liquidación Empleados (dependiente de empleados)
+      if (empleadosPullFailed) {
+        console.warn('[SyncManager] ⚠️ Pull de empleado_liquidacion_config omitido por falla previa en empleados (dependencia).');
+        skippedEntities.push({ entity: 'empleado_liquidacion_config', reason: 'dependencia de empleados' });
+      } else {
+        try {
+          const payrollConfigs = await supabaseEmployeeService.getAllPayrollConfigs();
+          if (Array.isArray(payrollConfigs) && this.employeeService?.upsertPayrollConfig) {
+            for (const cfg of payrollConfigs) this.employeeService.upsertPayrollConfig(cfg);
+            totalPulled += payrollConfigs.length;
+          }
+        } catch (cfgErr) {
+          console.error('[SyncManager] Error en pull de empleado_liquidacion_config:', cfgErr.message);
+          failedEntities.push('empleado_liquidacion_config');
         }
-      } catch (cfgErr) {
-        console.error('[SyncManager] Error en pull de empleado_liquidacion_config:', cfgErr.message);
       }
 
-      // 25. Liquidaciones Empleados
-      try {
-        const payrolls = await supabaseEmployeeService.getAllPayrolls();
-        if (Array.isArray(payrolls) && this.employeeService?.upsertPayroll) {
-          for (const liq of payrolls) this.employeeService.upsertPayroll(liq);
-          totalPulled += payrolls.length;
+      // 25. Liquidaciones Empleados (dependiente de empleados)
+      if (empleadosPullFailed) {
+        console.warn('[SyncManager] ⚠️ Pull de empleado_liquidaciones omitido por falla previa en empleados (dependencia).');
+        skippedEntities.push({ entity: 'empleado_liquidaciones', reason: 'dependencia de empleados' });
+      } else {
+        try {
+          const payrolls = await supabaseEmployeeService.getAllPayrolls();
+          if (Array.isArray(payrolls) && this.employeeService?.upsertPayroll) {
+            for (const liq of payrolls) this.employeeService.upsertPayroll(liq);
+            totalPulled += payrolls.length;
+          }
+        } catch (liqErr) {
+          console.error('[SyncManager] Error en pull de empleado_liquidaciones:', liqErr.message);
+          failedEntities.push('empleado_liquidaciones');
         }
-      } catch (liqErr) {
-        console.error('[SyncManager] Error en pull de empleado_liquidaciones:', liqErr.message);
       }
 
       // 26. Presupuestos
@@ -933,6 +957,7 @@ class SyncManager {
         }
       } catch (bErr) {
         console.error('[SyncManager] Error en pull de presupuestos:', bErr.message);
+        failedEntities.push('presupuestos');
       }
 
       // 27. Remitos
@@ -944,16 +969,25 @@ class SyncManager {
         }
       } catch (rErr) {
         console.error('[SyncManager] Error en pull de remitos:', rErr.message);
+        failedEntities.push('remitos');
       }
 
-      if (this.syncStatus) {
-        this.syncStatus.setStatus('ONLINE');
-        this.syncStatus.updateLastPull();
-        this.syncStatus.updateLastSync();
+      if (failedEntities.length === 0) {
+        if (this.syncStatus) {
+          this.syncStatus.setStatus('ONLINE');
+          this.syncStatus.updateLastPull();
+          this.syncStatus.updateLastSync();
+        }
+        console.log(`[SyncManager] Pull completado exitosamente. Total registros procesados: ${totalPulled}`);
+        return { success: true, changesPulled: totalPulled };
+      } else {
+        if (this.syncStatus) {
+          this.syncStatus.setStatus('PARTIAL_ERROR');
+        }
+        const skippedNames = skippedEntities.map(s => s.entity).join(', ');
+        console.warn(`[SyncManager] ⚠️ Pull completado con errores parciales. Entidades fallidas: [${failedEntities.join(', ')}]${skippedNames ? `. Omitidas por dependencia: [${skippedNames}]` : ''}. Total registros procesados: ${totalPulled}`);
+        return { success: false, partial: true, failedEntities, skippedEntities, changesPulled: totalPulled };
       }
-
-      console.log(`[SyncManager] Pull completado exitosamente. Total registros procesados: ${totalPulled}`);
-      return { success: true, changesPulled: totalPulled };
     } catch (error) {
       console.error('[PullSync] Error durante Pull Sync:', error.message || error);
       if (this.syncStatus) {
