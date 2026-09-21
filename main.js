@@ -198,6 +198,7 @@ try {
 db.prepare(`
   CREATE TABLE IF NOT EXISTS clientes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uuid TEXT UNIQUE,
     nombre TEXT NOT NULL,
     telefono TEXT,
     email TEXT,
@@ -208,6 +209,14 @@ db.prepare(`
     created_at TEXT DEFAULT (datetime('now', 'localtime'))
   )
 `).run();
+
+try {
+  db.prepare("ALTER TABLE clientes ADD COLUMN uuid TEXT").run();
+} catch (err) {}
+
+try {
+  db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_clientes_uuid ON clientes(uuid)").run();
+} catch (err) {}
 
 db.prepare(`
   CREATE TABLE IF NOT EXISTS pagos_cliente (
@@ -259,6 +268,7 @@ db.prepare(`
 db.prepare(`
   CREATE TABLE IF NOT EXISTS proveedores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uuid TEXT UNIQUE,
     razon_social TEXT NOT NULL,
     contacto TEXT,
     telefono TEXT,
@@ -272,6 +282,14 @@ db.prepare(`
     created_at TEXT DEFAULT (datetime('now', 'localtime'))
   )
 `).run();
+
+try {
+  db.prepare("ALTER TABLE proveedores ADD COLUMN uuid TEXT").run();
+} catch (err) {}
+
+try {
+  db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_proveedores_uuid ON proveedores(uuid)").run();
+} catch (err) {}
 
 db.prepare(`
   CREATE TABLE IF NOT EXISTS compras_proveedor (

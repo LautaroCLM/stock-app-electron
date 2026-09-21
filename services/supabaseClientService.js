@@ -54,6 +54,7 @@ const supabaseClientService = {
 
     try {
       const payload = {
+        uuid: cliente.uuid || null,
         nombre: cliente.nombre || '',
         telefono: cliente.telefono || '',
         email: cliente.email || '',
@@ -63,11 +64,14 @@ const supabaseClientService = {
         estado: cliente.estado || 'Activo'
       };
 
-      if (cliente.id) payload.id = Number(cliente.id);
+      let query;
+      if (payload.uuid) {
+        query = client.from('clientes').upsert(payload, { onConflict: 'uuid' });
+      } else {
+        query = client.from('clientes').insert(payload);
+      }
 
-      const { error } = await client
-        .from('clientes')
-        .upsert(payload, { onConflict: 'id' });
+      const { error } = await query;
 
       if (error) {
         console.error('[SupabaseClientService] Error al insertar/actualizar cliente:', error.message);
@@ -96,28 +100,37 @@ const supabaseClientService = {
    * @param {number|string} id
    * @returns {Promise<{ success: boolean, error?: string }>}
    */
-  async deleteClient(id) {
-    if (!id) return { success: false, error: 'ID de cliente requerido.' };
+  async deleteClient(target) {
+    if (!target) return { success: false, error: 'ID o UUID de cliente requerido.' };
     if (!isSupabaseConfigured()) return { success: false, error: 'Supabase no configurado' };
 
     const client = getSupabaseClient();
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
+    const uuid = typeof target === 'object' ? target.uuid : (typeof target === 'string' && target.includes('-') ? target : null);
+    const id = typeof target === 'object' ? target.id : (typeof target === 'number' || (typeof target === 'string' && !target.includes('-')) ? Number(target) : null);
+
     try {
-      const { error } = await client
-        .from('clientes')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('clientes').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else if (id) {
+        query = query.eq('id', Number(id));
+      } else {
+        return { success: false, error: 'UUID o ID no válido para eliminación.' };
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseClientService] Error al eliminar cliente ID ${id}:`, error.message);
+        console.error(`[SupabaseClientService] Error al eliminar cliente:`, error.message);
         return { success: false, error: error.message };
       }
 
-      console.log(`[SupabaseClientService] Cliente ID ${id} eliminado en Supabase.`);
+      console.log(`[SupabaseClientService] Cliente eliminado en Supabase (UUID: ${uuid}, ID: ${id}).`);
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseClientService] Excepción al eliminar cliente ID ${id}:`, err.message);
+      console.error(`[SupabaseClientService] Excepción al eliminar cliente:`, err.message);
       return { success: false, error: err.message };
     }
   },

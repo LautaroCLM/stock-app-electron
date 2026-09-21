@@ -293,7 +293,7 @@ class SyncManager {
           if (action === 'INSERT' || action === 'UPDATE') {
             result = await supabaseSupplierService.addSupplier(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseSupplierService.deleteSupplier(payload.id);
+            result = await supabaseSupplierService.deleteSupplier(payload);
           }
         } else if (entity === 'compras_proveedor') {
           if (action === 'INSERT' || action === 'UPDATE') {
@@ -339,7 +339,7 @@ class SyncManager {
           if (action === 'INSERT' || action === 'UPDATE') {
             result = await supabaseClientService.addClient(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseClientService.deleteClient(payload.id);
+            result = await supabaseClientService.deleteClient(payload);
           }
         } else if (entity === 'cliente_ventas') {
           if (action === 'INSERT' || action === 'UPDATE') {

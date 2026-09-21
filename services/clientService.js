@@ -3,10 +3,9 @@
 // Servicio para el módulo de Clientes y Cuenta Corriente de Clientes.
 // Encapsula las operaciones de datos en SQLite local e integra Dual Write a Supabase.
 
+const crypto = require('crypto');
 const supabaseClientService = require('./supabaseClientService');
 const supabaseProductService = require('./supabaseProductService');
-
-
 
 /**
  * Fábrica del servicio de Clientes.
@@ -48,12 +47,14 @@ function createClientService(db, registrarAccion, syncManager = null) {
   }
 
   function createClient(data) {
+    const uuid = data.uuid || crypto.randomUUID();
     const stmt = db.prepare(`
-      INSERT INTO clientes (nombre, telefono, email, direccion, cuit, observaciones, estado)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO clientes (uuid, nombre, telefono, email, direccion, cuit, observaciones, estado)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const info = stmt.run(
+      uuid,
       data.nombre || '',
       data.telefono || '',
       data.email || '',
@@ -70,7 +71,7 @@ function createClientService(db, registrarAccion, syncManager = null) {
     }
 
     const payload = {
-      id: clientId,
+      uuid,
       nombre: data.nombre || '',
       telefono: data.telefono || '',
       email: data.email || '',
@@ -87,19 +88,29 @@ function createClientService(db, registrarAccion, syncManager = null) {
       payload
     );
 
-    return { success: true, id: clientId };
+    return { success: true, id: clientId, uuid };
   }
 
   function updateClient(data) {
-    if (!data || !data.id) return { success: false, error: 'ID de cliente requerido.' };
+    if (!data || (!data.id && !data.uuid)) return { success: false, error: 'ID o UUID de cliente requerido.' };
+
+    let uuid = data.uuid;
+    if (!uuid && data.id) {
+      const existing = db.prepare('SELECT uuid FROM clientes WHERE id = ?').get(data.id);
+      uuid = existing?.uuid;
+    }
+    if (!uuid) {
+      uuid = crypto.randomUUID();
+    }
 
     const stmt = db.prepare(`
       UPDATE clientes
-      SET nombre = ?, telefono = ?, email = ?, direccion = ?, cuit = ?, observaciones = ?, estado = ?
-      WHERE id = ?
+      SET uuid = ?, nombre = ?, telefono = ?, email = ?, direccion = ?, cuit = ?, observaciones = ?, estado = ?
+      WHERE id = ? OR (uuid IS NOT NULL AND uuid = ?)
     `);
 
     stmt.run(
+      uuid,
       data.nombre || '',
       data.telefono || '',
       data.email || '',
@@ -107,7 +118,8 @@ function createClientService(db, registrarAccion, syncManager = null) {
       data.cuit || '',
       data.observaciones || '',
       data.estado || 'Activo',
-      data.id
+      data.id || null,
+      uuid
     );
 
     if (typeof registrarAccion === 'function') {
@@ -115,6 +127,7 @@ function createClientService(db, registrarAccion, syncManager = null) {
     }
 
     const payload = {
+      uuid,
       id: data.id,
       nombre: data.nombre || '',
       telefono: data.telefono || '',
@@ -135,33 +148,54 @@ function createClientService(db, registrarAccion, syncManager = null) {
     return { success: true };
   }
 
-  function deleteClient(id) {
-    if (!id) return { success: false, error: 'ID de cliente requerido.' };
+  function deleteClient(target) {
+    if (!target) return { success: false, error: 'ID o UUID de cliente requerido.' };
 
-    const cliente = getClientById(id);
-    db.prepare('DELETE FROM clientes WHERE id = ?').run(id);
-
-    if (typeof registrarAccion === 'function' && cliente) {
-      registrarAccion('Eliminación Cliente', `Cliente: ${cliente.nombre} (ID: ${id})`);
+    let cliente;
+    if (typeof target === 'object') {
+      if (target.id || target.uuid) {
+        cliente = db.prepare('SELECT * FROM clientes WHERE id = ? OR uuid = ?').get(target.id || null, target.uuid || null) || target;
+      } else {
+        cliente = target;
+      }
+    } else {
+      cliente = db.prepare('SELECT * FROM clientes WHERE id = ? OR uuid = ?').get(target, String(target));
     }
 
+    const targetUuid = cliente?.uuid || (typeof target === 'string' && target.includes('-') ? target : null);
+    const targetId = cliente?.id || (typeof target === 'number' || (!isNaN(Number(target)) && !String(target).includes('-')) ? Number(target) : null);
+
+    if (cliente && cliente.id) {
+      db.prepare('DELETE FROM clientes WHERE id = ?').run(cliente.id);
+    } else if (targetId) {
+      db.prepare('DELETE FROM clientes WHERE id = ?').run(targetId);
+    }
+
+    if (typeof registrarAccion === 'function' && cliente) {
+      registrarAccion('Eliminación Cliente', `Cliente: ${cliente.nombre || 'Desconocido'} (ID: ${cliente.id})`);
+    }
+
+    const payload = { uuid: targetUuid, id: targetId };
+
     handleDualWrite(
-      supabaseClientService.deleteClient(id),
+      supabaseClientService.deleteClient(payload),
       'clientes',
       'DELETE',
-      { id: Number(id) }
+      payload
     );
 
     return { success: true };
   }
 
   function upsertClient(cliente) {
-    if (!cliente || !cliente.id) return { success: false, error: 'ID de cliente requerido.' };
+    if (!cliente || (!cliente.id && !cliente.uuid)) return { success: false, error: 'ID o UUID de cliente requerido.' };
 
+    const uuid = cliente.uuid || crypto.randomUUID();
     const stmt = db.prepare(`
-      INSERT INTO clientes (id, nombre, telefono, email, direccion, cuit, observaciones, estado)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO clientes (id, uuid, nombre, telefono, email, direccion, cuit, observaciones, estado)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
+        uuid = COALESCE(excluded.uuid, clientes.uuid),
         nombre = excluded.nombre,
         telefono = excluded.telefono,
         email = excluded.email,
@@ -172,7 +206,8 @@ function createClientService(db, registrarAccion, syncManager = null) {
     `);
 
     stmt.run(
-      Number(cliente.id),
+      cliente.id ? Number(cliente.id) : null,
+      uuid,
       cliente.nombre || '',
       cliente.telefono || '',
       cliente.email || '',
@@ -182,7 +217,7 @@ function createClientService(db, registrarAccion, syncManager = null) {
       cliente.estado || 'Activo'
     );
 
-    return { success: true, id: Number(cliente.id) };
+    return { success: true, id: cliente.id ? Number(cliente.id) : null, uuid };
   }
 
   // ── PAGOS CLIENTE ──────────────────────────────────────────────────────────

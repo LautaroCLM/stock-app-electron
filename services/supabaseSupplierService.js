@@ -84,6 +84,7 @@ const supabaseSupplierService = {
 
     try {
       const payload = {
+        uuid: prov.uuid || null,
         razon_social: prov.razon_social.trim(),
         contacto: prov.contacto || null,
         telefono: prov.telefono || null,
@@ -96,12 +97,14 @@ const supabaseSupplierService = {
         estado: prov.estado || 'Activo'
       };
 
-      if (prov.id) payload.id = Number(prov.id);
+      let query;
+      if (payload.uuid) {
+        query = client.from('proveedores').upsert(payload, { onConflict: 'uuid' }).select();
+      } else {
+        query = client.from('proveedores').insert(payload).select();
+      }
 
-      const { data, error } = await client
-        .from('proveedores')
-        .upsert(payload, { onConflict: 'id' })
-        .select();
+      const { data, error } = await query;
 
       console.log('[SupabaseSupplierService] Payload enviado:', payload);
       console.log('[SupabaseSupplierService] Registro devuelto:', data);
@@ -126,8 +129,8 @@ const supabaseSupplierService = {
    * @returns {Promise<{ success: boolean, error?: string }>}
    */
   async updateSupplier(prov) {
-    if (!prov || !prov.id) {
-      return { success: false, error: 'ID de proveedor requerido.' };
+    if (!prov || (!prov.id && !prov.uuid)) {
+      return { success: false, error: 'ID o UUID de proveedor requerido.' };
     }
 
     if (!isSupabaseConfigured()) {
@@ -140,6 +143,7 @@ const supabaseSupplierService = {
 
     try {
       const payload = {
+        uuid: prov.uuid || null,
         razon_social: prov.razon_social?.trim() || '',
         contacto: prov.contacto || null,
         telefono: prov.telefono || null,
@@ -152,32 +156,36 @@ const supabaseSupplierService = {
         estado: prov.estado || 'Activo'
       };
 
-      const { error } = await client
-        .from('proveedores')
-        .update(payload)
-        .eq('id', prov.id);
+      let query;
+      if (payload.uuid) {
+        query = client.from('proveedores').update(payload).eq('uuid', payload.uuid);
+      } else {
+        query = client.from('proveedores').update(payload).eq('id', prov.id);
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseSupplierService] Error al actualizar proveedor ID ${prov.id} en Supabase:`, error.message);
+        console.error(`[SupabaseSupplierService] Error al actualizar proveedor:`, error.message);
         return { success: false, error: error.message };
       }
 
-      console.log(`[SupabaseSupplierService] Proveedor ID ${prov.id} actualizado en Supabase.`);
+      console.log(`[SupabaseSupplierService] Proveedor actualizado en Supabase (UUID: ${payload.uuid}, ID: ${prov.id}).`);
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseSupplierService] Excepción al actualizar proveedor ID ${prov.id}:`, err.message);
+      console.error(`[SupabaseSupplierService] Excepción al actualizar proveedor:`, err.message);
       return { success: false, error: err.message };
     }
   },
 
   /**
-   * Elimina un proveedor en Supabase por ID.
+   * Elimina un proveedor en Supabase por ID o UUID.
    * 
-   * @param {number|string} id - ID del proveedor.
+   * @param {object|number|string} target - Datos o ID/UUID del proveedor.
    * @returns {Promise<{ success: boolean, error?: string }>}
    */
-  async deleteSupplier(id) {
-    if (!id) return { success: false, error: 'ID de proveedor requerido.' };
+  async deleteSupplier(target) {
+    if (!target) return { success: false, error: 'ID o UUID de proveedor requerido.' };
 
     if (!isSupabaseConfigured()) {
       console.warn('[SupabaseSupplierService] Supabase no configurado. Omitiendo eliminación de proveedor.');
@@ -187,28 +195,30 @@ const supabaseSupplierService = {
     const client = getSupabaseClient();
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
+    const uuid = typeof target === 'object' ? target.uuid : (typeof target === 'string' && target.includes('-') ? target : null);
+    const id = typeof target === 'object' ? target.id : (typeof target === 'number' || (typeof target === 'string' && !target.includes('-')) ? Number(target) : null);
+
     try {
-      const numericId = Number(id);
-      const { data, error } = await client
-        .from('proveedores')
-        .delete()
-        .eq('id', numericId)
-        .select();
+      let query = client.from('proveedores').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else if (id) {
+        query = query.eq('id', Number(id));
+      } else {
+        return { success: false, error: 'UUID o ID no válido para eliminación.' };
+      }
+
+      const { data, error } = await query.select();
 
       if (error) {
-        console.error(`[SupabaseSupplierService] Error al eliminar proveedor ID ${numericId} en Supabase:`, error.message);
+        console.error(`[SupabaseSupplierService] Error al eliminar proveedor:`, error.message);
         return { success: false, error: error.message };
       }
 
-      if (!data || data.length === 0) {
-        console.warn(`[SupabaseSupplierService] No se encontró ningún proveedor con ID ${numericId} en Supabase para eliminar.`);
-        return { success: false, error: `No se encontró el proveedor con ID ${numericId} en Supabase.` };
-      }
-
-      console.log(`[SupabaseSupplierService] Proveedor ID ${numericId} eliminado en Supabase.`);
-      return { success: true, deleted: data[0] };
+      console.log(`[SupabaseSupplierService] Proveedor eliminado en Supabase (UUID: ${uuid}, ID: ${id}).`);
+      return { success: true, deleted: data };
     } catch (err) {
-      console.error(`[SupabaseSupplierService] Excepción al eliminar proveedor ID ${id}:`, err.message);
+      console.error(`[SupabaseSupplierService] Excepción al eliminar proveedor:`, err.message);
       return { success: false, error: err.message };
     }
   }

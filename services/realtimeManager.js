@@ -52,6 +52,7 @@ class RealtimeManager {
       { name: 'productos', topic: 'realtime:productos', handler: (p) => this.handleProductChange(p), channelKey: 'realtime-product-event' },
       { name: 'cliente_ventas', topic: 'realtime:cliente_ventas', handler: (p) => this.handleClientSaleChange(p), channelKey: 'realtime-client-sale-event' },
       { name: 'clientes', topic: 'realtime:clientes', handler: (p) => this.handleClientChange(p), channelKey: 'realtime-client-event' },
+      { name: 'proveedores', topic: 'realtime:proveedores', handler: (p) => this.handleSupplierChange(p), channelKey: 'realtime-supplier-event' },
       { name: 'municipio_ordenes', topic: 'realtime:municipio_ordenes', handler: (p) => this.handleMunicipioOrderChange(p), channelKey: 'realtime-muni-order-event' },
       { name: 'atmos_ordenes', topic: 'realtime:atmos_ordenes', handler: (p) => this.handleAtmosOrderChange(p), channelKey: 'realtime-atmos-order-event' },
       { name: 'ventas', topic: 'realtime:ventas', handler: (p) => this.handleVentaChange(p), channelKey: 'realtime-venta-event' },
@@ -262,44 +263,60 @@ class RealtimeManager {
     const { eventType, new: newRow, old: oldRow } = payload;
     console.log('[RealtimeManager] Procesando evento "clientes":', { eventType, newRow, oldRow });
 
-    const deletedId = (oldRow && oldRow.id !== undefined && oldRow.id !== null)
-      ? Number(oldRow.id)
-      : (payload && payload.old && payload.old.id !== undefined && payload.old.id !== null)
-        ? Number(payload.old.id)
-        : null;
+    const deletedUuid = oldRow?.uuid || newRow?.uuid || null;
+    const deletedId = (oldRow && oldRow.id !== undefined && oldRow.id !== null) ? Number(oldRow.id) : null;
 
     if (this.db) {
       try {
-        if ((eventType === 'INSERT' || eventType === 'UPDATE') && newRow?.id) {
-          const stmt = this.db.prepare(`
-            INSERT INTO clientes (id, nombre, telefono, email, direccion, cuit, observaciones, estado)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET
-              nombre = excluded.nombre,
-              telefono = excluded.telefono,
-              email = excluded.email,
-              direccion = excluded.direccion,
-              cuit = excluded.cuit,
-              observaciones = excluded.observaciones,
-              estado = excluded.estado
-          `);
-          const res = stmt.run(
-            Number(newRow.id),
-            String(newRow.nombre || ''),
-            newRow.telefono || null,
-            newRow.email || null,
-            newRow.direccion || null,
-            newRow.cuit || null,
-            newRow.observaciones || null,
-            newRow.estado || 'Activo'
-          );
-          console.log('[RealtimeManager] SQLite actualizado en clientes:', { id: newRow.id, changes: res.changes });
-        } else if (eventType === 'DELETE') {
-          if (deletedId) {
-            const res = this.db.prepare('DELETE FROM clientes WHERE id = ?').run(deletedId);
-            console.log('[RealtimeManager] Cliente eliminado de SQLite por Realtime:', { id: deletedId, changes: res.changes });
+        if ((eventType === 'INSERT' || eventType === 'UPDATE') && (newRow?.uuid || newRow?.id)) {
+          let localId = null;
+          if (newRow.uuid) {
+            const existing = this.db.prepare('SELECT id FROM clientes WHERE uuid = ?').get(String(newRow.uuid));
+            localId = existing?.id;
+          }
+
+          if (localId) {
+            const stmt = this.db.prepare(`
+              UPDATE clientes SET
+                uuid = ?, nombre = ?, telefono = ?, email = ?, direccion = ?, cuit = ?, observaciones = ?, estado = ?
+              WHERE id = ?
+            `);
+            const res = stmt.run(
+              newRow.uuid || null,
+              String(newRow.nombre || ''),
+              newRow.telefono || null,
+              newRow.email || null,
+              newRow.direccion || null,
+              newRow.cuit || null,
+              newRow.observaciones || null,
+              newRow.estado || 'Activo',
+              localId
+            );
+            console.log('[RealtimeManager] SQLite actualizado en clientes por UUID/ID local:', { id: localId, uuid: newRow.uuid, changes: res.changes });
           } else {
-            console.warn('[RealtimeManager] DELETE de clientes recibido pero sin ID en payload.old:', payload);
+            const stmt = this.db.prepare(`
+              INSERT INTO clientes (uuid, nombre, telefono, email, direccion, cuit, observaciones, estado)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+            const res = stmt.run(
+              newRow.uuid || null,
+              String(newRow.nombre || ''),
+              newRow.telefono || null,
+              newRow.email || null,
+              newRow.direccion || null,
+              newRow.cuit || null,
+              newRow.observaciones || null,
+              newRow.estado || 'Activo'
+            );
+            console.log('[RealtimeManager] SQLite insertado en clientes por UUID/ID local:', { id: res.lastInsertRowid, uuid: newRow.uuid });
+          }
+        } else if (eventType === 'DELETE') {
+          if (deletedUuid) {
+            const res = this.db.prepare('DELETE FROM clientes WHERE uuid = ?').run(String(deletedUuid));
+            console.log('[RealtimeManager] Cliente eliminado de SQLite por UUID:', { uuid: deletedUuid, changes: res.changes });
+          } else if (deletedId) {
+            const res = this.db.prepare('DELETE FROM clientes WHERE id = ?').run(deletedId);
+            console.log('[RealtimeManager] Cliente eliminado de SQLite por ID:', { id: deletedId, changes: res.changes });
           }
         }
       } catch (dbErr) {
@@ -308,6 +325,80 @@ class RealtimeManager {
     }
 
     this.notifyRenderer('realtime-client-event', { eventType, newRow, oldRow, deletedId });
+  }
+
+  async handleSupplierChange(payload) {
+    const { eventType, new: newRow, old: oldRow } = payload;
+    console.log('[RealtimeManager] Procesando evento "proveedores":', { eventType, newRow, oldRow });
+
+    const deletedUuid = oldRow?.uuid || newRow?.uuid || null;
+    const deletedId = (oldRow && oldRow.id !== undefined && oldRow.id !== null) ? Number(oldRow.id) : null;
+
+    if (this.db) {
+      try {
+        if ((eventType === 'INSERT' || eventType === 'UPDATE') && (newRow?.uuid || newRow?.id)) {
+          let localId = null;
+          if (newRow.uuid) {
+            const existing = this.db.prepare('SELECT id FROM proveedores WHERE uuid = ?').get(String(newRow.uuid));
+            localId = existing?.id;
+          }
+
+          if (localId) {
+            const stmt = this.db.prepare(`
+              UPDATE proveedores SET
+                uuid = ?, razon_social = ?, contacto = ?, telefono = ?, email = ?, direccion = ?, ciudad = ?, provincia = ?, cuit = ?, observaciones = ?, estado = ?
+              WHERE id = ?
+            `);
+            const res = stmt.run(
+              newRow.uuid || null,
+              String(newRow.razon_social || ''),
+              newRow.contacto || null,
+              newRow.telefono || null,
+              newRow.email || null,
+              newRow.direccion || null,
+              newRow.ciudad || null,
+              newRow.provincia || null,
+              newRow.cuit || null,
+              newRow.observaciones || null,
+              newRow.estado || 'Activo',
+              localId
+            );
+            console.log('[RealtimeManager] SQLite actualizado en proveedores por UUID/ID local:', { id: localId, uuid: newRow.uuid, changes: res.changes });
+          } else {
+            const stmt = this.db.prepare(`
+              INSERT INTO proveedores (uuid, razon_social, contacto, telefono, email, direccion, ciudad, provincia, cuit, observaciones, estado)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+            const res = stmt.run(
+              newRow.uuid || null,
+              String(newRow.razon_social || ''),
+              newRow.contacto || null,
+              newRow.telefono || null,
+              newRow.email || null,
+              newRow.direccion || null,
+              newRow.ciudad || null,
+              newRow.provincia || null,
+              newRow.cuit || null,
+              newRow.observaciones || null,
+              newRow.estado || 'Activo'
+            );
+            console.log('[RealtimeManager] SQLite insertado en proveedores por UUID/ID local:', { id: res.lastInsertRowid, uuid: newRow.uuid });
+          }
+        } else if (eventType === 'DELETE') {
+          if (deletedUuid) {
+            const res = this.db.prepare('DELETE FROM proveedores WHERE uuid = ?').run(String(deletedUuid));
+            console.log('[RealtimeManager] Proveedor eliminado de SQLite por UUID:', { uuid: deletedUuid, changes: res.changes });
+          } else if (deletedId) {
+            const res = this.db.prepare('DELETE FROM proveedores WHERE id = ?').run(deletedId);
+            console.log('[RealtimeManager] Proveedor eliminado de SQLite por ID:', { id: deletedId, changes: res.changes });
+          }
+        }
+      } catch (dbErr) {
+        console.warn('[RealtimeManager] Error actualizando caché SQLite de proveedores:', dbErr.message);
+      }
+    }
+
+    this.notifyRenderer('realtime-supplier-event', { eventType, newRow, oldRow, deletedId });
   }
 
   async handleMunicipioOrderChange(payload) {

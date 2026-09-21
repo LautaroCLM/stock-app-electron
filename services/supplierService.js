@@ -12,6 +12,7 @@
 
 'use strict';
 
+const crypto = require('crypto');
 const CONFIG = require('./config');
 const supabaseSupplierService = require('./supabaseSupplierService');
 const supabasePurchaseService = require('./supabasePurchaseService');
@@ -65,10 +66,12 @@ function createSupplierService(db, registrarAccion, syncManager = null) {
     const exists = db.prepare('SELECT id FROM proveedores WHERE razon_social = ? COLLATE NOCASE').get(prov.razon_social?.trim());
     if (exists) return { success: false, error: 'Ya existe un proveedor con esa razón social.' };
 
+    const uuid = prov.uuid || crypto.randomUUID();
     const info = db.prepare(`
-      INSERT INTO proveedores (razon_social, contacto, telefono, email, direccion, ciudad, provincia, cuit, observaciones, estado)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO proveedores (uuid, razon_social, contacto, telefono, email, direccion, ciudad, provincia, cuit, observaciones, estado)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
+      uuid,
       prov.razon_social?.trim() || '',
       prov.contacto || null,
       prov.telefono || null,
@@ -82,6 +85,7 @@ function createSupplierService(db, registrarAccion, syncManager = null) {
     );
 
     const newId = info.lastInsertRowid;
+    const fullProv = { ...prov, uuid, id: newId };
 
     if (typeof registrarAccion === 'function') {
       registrarAccion('Agregar proveedor', `Proveedor: ${prov.razon_social}`);
@@ -89,26 +93,38 @@ function createSupplierService(db, registrarAccion, syncManager = null) {
 
     // Dual Write asíncrono a Supabase (no bloqueante)
     handleDualWrite(
-      supabaseSupplierService.addSupplier({ ...prov, id: newId }),
+      supabaseSupplierService.addSupplier(fullProv),
       'proveedores',
       'INSERT',
-      { ...prov, id: newId }
+      fullProv
     );
 
-    return { success: true, id: newId };
+    return { success: true, id: newId, uuid };
   }
 
   // ── updateSupplier ────────────────────────────────────────────────────────
   function updateSupplier(prov) {
-    const exists = db.prepare('SELECT id FROM proveedores WHERE razon_social = ? COLLATE NOCASE AND id != ?').get(prov.razon_social?.trim(), prov.id);
+    if (!prov || (!prov.id && !prov.uuid)) return { success: false, error: 'ID o UUID de proveedor requerido.' };
+
+    const exists = db.prepare('SELECT id FROM proveedores WHERE razon_social = ? COLLATE NOCASE AND id != ?').get(prov.razon_social?.trim(), prov.id || 0);
     if (exists) return { success: false, error: 'Ya existe otro proveedor con esa razón social.' };
+
+    let uuid = prov.uuid;
+    if (!uuid && prov.id) {
+      const existing = db.prepare('SELECT uuid FROM proveedores WHERE id = ?').get(prov.id);
+      uuid = existing?.uuid;
+    }
+    if (!uuid) {
+      uuid = crypto.randomUUID();
+    }
 
     const info = db.prepare(`
       UPDATE proveedores SET
-        razon_social=?, contacto=?, telefono=?, email=?, direccion=?,
+        uuid=?, razon_social=?, contacto=?, telefono=?, email=?, direccion=?,
         ciudad=?, provincia=?, cuit=?, observaciones=?, estado=?
-      WHERE id=?
+      WHERE id=? OR (uuid IS NOT NULL AND uuid=?)
     `).run(
+      uuid,
       prov.razon_social?.trim() || '',
       prov.contacto || null,
       prov.telefono || null,
@@ -119,7 +135,8 @@ function createSupplierService(db, registrarAccion, syncManager = null) {
       prov.cuit || null,
       prov.observaciones || null,
       prov.estado || 'Activo',
-      prov.id
+      prov.id || null,
+      uuid
     );
 
     if (info.changes > 0) {
@@ -127,12 +144,17 @@ function createSupplierService(db, registrarAccion, syncManager = null) {
         registrarAccion('Editar proveedor', `Proveedor ID: ${prov.id}, Nombre: ${prov.razon_social}`);
       }
 
+      const payload = {
+        ...prov,
+        uuid
+      };
+
       // Dual Write asíncrono a Supabase (no bloqueante)
       handleDualWrite(
-        supabaseSupplierService.updateSupplier(prov),
+        supabaseSupplierService.updateSupplier(payload),
         'proveedores',
         'UPDATE',
-        prov
+        payload
       );
     }
 
@@ -140,25 +162,47 @@ function createSupplierService(db, registrarAccion, syncManager = null) {
   }
 
   // ── deleteSupplier ────────────────────────────────────────────────────────
-  function deleteSupplier(id) {
-    const prov = db.prepare('SELECT razon_social FROM proveedores WHERE id=?').get(id);
-    const info = db.prepare('DELETE FROM proveedores WHERE id=?').run(id);
+  function deleteSupplier(target) {
+    if (!target) return { success: false, error: 'ID o UUID de proveedor requerido.' };
 
-    if (info.changes > 0) {
-      if (typeof registrarAccion === 'function') {
-        registrarAccion('Eliminar proveedor', `Proveedor ID: ${id}, Nombre: ${prov?.razon_social}`);
+    let prov;
+    if (typeof target === 'object') {
+      if (target.id || target.uuid) {
+        prov = db.prepare('SELECT * FROM proveedores WHERE id=? OR uuid=?').get(target.id || null, target.uuid || null) || target;
+      } else {
+        prov = target;
       }
+    } else {
+      prov = db.prepare('SELECT * FROM proveedores WHERE id=? OR uuid=?').get(target, String(target));
+    }
+
+    const targetUuid = prov?.uuid || (typeof target === 'string' && target.includes('-') ? target : null);
+    const targetId = prov?.id || (typeof target === 'number' || (!isNaN(Number(target)) && !String(target).includes('-')) ? Number(target) : null);
+
+    let info = { changes: 0 };
+    if (prov && prov.id) {
+      info = db.prepare('DELETE FROM proveedores WHERE id=?').run(prov.id);
+    } else if (targetId) {
+      info = db.prepare('DELETE FROM proveedores WHERE id=?').run(targetId);
+    }
+
+    if (info.changes > 0 || prov) {
+      if (typeof registrarAccion === 'function') {
+        registrarAccion('Eliminar proveedor', `Proveedor ID: ${targetId}, UUID: ${targetUuid}, Nombre: ${prov?.razon_social}`);
+      }
+
+      const payload = { uuid: targetUuid, id: targetId };
 
       // Dual Write asíncrono a Supabase (no bloqueante)
       handleDualWrite(
-        supabaseSupplierService.deleteSupplier(id),
+        supabaseSupplierService.deleteSupplier(payload),
         'proveedores',
         'DELETE',
-        { id }
+        payload
       );
     }
 
-    return { success: info.changes > 0 };
+    return { success: info.changes > 0 || Boolean(prov) };
   }
 
   // ── getPurchases ──────────────────────────────────────────────────────────
@@ -605,14 +649,16 @@ function createSupplierService(db, registrarAccion, syncManager = null) {
    * @returns {{ success: boolean, id?: number, error?: string }}
    */
   function upsertSupplier(prov) {
-    if (!prov || !prov.id) {
-      return { success: false, error: 'ID de proveedor requerido para UPSERT.' };
+    if (!prov || (!prov.id && !prov.uuid)) {
+      return { success: false, error: 'ID o UUID de proveedor requerido para UPSERT.' };
     }
 
+    const uuid = prov.uuid || crypto.randomUUID();
     const stmt = db.prepare(`
-      INSERT INTO proveedores (id, razon_social, contacto, telefono, email, direccion, ciudad, provincia, cuit, observaciones, estado)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO proveedores (id, uuid, razon_social, contacto, telefono, email, direccion, ciudad, provincia, cuit, observaciones, estado)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
+        uuid = COALESCE(excluded.uuid, proveedores.uuid),
         razon_social = excluded.razon_social,
         contacto = excluded.contacto,
         telefono = excluded.telefono,
@@ -626,7 +672,8 @@ function createSupplierService(db, registrarAccion, syncManager = null) {
     `);
 
     stmt.run(
-      Number(prov.id),
+      prov.id ? Number(prov.id) : null,
+      uuid,
       prov.razon_social?.trim() || '',
       prov.contacto || null,
       prov.telefono || null,
@@ -639,7 +686,7 @@ function createSupplierService(db, registrarAccion, syncManager = null) {
       prov.estado || 'Activo'
     );
 
-    return { success: true, id: Number(prov.id) };
+    return { success: true, id: prov.id ? Number(prov.id) : null, uuid };
   }
 
   // ── upsertPurchase (LOCAL SQLITE PURA SIN DUAL WRITE NI ENCOLADO) ────────

@@ -59,6 +59,7 @@ export const clientWebService = {
     }
 
     const payload: Partial<Client> = {
+      uuid: clientData.uuid || crypto.randomUUID(),
       nombre: clientData.nombre.trim(),
       telefono: clientData.telefono?.trim() || '',
       email: clientData.email?.trim() || '',

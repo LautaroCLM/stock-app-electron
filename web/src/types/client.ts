@@ -1,5 +1,6 @@
 export interface Client {
   id: number;
+  uuid?: string;
   nombre: string;
   telefono?: string;
   email?: string;
@@ -10,7 +11,7 @@ export interface Client {
   created_at?: string;
 }
 
-export type ClientFormData = Omit<Client, 'id' | 'created_at'> & { id?: number };
+export type ClientFormData = Omit<Client, 'id' | 'created_at'> & { id?: number; uuid?: string };
 
 export interface ClientSaleItem {
   id?: number;
