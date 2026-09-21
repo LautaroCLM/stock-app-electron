@@ -68,7 +68,7 @@ function createMunicipioService(db, registrarAccion, syncManager = null) {
       // Descontar stock de productos localmente y disparar Dual Write de stock
       for (const p of productosArr) {
         if (p.id) {
-          const currentProd = db.prepare('SELECT stock, nombre FROM productos WHERE id = ?').get(p.id);
+          const currentProd = db.prepare('SELECT uuid, stock, nombre FROM productos WHERE id = ?').get(p.id);
           if (currentProd) {
             const newStock = Math.max(0, currentProd.stock - p.cantidad);
             db.prepare('UPDATE productos SET stock = ? WHERE id = ?').run(newStock, p.id);
@@ -80,12 +80,14 @@ function createMunicipioService(db, registrarAccion, syncManager = null) {
               );
             }
 
-            handleDualWrite(
-              supabaseProductService.updateStock(p.id, newStock),
-              'productos',
-              'UPDATE_STOCK',
-              { id: p.id, stock: newStock }
-            );
+            if (currentProd.uuid) {
+              handleDualWrite(
+                supabaseProductService.updateStockByUuid(currentProd.uuid, newStock),
+                'productos',
+                'UPDATE_STOCK',
+                { uuid: currentProd.uuid, stock: newStock, id: p.id }
+              );
+            }
           }
         }
       }

@@ -49,6 +49,7 @@ export const productWebService = {
     }
 
     const payload: Partial<Product> = {
+      uuid: productData.uuid || crypto.randomUUID(),
       nombre: productData.nombre.trim(),
       codigo: productData.codigo?.trim() || '',
       categoria: productData.categoria?.trim() || 'General',

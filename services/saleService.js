@@ -102,21 +102,28 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
           let pNombre = item.nombre || null;
           let pPrecio = Number(item.precio || 0);
           const pCantidad = Number(item.cantidad || 1);
+          let pUuid = item.uuid || null;
+          let pRemoteId = null;
 
-          if (!pNombre || pPrecio === 0) {
-            try {
-              const dbProd = db.prepare('SELECT nombre, precio FROM productos WHERE id = ?').get(pId);
-              if (dbProd) {
-                if (!pNombre) pNombre = dbProd.nombre;
-                if (!pPrecio || pPrecio === 0) pPrecio = Number(dbProd.precio || 0);
-              }
-            } catch (e) {}
+          try {
+            const dbProd = db.prepare('SELECT uuid, nombre, precio FROM productos WHERE id = ?').get(pId);
+            if (dbProd) {
+              if (!pNombre) pNombre = dbProd.nombre;
+              if (!pPrecio || pPrecio === 0) pPrecio = Number(dbProd.precio || 0);
+              if (!pUuid) pUuid = dbProd.uuid;
+            }
+          } catch (e) {}
+
+          if (pUuid && typeof supabaseProductService.resolveRemoteProductIdByUuid === 'function') {
+            pRemoteId = await supabaseProductService.resolveRemoteProductIdByUuid(pUuid);
           }
 
           const itemSubtotal = pPrecio * pCantidad;
           subtotalVenta += itemSubtotal;
           validItems.push({
-            producto_id: pId,
+            producto_id: pRemoteId || pId,
+            local_producto_id: pId,
+            uuid: pUuid,
             nombre: pNombre || `Producto #${pId}`,
             precio: pPrecio,
             cantidad: pCantidad,
@@ -402,12 +409,16 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
           );
 
           // Dual Write asíncrono del descuento de stock en Supabase (no bloqueante)
-          handleDualWrite(
-            supabaseProductService.updateStock(item.id, nuevoStockItem),
-            'productos',
-            'UPDATE_STOCK',
-            { id: item.id, stock: nuevoStockItem }
-          );
+          const itemProd = db.prepare('SELECT uuid FROM productos WHERE id = ?').get(item.id);
+          const itemUuid = itemProd?.uuid || null;
+          if (itemUuid) {
+            handleDualWrite(
+              supabaseProductService.updateStockByUuid(itemUuid, nuevoStockItem),
+              'productos',
+              'UPDATE_STOCK',
+              { uuid: itemUuid, stock: nuevoStockItem, id: item.id }
+            );
+          }
         }
 
         if (ventasExitosas > 0) {
@@ -426,35 +437,43 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
       // 🟢 Caso 2: Venta Individual
       const product = db.prepare('SELECT * FROM productos WHERE id = ?').get(id);
       if (!product) return { success: false, error: 'Producto no encontrado' };
-      if (product.stock < cantidad) return { success: false, error: 'Stock insuficiente' };
 
-      let total = product.precio * cantidad;
-      if (ajuste && Number(ajuste.valor) > 0 && total > 0) {
-        const valor = Number(ajuste.valor || 0);
-        let monto = ajuste.modo === 'percent'
-          ? (total * valor / 100)
-          : valor;
-        if (ajuste.tipo === 'discount') {
-          monto = -Math.abs(monto);
-        } else {
-          monto = Math.abs(monto);
+      const nuevoStock = Math.max(0, product.stock - cantidad);
+      db.prepare('UPDATE productos SET stock = ? WHERE id = ?').run(nuevoStock, id);
+
+      const total = product.precio * cantidad;
+      let ventaId = null;
+
+      if (ticketService) {
+        const ticketResult = ticketService.createTicket({
+          metodo_pago,
+          cliente: 'Consumidor Final',
+          productos: [{ id: product.id, nombre: product.nombre, cantidad, precio: product.precio, subtotal: total }],
+          subtotal: total,
+          monto_descuento: 0,
+          tipo_descuento: 'ninguno',
+          total: total,
+          client_transaction_id: clientTransactionId
+        });
+
+        if (ticketResult && ticketResult.success && ticketResult.id) {
+          ventaId = ticketResult.id;
         }
-        total = Math.max(0, total + monto);
       }
 
-      const info = db.prepare(`
-        INSERT INTO ventas (producto_id, cantidad, total, metodo_pago, client_transaction_id)
-        VALUES (?, ?, ?, ?, ?)
-      `).run(id, cantidad, total, metodo_pago, clientTransactionId);
-
-      const ventaId = info.lastInsertRowid;
-      db.prepare('UPDATE productos SET stock = stock - ? WHERE id = ?').run(cantidad, id);
-      const nuevoStock = product.stock - cantidad;
+      if (!ventaId) {
+        const stmtVenta = db.prepare(`
+          INSERT INTO ventas (producto_id, cantidad, total, cliente, metodo_pago, client_transaction_id)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `);
+        const info = stmtVenta.run(id, cantidad, total, 'Consumidor Final', metodo_pago, clientTransactionId);
+        ventaId = info.lastInsertRowid;
+      }
 
       if (typeof registrarAccion === 'function') {
         registrarAccion(
           'Venta',
-          `Producto: ${product.nombre} | Cantidad: ${cantidad} | Total: $${total.toFixed(2)} | Pago: ${metodo_pago}`
+          `Producto: ${product.nombre} (x${cantidad}) - Total: $${total} - Método: ${metodo_pago}`
         );
       }
 
@@ -483,12 +502,14 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
       );
 
       // Dual Write asíncrono del descuento de stock en Supabase (no bloqueante)
-      handleDualWrite(
-        supabaseProductService.updateStock(id, nuevoStock),
-        'productos',
-        'UPDATE_STOCK',
-        { id, stock: nuevoStock }
-      );
+      if (product.uuid) {
+        handleDualWrite(
+          supabaseProductService.updateStockByUuid(product.uuid, nuevoStock),
+          'productos',
+          'UPDATE_STOCK',
+          { uuid: product.uuid, stock: nuevoStock, id }
+        );
+      }
 
       return { success: true, total, id: ventaId };
 

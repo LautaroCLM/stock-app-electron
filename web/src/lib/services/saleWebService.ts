@@ -163,7 +163,13 @@ export const saleWebService = {
 
     // 3. Procesar distribución proporcional de totales centavo por centavo
     let assignedSum = 0;
-    const payloadItems: Array<{ producto_id: number; cantidad: number; total: number }> = [];
+    const payloadItems: Array<{
+      producto_id: number;
+      nombre?: string;
+      precio?: number;
+      cantidad: number;
+      total: number;
+    }> = [];
 
     for (let i = 0; i < cartItems.length; i++) {
       const { product, quantity } = cartItems[i];
@@ -183,8 +189,8 @@ export const saleWebService = {
 
       payloadItems.push({
         producto_id: Number(product.id),
-        nombre: product.nombre || product.name || `Producto #${product.id}`,
-        precio: Number(product.precio || product.price || (quantity ? itemTotal / quantity : 0)),
+        nombre: product.nombre || (product as Record<string, any>).name || `Producto #${product.id}`,
+        precio: Number(product.precio ?? (product as Record<string, any>).price ?? (quantity ? itemTotal / quantity : 0)),
         cantidad: Number(quantity || 1),
         total: Number(itemTotal || 0),
       });

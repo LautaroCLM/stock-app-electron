@@ -19,6 +19,7 @@ function formatProduct(p) {
   if (!p) return null;
   return {
     id: p.id !== undefined && p.id !== null ? Number(p.id) : null,
+    uuid: p.uuid !== undefined && p.uuid !== null ? String(p.uuid) : null,
     codigo: p.codigo !== undefined && p.codigo !== null ? String(p.codigo) : '',
     nombre: p.nombre !== undefined && p.nombre !== null ? String(p.nombre) : '',
     categoria: p.categoria !== undefined && p.categoria !== null ? String(p.categoria) : '',
@@ -184,8 +185,8 @@ const supabaseProductService = {
   /**
    * Inserta un nuevo producto en Supabase.
    * 
-   * @param {object} product - Datos del producto (incluyendo id si fue generado en SQLite).
-   * @returns {Promise<{ success: boolean, error?: string }>}
+   * @param {object} product - Datos del producto.
+   * @returns {Promise<{ success: boolean, data?: object, error?: string }>}
    */
   async createProduct(product) {
     if (!product) return { success: false, error: 'Datos de producto requeridos.' };
@@ -200,6 +201,7 @@ const supabaseProductService = {
 
     try {
       const payload = {
+        uuid: product.uuid || null,
         codigo: product.codigo || '',
         nombre: product.nombre || '',
         categoria: product.categoria || '',
@@ -213,19 +215,22 @@ const supabaseProductService = {
           : null
       };
 
-      if (product.id) payload.id = Number(product.id);
+      let query;
+      if (payload.uuid) {
+        query = client.from('productos').upsert(payload, { onConflict: 'uuid' }).select('id, uuid').maybeSingle();
+      } else {
+        query = client.from('productos').insert(payload).select('id, uuid').maybeSingle();
+      }
 
-      const { data, error } = await client
-        .from('productos')
-        .upsert(payload, { onConflict: 'id' });
+      const { data, error } = await query;
 
       if (error) {
         console.error('[SupabaseProductService] Error al crear producto en Supabase:', error.message);
         return { success: false, error: error.message };
       }
 
-      console.log('[SupabaseProductService] Producto guardado en Supabase:', payload.nombre);
-      return { success: true };
+      console.log('[SupabaseProductService] Producto guardado en Supabase:', payload.nombre, 'Remote ID:', data?.id);
+      return { success: true, data: data ? formatProduct(data) : null };
     } catch (err) {
       console.error('[SupabaseProductService] Excepción al crear producto en Supabase:', err.message);
       return { success: false, error: err.message };
@@ -233,14 +238,14 @@ const supabaseProductService = {
   },
 
   /**
-   * Actualiza un producto existente en Supabase.
+   * Actualiza un producto existente en Supabase identificándolo preferentemente por su UUID.
    * 
-   * @param {object} product - Datos del producto (debe contener id).
+   * @param {object} product - Datos del producto (debe contener uuid o id).
    * @returns {Promise<{ success: boolean, error?: string }>}
    */
   async updateProduct(product) {
-    if (!product || !product.id) {
-      return { success: false, error: 'ID de producto requerido.' };
+    if (!product || (!product.uuid && !product.id)) {
+      return { success: false, error: 'UUID o ID de producto requerido.' };
     }
 
     if (!isSupabaseConfigured()) {
@@ -269,32 +274,36 @@ const supabaseProductService = {
         payload.stock_minimo = Number(product.stock_minimo);
       }
 
-      const { error } = await client
-        .from('productos')
-        .update(payload)
-        .eq('id', product.id);
+      let query = client.from('productos').update(payload);
+      if (product.uuid) {
+        query = query.eq('uuid', product.uuid);
+      } else {
+        query = query.eq('id', product.id);
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseProductService] Error al actualizar producto ID ${product.id} en Supabase:`, error.message);
+        console.error(`[SupabaseProductService] Error al actualizar producto ${product.uuid || product.id} en Supabase:`, error.message);
         return { success: false, error: error.message };
       }
 
-      console.log(`[SupabaseProductService] Producto ID ${product.id} actualizado en Supabase.`);
+      console.log(`[SupabaseProductService] Producto ${product.uuid || product.id} actualizado en Supabase.`);
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseProductService] Excepción al actualizar producto ID ${product.id}:`, err.message);
+      console.error(`[SupabaseProductService] Excepción al actualizar producto ${product.uuid || product.id}:`, err.message);
       return { success: false, error: err.message };
     }
   },
 
   /**
-   * Elimina un producto de Supabase por ID.
+   * Elimina un producto de Supabase por UUID o ID.
    * 
-   * @param {number|string} id - ID del producto.
+   * @param {number|string} identifier - UUID o ID del producto.
    * @returns {Promise<{ success: boolean, error?: string }>}
    */
-  async deleteProduct(id) {
-    if (!id) return { success: false, error: 'ID de producto requerido.' };
+  async deleteProduct(identifier) {
+    if (!identifier) return { success: false, error: 'ID o UUID de producto requerido.' };
 
     if (!isSupabaseConfigured()) {
       console.warn('[SupabaseProductService] Supabase no configurado. Omitiendo eliminación de producto.');
@@ -305,36 +314,44 @@ const supabaseProductService = {
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
-      const { error } = await client
-        .from('productos')
-        .delete()
-        .eq('id', id);
+      let query = client.from('productos').delete();
+      if (typeof identifier === 'string' && identifier.includes('-')) {
+        query = query.eq('uuid', identifier);
+      } else {
+        query = query.eq('id', identifier);
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseProductService] Error al eliminar producto ID ${id} en Supabase:`, error.message);
+        console.error(`[SupabaseProductService] Error al eliminar producto ${identifier} en Supabase:`, error.message);
         return { success: false, error: error.message };
       }
 
-      console.log(`[SupabaseProductService] Producto ID ${id} eliminado en Supabase.`);
+      console.log(`[SupabaseProductService] Producto ${identifier} eliminado en Supabase.`);
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseProductService] Excepción al eliminar producto ID ${id}:`, err.message);
+      console.error(`[SupabaseProductService] Excepción al eliminar producto ${identifier}:`, err.message);
       return { success: false, error: err.message };
     }
   },
 
   /**
-   * Actualiza únicamente la columna de stock de un producto en Supabase.
+   * Actualiza únicamente la columna de stock de un producto en Supabase basándose EXCLUSIVAMENTE en su UUID.
+   * Rechaza cualquier intento de usar IDs físicos locales o ambiguos.
    * 
-   * @param {number|string} id - ID del producto.
+   * @param {string} uuid - UUID inmutable global del producto.
    * @param {number} newStock - Nuevo valor de stock.
    * @returns {Promise<{ success: boolean, error?: string }>}
    */
-  async updateStock(id, newStock) {
-    if (!id) return { success: false, error: 'ID de producto requerido.' };
+  async updateStockByUuid(uuid, newStock) {
+    if (!uuid || typeof uuid !== 'string' || !uuid.includes('-')) {
+      console.error('[SupabaseProductService] 🚨 Error de Seguridad: updateStockByUuid requiere un UUID de producto válido.');
+      return { success: false, error: 'UUID de producto inválido o no provisto para updateStockByUuid' };
+    }
 
     if (!isSupabaseConfigured()) {
-      console.warn('[SupabaseProductService] Supabase no configurado. Omitiendo actualización de stock.');
+      console.warn('[SupabaseProductService] Supabase no configurado. Omitiendo actualización de stock por UUID.');
       return { success: false, error: 'Supabase no configurado' };
     }
 
@@ -345,18 +362,59 @@ const supabaseProductService = {
       const { error } = await client
         .from('productos')
         .update({ stock: Number(newStock) })
-        .eq('id', id);
+        .eq('uuid', uuid);
 
       if (error) {
-        console.error(`[SupabaseProductService] Error al actualizar stock de producto ID ${id} en Supabase:`, error.message);
+        console.error(`[SupabaseProductService] Error al actualizar stock por UUID ${uuid} en Supabase:`, error.message);
         return { success: false, error: error.message };
       }
 
-      console.log(`[SupabaseProductService] Stock de producto ID ${id} actualizado a ${newStock} en Supabase.`);
+      console.log(`[SupabaseProductService] Stock de producto (UUID: ${uuid}) actualizado a ${newStock} en Supabase.`);
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseProductService] Excepción al actualizar stock de producto ID ${id}:`, err.message);
+      console.error(`[SupabaseProductService] Excepción al actualizar stock por UUID ${uuid}:`, err.message);
       return { success: false, error: err.message };
+    }
+  },
+
+  /**
+   * Actualiza stock delegando estrictamente a updateStockByUuid.
+   * @deprecated Usar updateStockByUuid directamente.
+   */
+  async updateStock(identifier, newStock, uuid = null) {
+    const targetUuid = uuid || (typeof identifier === 'string' && identifier.includes('-') ? identifier : null);
+    if (!targetUuid) {
+      console.error(`[SupabaseProductService] 🚨 Intento rechazado: updateStock invocado con ID local/físico (${identifier}) sin UUID.`);
+      return { success: false, error: 'Se requiere UUID para actualizar stock en Supabase. No se permite ID físico local.' };
+    }
+    return this.updateStockByUuid(targetUuid, newStock);
+  },
+
+  /**
+   * Resuelve el ID remoto (int8) de Supabase para un producto dado su UUID.
+   * 
+   * @param {string} uuid - Identificador lógico global del producto.
+   * @returns {Promise<number|null>} Remote id int8 or null.
+   */
+  async resolveRemoteProductIdByUuid(uuid) {
+    if (!uuid) return null;
+    if (!isSupabaseConfigured()) return null;
+
+    const client = getSupabaseClient();
+    if (!client) return null;
+
+    try {
+      const { data, error } = await client
+        .from('productos')
+        .select('id')
+        .eq('uuid', uuid)
+        .maybeSingle();
+
+      if (error || !data) return null;
+      return Number(data.id);
+    } catch (err) {
+      console.warn(`[SupabaseProductService] Error resolviendo ID remoto para UUID ${uuid}:`, err.message);
+      return null;
     }
   }
 };

@@ -1,5 +1,6 @@
 export interface Product {
   id: number;
+  uuid?: string;
   codigo?: string;
   nombre: string;
   categoria?: string;
@@ -12,4 +13,4 @@ export interface Product {
   created_at?: string;
 }
 
-export type ProductFormData = Omit<Product, 'id' | 'created_at'> & { id?: number };
+export type ProductFormData = Omit<Product, 'id' | 'created_at'> & { id?: number; uuid?: string };

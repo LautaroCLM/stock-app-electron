@@ -66,6 +66,10 @@ try {
 } catch (err) {}
 
 try {
+  db.prepare("ALTER TABLE productos ADD COLUMN uuid TEXT").run();
+} catch (err) {}
+
+try {
   db.prepare("ALTER TABLE productos ADD COLUMN proveedor_id INTEGER DEFAULT NULL").run();
 } catch (err) {}
 
@@ -1315,12 +1319,13 @@ ipcMain.handle('delete-gasto', (event, id) => {
 ipcMain.handle('add-products-bulk', (event, products, opciones = {}) => {
 
   const selectStmt = db.prepare(`
-    SELECT id FROM productos 
+    SELECT id, uuid FROM productos 
     WHERE codigo = ?
   `);
 
   const insertStmt = db.prepare(`
     INSERT INTO productos (
+      uuid,
       codigo,
       nombre,
       categoria,
@@ -1328,7 +1333,7 @@ ipcMain.handle('add-products-bulk', (event, products, opciones = {}) => {
       unidad,
       precio_costo,
       precio
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   // 🔥 Construye UPDATE dinámico según lo marcado en el modal
@@ -1418,6 +1423,12 @@ ipcMain.handle('add-products-bulk', (event, products, opciones = {}) => {
       const existente = selectStmt.get(codigo);
 
       if (existente) {
+        let prodUuid = existente.uuid;
+        if (!prodUuid) {
+          prodUuid = crypto.randomUUID();
+          db.prepare('UPDATE productos SET uuid = ? WHERE id = ?').run(prodUuid, existente.id);
+        }
+
         const params = [];
 
         if (updateConfig.usesStock) params.push(stock);
@@ -1437,6 +1448,7 @@ ipcMain.handle('add-products-bulk', (event, products, opciones = {}) => {
               type: 'UPDATE',
               payload: {
                 id: target.id,
+                uuid: prodUuid,
                 codigo: target.codigo,
                 nombre: target.nombre,
                 categoria: target.categoria,
@@ -1449,7 +1461,7 @@ ipcMain.handle('add-products-bulk', (event, products, opciones = {}) => {
           } else if (updateConfig.usesStock) {
             dualWriteOps.push({
               type: 'UPDATE_STOCK',
-              payload: { id: target.id, stock: target.stock }
+              payload: { id: target.id, uuid: prodUuid, stock: target.stock }
             });
           }
         }
@@ -1458,8 +1470,10 @@ ipcMain.handle('add-products-bulk', (event, products, opciones = {}) => {
         const stockInicial = opciones.stock ? stock : 0;
         const costoInicial = opciones.precioCosto ? precioCosto : 0;
         const ventaInicial = opciones.precioVenta ? precioVenta : 0;
+        const prodUuid = crypto.randomUUID();
 
         const info = insertStmt.run(
+          prodUuid,
           codigo,
           nombre,
           categoria,
@@ -1475,6 +1489,7 @@ ipcMain.handle('add-products-bulk', (event, products, opciones = {}) => {
           type: 'INSERT',
           payload: {
             id: newId,
+            uuid: prodUuid,
             codigo,
             nombre,
             categoria,
@@ -1501,7 +1516,7 @@ ipcMain.handle('add-products-bulk', (event, products, opciones = {}) => {
       );
     } else if (op.type === 'UPDATE_STOCK') {
       handleDualWrite(
-        supabaseProductService.updateStock(op.payload.id, op.payload.stock),
+        supabaseProductService.updateStockByUuid(op.payload.uuid, op.payload.stock),
         'productos',
         'UPDATE_STOCK',
         op.payload
@@ -1860,20 +1875,20 @@ ipcMain.handle('save-ajuste', (event, data) => {
           if (p.id) {
             // Tickets nuevos: devolver stock por id (correcto)
             updateById.run(p.cantidad, p.id);
-            targetProd = db.prepare('SELECT id, stock FROM productos WHERE id = ?').get(p.id);
+            targetProd = db.prepare('SELECT id, uuid, stock FROM productos WHERE id = ?').get(p.id);
           } else {
             // Tickets históricos sin id: fallback por nombre (compatibilidad)
             updateByNombre.run(p.cantidad, p.nombre);
-            targetProd = db.prepare('SELECT id, stock FROM productos WHERE nombre = ?').get(p.nombre);
+            targetProd = db.prepare('SELECT id, uuid, stock FROM productos WHERE nombre = ?').get(p.nombre);
           }
 
-          if (targetProd) {
+          if (targetProd && targetProd.uuid) {
             // Dual Write asíncrono del stock restaurado hacia Supabase (no bloqueante)
             handleDualWrite(
-              supabaseProductService.updateStock(targetProd.id, targetProd.stock),
+              supabaseProductService.updateStockByUuid(targetProd.uuid, targetProd.stock),
               'productos',
               'UPDATE_STOCK',
-              { id: targetProd.id, stock: targetProd.stock }
+              { uuid: targetProd.uuid, stock: targetProd.stock, id: targetProd.id }
             );
           }
         });

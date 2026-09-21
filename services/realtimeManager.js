@@ -100,58 +100,97 @@ class RealtimeManager {
         ? Number(payload.old.id)
         : null;
 
+    const deletedUuid = (oldRow && oldRow.uuid)
+      ? String(oldRow.uuid).trim()
+      : (payload && payload.old && payload.old.uuid)
+        ? String(payload.old.uuid).trim()
+        : null;
+
     if (this.db) {
       try {
-        if ((eventType === 'INSERT' || eventType === 'UPDATE') && newRow?.id) {
-          const prodId = Number(newRow.id);
-          const codigo = newRow.codigo ? String(newRow.codigo).trim() : '';
-          const nombre = newRow.nombre ? String(newRow.nombre).trim() : '';
+        if (eventType === 'INSERT' || eventType === 'UPDATE') {
+          const prodUuid = newRow?.uuid ? String(newRow.uuid).trim() : null;
+          const codigo = newRow?.codigo ? String(newRow.codigo).trim() : '';
+          const nombre = newRow?.nombre ? String(newRow.nombre).trim() : '';
+          const categoria = String(newRow?.categoria || '');
+          const stock = Number(newRow?.stock || 0);
+          const unidad = String(newRow?.unidad || 'un');
+          const precioCosto = Number(newRow?.precio_costo || 0);
+          const precio = Number(newRow?.precio || 0);
+          const stockMinimo = Number(newRow?.stock_minimo || 10);
+          const proveedorId = newRow?.proveedor_id ? Number(newRow.proveedor_id) : null;
 
-          if (codigo && nombre) {
-            const existing = this.db.prepare('SELECT id FROM productos WHERE codigo = ? AND nombre = ?').get(codigo, nombre);
-            if (existing && Number(existing.id) !== prodId) {
-              console.log(`[RealtimeManager] Re-alineando ID local de producto ${existing.id} ➔ ${prodId} por coincidencia de código/nombre.`);
-              this.db.prepare('UPDATE productos SET id = ? WHERE id = ?').run(prodId, Number(existing.id));
-            }
+          let existing = null;
+          if (prodUuid) {
+            existing = this.db.prepare('SELECT id, uuid FROM productos WHERE uuid = ?').get(prodUuid);
+          }
+          if (!existing && codigo && nombre) {
+            existing = this.db.prepare('SELECT id, uuid FROM productos WHERE codigo = ? AND nombre = ?').get(codigo, nombre);
           }
 
-          const stmt = this.db.prepare(`
-            INSERT INTO productos (id, codigo, nombre, categoria, stock, unidad, precio_costo, precio, stock_minimo, proveedor_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET
-              codigo = excluded.codigo,
-              nombre = excluded.nombre,
-              categoria = excluded.categoria,
-              stock = excluded.stock,
-              unidad = excluded.unidad,
-              precio_costo = excluded.precio_costo,
-              precio = excluded.precio,
-              stock_minimo = excluded.stock_minimo,
-              proveedor_id = excluded.proveedor_id
-          `);
-          const res = stmt.run(
-            prodId,
-            codigo,
-            nombre,
-            String(newRow.categoria || ''),
-            Number(newRow.stock || 0),
-            String(newRow.unidad || 'un'),
-            Number(newRow.precio_costo || 0),
-            Number(newRow.precio || 0),
-            Number(newRow.stock_minimo || 10),
-            newRow.proveedor_id ? Number(newRow.proveedor_id) : null
-          );
-          console.log('[RealtimeManager] SQLite actualizado en productos:', { id: prodId, changes: res.changes });
-        } else if (eventType === 'DELETE') {
-          if (deletedId) {
-            const res = this.db.prepare('DELETE FROM productos WHERE id = ?').run(deletedId);
-            if (res.changes > 0) {
-              console.log('[RealtimeManager] Producto eliminado de SQLite por Realtime:', { id: deletedId, changes: res.changes });
-            } else {
-              console.warn('[RealtimeManager] Producto no encontrado en SQLite durante DELETE Realtime (posible desincronización previa):', { id: deletedId, changes: 0 });
-            }
+          if (existing) {
+            const localId = Number(existing.id);
+            const updateUuid = prodUuid || existing.uuid;
+            const stmt = this.db.prepare(`
+              UPDATE productos SET
+                uuid = ?,
+                codigo = ?,
+                nombre = ?,
+                categoria = ?,
+                stock = ?,
+                unidad = ?,
+                precio_costo = ?,
+                precio = ?,
+                stock_minimo = ?,
+                proveedor_id = ?
+              WHERE id = ?
+            `);
+            const res = stmt.run(
+              updateUuid,
+              codigo,
+              nombre,
+              categoria,
+              stock,
+              unidad,
+              precioCosto,
+              precio,
+              stockMinimo,
+              proveedorId,
+              localId
+            );
+            console.log('[RealtimeManager] SQLite actualizado en productos por UUID/ID local:', { id: localId, uuid: updateUuid, changes: res.changes });
           } else {
-            console.warn('[RealtimeManager] DELETE de productos recibido pero sin ID en payload.old:', payload);
+            const stmt = this.db.prepare(`
+              INSERT INTO productos (uuid, codigo, nombre, categoria, stock, unidad, precio_costo, precio, stock_minimo, proveedor_id)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+            const res = stmt.run(
+              prodUuid,
+              codigo,
+              nombre,
+              categoria,
+              stock,
+              unidad,
+              precioCosto,
+              precio,
+              stockMinimo,
+              proveedorId
+            );
+            console.log('[RealtimeManager] Nuevo producto insertado en SQLite por Realtime:', { id: res.lastInsertRowid, uuid: prodUuid });
+          }
+        } else if (eventType === 'DELETE') {
+          let res = { changes: 0 };
+          if (deletedUuid) {
+            res = this.db.prepare('DELETE FROM productos WHERE uuid = ?').run(deletedUuid);
+          }
+          if (res.changes === 0 && deletedId) {
+            res = this.db.prepare('DELETE FROM productos WHERE id = ?').run(deletedId);
+          }
+
+          if (res.changes > 0) {
+            console.log('[RealtimeManager] Producto eliminado de SQLite por Realtime:', { uuid: deletedUuid, id: deletedId, changes: res.changes });
+          } else {
+            console.warn('[RealtimeManager] Producto no encontrado en SQLite durante DELETE Realtime:', { uuid: deletedUuid, id: deletedId });
           }
         }
       } catch (dbErr) {

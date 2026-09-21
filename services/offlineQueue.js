@@ -84,7 +84,8 @@ class OfflineQueue {
     const createdAt = operation.timestamp || new Date().toISOString();
 
     // Deduplicación para operaciones UPDATE/UPDATE_STOCK en entidades (excepto ventas_cart)
-    if ((action === 'UPDATE' || action === 'UPDATE_STOCK') && entity !== 'ventas_cart' && payloadObj.id) {
+    const targetDedupeKey = payloadObj.uuid || payloadObj.id;
+    if ((action === 'UPDATE' || action === 'UPDATE_STOCK') && entity !== 'ventas_cart' && targetDedupeKey) {
       try {
         const pendingOps = this.db.prepare(`
           SELECT id, payload FROM offline_queue
@@ -94,8 +95,9 @@ class OfflineQueue {
         for (const op of pendingOps) {
           try {
             const p = JSON.parse(op.payload || '{}');
-            if (String(p.id) === String(payloadObj.id)) {
-              console.log(`[OfflineQueue] 🔄 Reemplazando actualización pendiente duplicada para ${entity} ID ${p.id} (Fila ID offline_queue: ${op.id})`);
+            const pKey = p.uuid || p.id;
+            if (pKey && String(pKey) === String(targetDedupeKey)) {
+              console.log(`[OfflineQueue] 🔄 Reemplazando actualización pendiente duplicada para ${entity} (${targetDedupeKey}) (Fila ID offline_queue: ${op.id})`);
               this.db.prepare(`
                 UPDATE offline_queue
                 SET payload = ?, created_at = ?

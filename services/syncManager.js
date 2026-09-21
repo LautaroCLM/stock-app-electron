@@ -274,9 +274,14 @@ class SyncManager {
           } else if (action === 'UPDATE') {
             result = await supabaseProductService.updateProduct(payload);
           } else if (action === 'UPDATE_STOCK') {
-            result = await supabaseProductService.updateStock(payload.id, payload.stock);
+            if (payload && payload.uuid) {
+              result = await supabaseProductService.updateStockByUuid(payload.uuid, payload.stock);
+            } else {
+              console.error('[SyncManager] 🚨 UPDATE_STOCK omitido por falta de UUID en el payload:', payload);
+              result = { success: false, error: 'UPDATE_STOCK omitido por falta de UUID en el payload' };
+            }
           } else if (action === 'DELETE') {
-            result = await supabaseProductService.deleteProduct(payload.id);
+            result = await supabaseProductService.deleteProduct(payload.uuid || payload.id);
           }
         } else if (entity === 'categorias') {
           if (action === 'INSERT' || action === 'UPDATE') {

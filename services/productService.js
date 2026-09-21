@@ -8,6 +8,7 @@
 
 'use strict';
 
+const crypto = require('crypto');
 const CONFIG = require('./config');
 const supabaseProductService = require('./supabaseProductService');
 
@@ -126,14 +127,16 @@ function createProductService(db, registrarAccion, syncManager = null) {
   /**
    * Inserta un nuevo producto en la base de datos local SQLite y replica a Supabase.
    * @param {object} product - Datos del producto a insertar.
-   * @returns {{ success: boolean, id?: number, error?: string }}
+   * @returns {{ success: boolean, id?: number, uuid?: string, error?: string }}
    */
   function createProduct(product) {
+    const uuid = product.uuid || crypto.randomUUID();
     const stmt = db.prepare(`
-      INSERT INTO productos (codigo, nombre, categoria, stock, precio, precio_costo, unidad, proveedor_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO productos (uuid, codigo, nombre, categoria, stock, precio, precio_costo, unidad, proveedor_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     const info = stmt.run(
+      uuid,
       product.codigo || '',
       product.nombre || '',
       product.categoria || '',
@@ -147,6 +150,7 @@ function createProductService(db, registrarAccion, syncManager = null) {
     );
 
     const newId = info.lastInsertRowid;
+    const fullProduct = { ...product, id: newId, uuid };
 
     if (typeof registrarAccion === 'function') {
       registrarAccion(
@@ -157,29 +161,39 @@ function createProductService(db, registrarAccion, syncManager = null) {
 
     // Dual Write asíncrono a Supabase (no bloqueante)
     handleDualWrite(
-      supabaseProductService.createProduct({ ...product, id: newId }),
+      supabaseProductService.createProduct(fullProduct),
       'productos',
       'INSERT',
-      { ...product, id: newId }
+      fullProduct
     );
 
-    return { success: true, id: newId };
+    return { success: true, id: newId, uuid };
   }
 
   // ── updateProduct (LOCAL SQLITE + DUAL WRITE SUPABASE) ───────────────────
   /**
-   * Actualiza un producto existente por su id en SQLite y replica a Supabase.
-   * @param {object} product - Datos del producto (debe incluir `id`).
-   * @returns {{ success: boolean, error?: string }}
+   * Actualiza un producto existente por su id o uuid en SQLite y replica a Supabase.
+   * @param {object} product - Datos del producto (debe incluir `id` o `uuid`).
+   * @returns {{ success: boolean, uuid?: string, error?: string }}
    */
   function updateProduct(product) {
+    let uuid = product.uuid;
+    if (!uuid && product.id) {
+      const existing = db.prepare('SELECT uuid FROM productos WHERE id = ?').get(product.id);
+      uuid = existing?.uuid;
+    }
+    if (!uuid) {
+      uuid = crypto.randomUUID();
+    }
+
     const stmt = db.prepare(`
       UPDATE productos
-      SET codigo = ?, nombre = ?, categoria = ?, stock = ?, precio = ?, precio_costo = ?, unidad = ?, proveedor_id = ?
-      WHERE id = ?
+      SET uuid = ?, codigo = ?, nombre = ?, categoria = ?, stock = ?, precio = ?, precio_costo = ?, unidad = ?, proveedor_id = ?
+      WHERE id = ? OR (uuid IS NOT NULL AND uuid = ?)
     `);
 
     const info = stmt.run(
+      uuid,
       product.codigo || '',
       product.nombre || '',
       product.categoria || '',
@@ -190,12 +204,14 @@ function createProductService(db, registrarAccion, syncManager = null) {
       (product.proveedor_id !== undefined && product.proveedor_id !== null && product.proveedor_id !== '')
         ? Number(product.proveedor_id)
         : null,
-      product.id
+      product.id || null,
+      uuid
     );
 
-    // Si el producto no existía en SQLite local (común en modo ONLINE al cargar desde Supabase), lo persistimos localmente
+    const fullProduct = { ...product, uuid };
+
     if (info.changes === 0) {
-      upsertProduct(product);
+      upsertProduct(fullProduct);
     }
 
     if (typeof registrarAccion === 'function') {
@@ -205,51 +221,61 @@ function createProductService(db, registrarAccion, syncManager = null) {
       );
     }
 
-    // Dual Write asíncrono a Supabase (no bloqueante): se envía SIEMPRE, sin depender del estado previo de SQLite
     handleDualWrite(
-      supabaseProductService.updateProduct(product),
+      supabaseProductService.updateProduct(fullProduct),
       'productos',
       'UPDATE',
-      product
+      fullProduct
     );
 
-    return { success: true };
+    return { success: true, uuid };
   }
 
   // ── deleteProduct (LOCAL SQLITE + DUAL WRITE SUPABASE) ───────────────────
   /**
-   * Elimina un producto por su id en SQLite y replica a Supabase.
-   * @param {number} id - Id del producto a eliminar.
-   * @returns {{ success: boolean, error?: string }}
-   */
-  // ── deleteProduct (LOCAL SQLITE + DUAL WRITE SUPABASE) ───────────────────
-  /**
-   * Elimina un producto por su id en SQLite y replica a Supabase.
-   * @param {number|string} id - Id del producto a eliminar.
+   * Elimina un producto por su id o uuid en SQLite y replica a Supabase.
+   * @param {number|string} id - Id o UUID del producto a eliminar.
    * @returns {{ success: boolean, error?: string }}
    */
   function deleteProduct(id) {
-    const prodId = Number(id);
-    const producto = db.prepare('SELECT nombre FROM productos WHERE id = ?').get(prodId);
-    const stmt = db.prepare('DELETE FROM productos WHERE id = ?');
-    const info = stmt.run(prodId);
+    let prodId = null;
+    let prodUuid = null;
+    let producto = null;
 
-    console.log(`[ProductService] DELETE ejecutado en SQLite local para ID ${prodId}. Filas afectadas: ${info.changes}`);
+    if (typeof id === 'string' && id.includes('-')) {
+      prodUuid = id;
+      producto = db.prepare('SELECT id, uuid, nombre FROM productos WHERE uuid = ?').get(prodUuid);
+      if (producto) prodId = producto.id;
+    } else {
+      prodId = Number(id);
+      producto = db.prepare('SELECT id, uuid, nombre FROM productos WHERE id = ?').get(prodId);
+      prodUuid = producto?.uuid;
+    }
+
+    let info = { changes: 0 };
+    if (prodId) {
+      const stmt = db.prepare('DELETE FROM productos WHERE id = ?');
+      info = stmt.run(prodId);
+    } else if (prodUuid) {
+      const stmt = db.prepare('DELETE FROM productos WHERE uuid = ?');
+      info = stmt.run(prodUuid);
+    }
+
+    console.log(`[ProductService] DELETE ejecutado en SQLite local para ID ${prodId} / UUID ${prodUuid}. Filas afectadas: ${info.changes}`);
 
     if (info.changes > 0 && typeof registrarAccion === 'function') {
       registrarAccion(
         'Eliminar producto',
-        `ID: ${prodId}, Nombre: ${producto?.nombre || 'Desconocido'}`
+        `ID: ${prodId}, UUID: ${prodUuid}, Nombre: ${producto?.nombre || 'Desconocido'}`
       );
     }
 
-    // En modo ONLINE o si existía localmente, disparar Dual Write a Supabase de forma transparente
     if (CONFIG.APP_MODE === 'ONLINE' || info.changes > 0) {
       handleDualWrite(
-        supabaseProductService.deleteProduct(prodId),
+        supabaseProductService.deleteProduct(prodUuid || prodId),
         'productos',
         'DELETE',
-        { id: prodId }
+        { id: prodId, uuid: prodUuid }
       );
       return { success: true };
     }
@@ -259,65 +285,90 @@ function createProductService(db, registrarAccion, syncManager = null) {
 
   // ── upsertProduct (LOCAL SQLITE PURA SIN DUAL WRITE NI ENCOLADO) ─────────
   /**
-   * Inserta o actualiza (UPSERT) un producto en SQLite local basándose en su ID.
-   * Utilizado para sincronización entrante desde Supabase hacia la base de datos local.
+   * Inserta o actualiza (UPSERT) un producto en SQLite local basándose en su UUID (o id/clave natural en transición).
+   * Preserva SIEMPRE el ID físico local de SQLite.
    * 
-   * @param {object} product - Objeto con datos del producto (debe contener id).
-   * @returns {{ success: boolean, id?: number, error?: string }}
+   * @param {object} product - Objeto con datos del producto.
+   * @returns {{ success: boolean, id?: number, uuid?: string, error?: string }}
    */
   function upsertProduct(product) {
-    if (!product || !product.id) {
-      return { success: false, error: 'ID de producto requerido para UPSERT.' };
+    if (!product) {
+      return { success: false, error: 'Datos de producto requeridos para UPSERT.' };
     }
 
-    const prodId = Number(product.id);
+    const prodUuid = product.uuid ? String(product.uuid).trim() : null;
     const codigo = product.codigo ? String(product.codigo).trim() : '';
     const nombre = product.nombre ? String(product.nombre).trim() : '';
 
     try {
-      // Si ya existe un producto local con la misma combinación (codigo, nombre) pero ID distinto,
-      // sincronizamos la clave id local para alinearnos con Supabase.
-      if (codigo && nombre) {
-        const existing = db.prepare('SELECT id FROM productos WHERE codigo = ? AND nombre = ?').get(codigo, nombre);
-        if (existing && Number(existing.id) !== prodId) {
-          console.log(`[ProductService] Re-alineando ID local de producto ${existing.id} ➔ ${prodId} (${nombre})`);
-          db.prepare('UPDATE productos SET id = ? WHERE id = ?').run(prodId, Number(existing.id));
-        }
+      let existingLocal = null;
+
+      if (prodUuid) {
+        existingLocal = db.prepare('SELECT id, uuid FROM productos WHERE uuid = ?').get(prodUuid);
       }
 
-      const stmt = db.prepare(`
-        INSERT INTO productos (id, codigo, nombre, categoria, stock, unidad, precio_costo, precio, stock_minimo, proveedor_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-          codigo = excluded.codigo,
-          nombre = excluded.nombre,
-          categoria = excluded.categoria,
-          stock = excluded.stock,
-          unidad = excluded.unidad,
-          precio_costo = excluded.precio_costo,
-          precio = excluded.precio,
-          stock_minimo = excluded.stock_minimo,
-          proveedor_id = excluded.proveedor_id
-      `);
+      if (!existingLocal && codigo && nombre) {
+        existingLocal = db.prepare('SELECT id, uuid FROM productos WHERE codigo = ? AND nombre = ?').get(codigo, nombre);
+      }
 
-      stmt.run(
-        prodId,
-        codigo,
-        nombre,
-        product.categoria || '',
-        product.stock !== undefined ? Number(product.stock) : 0,
-        product.unidad || 'un',
-        product.precio_costo !== undefined ? Number(product.precio_costo) : 0,
-        product.precio !== undefined ? Number(product.precio) : 0,
-        product.stock_minimo !== undefined ? Number(product.stock_minimo) : 10,
-        (product.proveedor_id !== undefined && product.proveedor_id !== null && product.proveedor_id !== '')
-          ? Number(product.proveedor_id)
-          : null
-      );
+      if (existingLocal) {
+        const localId = Number(existingLocal.id);
+        const updateUuid = prodUuid || existingLocal.uuid || crypto.randomUUID();
 
-      return { success: true, id: prodId };
+        const stmt = db.prepare(`
+          UPDATE productos SET
+            uuid = ?,
+            codigo = ?,
+            nombre = ?,
+            categoria = ?,
+            stock = ?,
+            unidad = ?,
+            precio_costo = ?,
+            precio = ?,
+            stock_minimo = ?,
+            proveedor_id = ?
+          WHERE id = ?
+        `);
+        stmt.run(
+          updateUuid,
+          codigo,
+          nombre,
+          product.categoria || '',
+          product.stock !== undefined ? Number(product.stock) : 0,
+          product.unidad || 'un',
+          product.precio_costo !== undefined ? Number(product.precio_costo) : 0,
+          product.precio !== undefined ? Number(product.precio) : 0,
+          product.stock_minimo !== undefined ? Number(product.stock_minimo) : 10,
+          (product.proveedor_id !== undefined && product.proveedor_id !== null && product.proveedor_id !== '')
+            ? Number(product.proveedor_id)
+            : null,
+          localId
+        );
+        return { success: true, id: localId, uuid: updateUuid };
+      } else {
+        const newUuid = prodUuid || crypto.randomUUID();
+        const stmt = db.prepare(`
+          INSERT INTO productos (uuid, codigo, nombre, categoria, stock, unidad, precio_costo, precio, stock_minimo, proveedor_id)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        const info = stmt.run(
+          newUuid,
+          codigo,
+          nombre,
+          product.categoria || '',
+          product.stock !== undefined ? Number(product.stock) : 0,
+          product.unidad || 'un',
+          product.precio_costo !== undefined ? Number(product.precio_costo) : 0,
+          product.precio !== undefined ? Number(product.precio) : 0,
+          product.stock_minimo !== undefined ? Number(product.stock_minimo) : 10,
+          (product.proveedor_id !== undefined && product.proveedor_id !== null && product.proveedor_id !== '')
+            ? Number(product.proveedor_id)
+            : null
+        );
+        return { success: true, id: info.lastInsertRowid, uuid: newUuid };
+      }
     } catch (err) {
-      console.warn(`[ProductService] Error en upsertProduct (ID ${prodId}):`, err.message);
+      console.warn(`[ProductService] Error en upsertProduct (UUID ${prodUuid}):`, err.message);
       return { success: false, error: err.message };
     }
   }
