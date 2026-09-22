@@ -108,6 +108,19 @@ try {
 } catch (err) {
   // Si ya existe, ignoramos el error
 }
+
+// ─── Migraciones de Identidad UUID (Fase 1C.3 — POS) ─────────────────────
+try { db.prepare("ALTER TABLE ventas ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE ventas ADD COLUMN producto_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE ventas ADD COLUMN ticket_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_ventas_uuid ON ventas(uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_ventas_producto_uuid ON ventas(producto_uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_ventas_ticket_uuid ON ventas(ticket_uuid)").run(); } catch (err) {}
+
+try { db.prepare("ALTER TABLE tickets ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE tickets ADD COLUMN cliente_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_tickets_uuid ON tickets(uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_tickets_cliente_uuid ON tickets(cliente_uuid)").run(); } catch (err) {}
 db.prepare(`
   CREATE TABLE IF NOT EXISTS historial (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
