@@ -232,6 +232,11 @@ db.prepare(`
   )
 `).run();
 
+try { db.prepare("ALTER TABLE pagos_cliente ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE pagos_cliente ADD COLUMN cliente_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_pagos_cliente_uuid ON pagos_cliente(uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_pagos_cliente_cliente_uuid ON pagos_cliente(cliente_uuid)").run(); } catch (err) {}
+
 db.prepare(`
   CREATE TABLE IF NOT EXISTS cuenta_corriente_cliente (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -246,6 +251,13 @@ db.prepare(`
     FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
   )
 `).run();
+
+try { db.prepare("ALTER TABLE cuenta_corriente_cliente ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE cuenta_corriente_cliente ADD COLUMN cliente_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE cuenta_corriente_cliente ADD COLUMN referencia_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_cta_cte_cliente_uuid ON cuenta_corriente_cliente(uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_cta_cte_cliente_cliente_uuid ON cuenta_corriente_cliente(cliente_uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_cta_cte_cliente_ref_uuid ON cuenta_corriente_cliente(referencia_uuid)").run(); } catch (err) {}
 
 db.prepare(`
   CREATE TABLE IF NOT EXISTS cliente_ventas (
@@ -263,6 +275,11 @@ db.prepare(`
     FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
   )
 `).run();
+
+try { db.prepare("ALTER TABLE cliente_ventas ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE cliente_ventas ADD COLUMN cliente_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_cliente_ventas_uuid ON cliente_ventas(uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_cliente_ventas_cliente_uuid ON cliente_ventas(cliente_uuid)").run(); } catch (err) {}
 
 // ─── Módulo de Proveedores ─────────────────────────────────────────────────
 db.prepare(`
@@ -306,6 +323,11 @@ db.prepare(`
   )
 `).run();
 
+try { db.prepare("ALTER TABLE compras_proveedor ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE compras_proveedor ADD COLUMN proveedor_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_compras_proveedor_uuid ON compras_proveedor(uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_compras_proveedor_proveedor_uuid ON compras_proveedor(proveedor_uuid)").run(); } catch (err) {}
+
 db.prepare(`
   CREATE TABLE IF NOT EXISTS pagos_proveedor (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -320,6 +342,13 @@ db.prepare(`
     FOREIGN KEY (proveedor_id) REFERENCES proveedores(id) ON DELETE CASCADE
   )
 `).run();
+
+try { db.prepare("ALTER TABLE pagos_proveedor ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE pagos_proveedor ADD COLUMN proveedor_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE pagos_proveedor ADD COLUMN compra_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_pagos_proveedor_uuid ON pagos_proveedor(uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_pagos_proveedor_proveedor_uuid ON pagos_proveedor(proveedor_uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_pagos_proveedor_compra_uuid ON pagos_proveedor(compra_uuid)").run(); } catch (err) {}
 
 db.prepare(`
   CREATE TABLE IF NOT EXISTS cuenta_corriente_proveedor (
@@ -337,6 +366,13 @@ db.prepare(`
     FOREIGN KEY (proveedor_id) REFERENCES proveedores(id) ON DELETE CASCADE
   )
 `).run();
+
+try { db.prepare("ALTER TABLE cuenta_corriente_proveedor ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE cuenta_corriente_proveedor ADD COLUMN proveedor_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE cuenta_corriente_proveedor ADD COLUMN referencia_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_cta_cte_proveedor_uuid ON cuenta_corriente_proveedor(uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_cta_cte_proveedor_proveedor_uuid ON cuenta_corriente_proveedor(proveedor_uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_cta_cte_proveedor_ref_uuid ON cuenta_corriente_proveedor(referencia_uuid)").run(); } catch (err) {}
 
 
 // ====================
