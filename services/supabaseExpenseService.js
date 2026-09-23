@@ -73,17 +73,19 @@ const supabaseExpenseService = {
       };
 
       if (gasto.id) payload.id = Number(gasto.id);
+      if (gasto.uuid) payload.uuid = gasto.uuid;
 
+      const onConflictTarget = gasto.uuid ? 'uuid' : 'id';
       const { error } = await client
         .from('gastos')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: onConflictTarget });
 
       if (error) {
         console.error('[SupabaseExpenseService] Error al insertar/actualizar gasto en Supabase:', error.message);
         return { success: false, error: error.message };
       }
 
-      console.log('[SupabaseExpenseService] Gasto guardado en Supabase ID:', payload.id || 'N/A');
+      console.log('[SupabaseExpenseService] Gasto guardado en Supabase (UUID:', payload.uuid || 'N/A', 'ID:', payload.id || 'N/A', ')');
       return { success: true };
     } catch (err) {
       console.error('[SupabaseExpenseService] Excepción al guardar gasto en Supabase:', err.message);
@@ -92,13 +94,14 @@ const supabaseExpenseService = {
   },
 
   /**
-   * Elimina un gasto por su ID en Supabase.
+   * Elimina un gasto por su UUID o ID en Supabase.
    * 
    * @param {number|string} id - ID del gasto a eliminar.
+   * @param {string} [uuid] - UUID opcional del gasto a eliminar.
    * @returns {Promise<{ success: boolean, error?: string }>}
    */
-  async deleteExpense(id) {
-    if (!id) return { success: false, error: 'ID de gasto requerido.' };
+  async deleteExpense(id, uuid = null) {
+    if (!id && !uuid) return { success: false, error: 'ID o UUID de gasto requerido.' };
 
     if (!isSupabaseConfigured()) {
       console.warn('[SupabaseExpenseService] Supabase no configurado. Omitiendo eliminación.');
@@ -109,20 +112,24 @@ const supabaseExpenseService = {
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
-      const { error } = await client
-        .from('gastos')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('gastos').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else {
+        query = query.eq('id', Number(id));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseExpenseService] Error al eliminar gasto ID ${id}:`, error.message);
+        console.error(`[SupabaseExpenseService] Error al eliminar gasto (UUID: ${uuid}, ID: ${id}):`, error.message);
         return { success: false, error: error.message };
       }
 
-      console.log(`[SupabaseExpenseService] Gasto eliminado en Supabase (ID: ${id})`);
+      console.log(`[SupabaseExpenseService] Gasto eliminado en Supabase (UUID: ${uuid}, ID: ${id})`);
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseExpenseService] Excepción al eliminar gasto ID ${id}:`, err.message);
+      console.error(`[SupabaseExpenseService] Excepción al eliminar gasto (UUID: ${uuid}, ID: ${id}):`, err.message);
       return { success: false, error: err.message };
     }
   }

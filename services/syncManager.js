@@ -597,6 +597,67 @@ class SyncManager {
     }
   }
 
+  upsertAjusteCaja(ajuste) {
+    if (!this.db || !ajuste) return;
+    try {
+      let localVentaId = ajuste.venta_id ? Number(ajuste.venta_id) : null;
+      if (!localVentaId && ajuste.venta_uuid) {
+        const matchedVenta = this.db.prepare('SELECT id FROM ventas WHERE uuid = ?').get(ajuste.venta_uuid);
+        if (matchedVenta) localVentaId = matchedVenta.id;
+      }
+
+      let existing = null;
+      if (ajuste.uuid) {
+        existing = this.db.prepare('SELECT id FROM ajustes_caja WHERE uuid = ?').get(ajuste.uuid);
+      }
+      if (!existing && ajuste.id) {
+        existing = this.db.prepare('SELECT id FROM ajustes_caja WHERE id = ?').get(Number(ajuste.id));
+      }
+
+      if (existing) {
+        this.db.prepare(`
+          UPDATE ajustes_caja SET
+            uuid = ?,
+            venta_uuid = ?,
+            fecha = ?,
+            tipo = ?,
+            motivo = ?,
+            monto = ?,
+            observacion = ?,
+            venta_id = ?
+          WHERE id = ?
+        `).run(
+          ajuste.uuid || null,
+          ajuste.venta_uuid || null,
+          ajuste.fecha,
+          ajuste.tipo,
+          ajuste.motivo,
+          Number(ajuste.monto || 0),
+          ajuste.observacion || '',
+          localVentaId,
+          existing.id
+        );
+      } else {
+        this.db.prepare(`
+          INSERT INTO ajustes_caja (id, uuid, venta_uuid, fecha, tipo, motivo, monto, observacion, venta_id)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          ajuste.id ? Number(ajuste.id) : null,
+          ajuste.uuid || null,
+          ajuste.venta_uuid || null,
+          ajuste.fecha,
+          ajuste.tipo,
+          ajuste.motivo,
+          Number(ajuste.monto || 0),
+          ajuste.observacion || '',
+          localVentaId
+        );
+      }
+    } catch (err) {
+      console.warn('[SyncManager] Error al realizar upsert local de ajuste de caja:', err.message);
+    }
+  }
+
   async pullChanges() {
     if (this.isPulling) {
       console.log('[SyncManager] pullChanges ya en ejecución. Omitiendo llamada concurrente.');
@@ -821,6 +882,18 @@ class SyncManager {
         }
       } catch (gErr) {
         console.error('[SyncManager] Error en pull de gastos:', gErr.message);
+      }
+
+      // 15.b. Ajustes de Caja
+      try {
+        const supabaseAjusteService = require('./supabaseAjusteService');
+        const ajustes = await supabaseAjusteService.getAllAjustes();
+        if (Array.isArray(ajustes)) {
+          for (const aj of ajustes) this.upsertAjusteCaja(aj);
+          totalPulled += ajustes.length;
+        }
+      } catch (ajErr) {
+        console.error('[SyncManager] Error en pull de ajustes_caja:', ajErr.message);
       }
 
       // 16. Órdenes Municipio

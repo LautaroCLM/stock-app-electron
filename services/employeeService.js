@@ -574,19 +574,39 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
 
   // ── CONFIGURACION LIQUIDACION ──────────────────────────────────────────────
   function savePayrollConfig(config) {
-    if (!config || !config.empleado_id) return { success: false, error: 'ID de empleado requerido.' };
+    if (!config || (!config.empleado_id && !config.empleado_uuid)) return { success: false, error: 'Empleado requerido.' };
+
+    let empUuid = config.empleado_uuid || null;
+    let localEmpId = config.empleado_id || null;
+
+    if (!empUuid && localEmpId) {
+      const emp = db.prepare('SELECT uuid FROM empleados WHERE id = ?').get(localEmpId);
+      if (emp) empUuid = emp.uuid;
+    }
+    if (!localEmpId && empUuid) {
+      const emp = db.prepare('SELECT id FROM empleados WHERE uuid = ?').get(empUuid);
+      if (emp) localEmpId = emp.id;
+    }
+
+    if (!localEmpId) return { success: false, error: 'Empleado local no encontrado.' };
 
     db.prepare(`
-      INSERT OR REPLACE INTO empleado_liquidacion_config (empleado_id, valor_hora, costo_mensual, estado)
-      VALUES (?, ?, ?, ?)
-    `).run(config.empleado_id, config.valor_hora || 0, config.costo_mensual || 0, config.estado || 'Activo');
+      INSERT INTO empleado_liquidacion_config (empleado_id, empleado_uuid, valor_hora, costo_mensual, estado)
+      VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(empleado_id) DO UPDATE SET
+        empleado_uuid = excluded.empleado_uuid,
+        valor_hora = excluded.valor_hora,
+        costo_mensual = excluded.costo_mensual,
+        estado = excluded.estado
+    `).run(localEmpId, empUuid, config.valor_hora || 0, config.costo_mensual || 0, config.estado || 'Activo');
 
     if (typeof registrarAccion === 'function') {
-      registrarAccion('Configuración Liquidación Empleado', `ID Empleado: ${config.empleado_id}`);
+      registrarAccion('Configuración Liquidación Empleado', `ID Empleado: ${localEmpId}`);
     }
 
     const payload = {
-      empleado_id: Number(config.empleado_id),
+      empleado_id: Number(localEmpId),
+      empleado_uuid: empUuid,
       valor_hora: Number(config.valor_hora || 0),
       costo_mensual: Number(config.costo_mensual || 0),
       estado: config.estado || 'Activo'
@@ -603,17 +623,33 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
   }
 
   function upsertPayrollConfig(config) {
-    if (!config || !config.empleado_id) return { success: false, error: 'ID de empleado requerido.' };
+    if (!config || (!config.empleado_id && !config.empleado_uuid)) return { success: false, error: 'Empleado requerido.' };
+
+    let empUuid = config.empleado_uuid || null;
+    let localEmpId = config.empleado_id || null;
+
+    if (!localEmpId && empUuid) {
+      const emp = db.prepare('SELECT id FROM empleados WHERE uuid = ?').get(empUuid);
+      if (emp) localEmpId = emp.id;
+    }
+    if (!empUuid && localEmpId) {
+      const emp = db.prepare('SELECT uuid FROM empleados WHERE id = ?').get(localEmpId);
+      if (emp) empUuid = emp.uuid;
+    }
+
+    if (!localEmpId) return { success: false, error: 'Empleado local no encontrado para config.' };
 
     db.prepare(`
-      INSERT INTO empleado_liquidacion_config (empleado_id, valor_hora, costo_mensual, estado)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO empleado_liquidacion_config (empleado_id, empleado_uuid, valor_hora, costo_mensual, estado)
+      VALUES (?, ?, ?, ?, ?)
       ON CONFLICT(empleado_id) DO UPDATE SET
+        empleado_uuid = excluded.empleado_uuid,
         valor_hora = excluded.valor_hora,
         costo_mensual = excluded.costo_mensual,
         estado = excluded.estado
     `).run(
-      Number(config.empleado_id),
+      Number(localEmpId),
+      empUuid,
       Number(config.valor_hora || 0),
       Number(config.costo_mensual || 0),
       config.estado || 'Activo'
@@ -629,11 +665,10 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
     if (parts1.length < 2 || parts2.length < 2 || isNaN(parts1[0]) || isNaN(parts1[1]) || isNaN(parts2[0]) || isNaN(parts2[1])) {
       return 0;
     }
-    let mins = (parts2[0] * 60 + parts2[1]) - (parts1[0] * 60 + parts1[1]);
-    if (mins < 0) {
-      mins += 24 * 60; // Cruce de medianoche (ej: 22:00 a 06:00)
-    }
-    return mins / 60;
+    const mins1 = parts1[0] * 60 + parts1[1];
+    const mins2 = parts2[0] * 60 + parts2[1];
+    const diff = mins2 - mins1;
+    return diff > 0 ? Number((diff / 60).toFixed(2)) : 0;
   }
 
   function getPayrollEmployees(mes) {
@@ -678,45 +713,89 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
   }
 
   function savePayroll(liq) {
-    if (!liq || !liq.empleado_id || !liq.mes) {
+    if (!liq || (!liq.empleado_id && !liq.empleado_uuid) || !liq.mes) {
       return { success: false, error: 'Empleado y mes son obligatorios.' };
     }
 
-    const stmt = db.prepare(`
-      INSERT INTO empleado_liquidaciones (
-        empleado_id, mes, horas_trabajadas, valor_hora, adicionales, descuentos, total_generado, total_liquidacion
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(empleado_id, mes) DO UPDATE SET
-        horas_trabajadas = excluded.horas_trabajadas,
-        valor_hora = excluded.valor_hora,
-        adicionales = excluded.adicionales,
-        descuentos = excluded.descuentos,
-        total_generado = excluded.total_generado,
-        total_liquidacion = excluded.total_liquidacion
-    `);
+    let empUuid = liq.empleado_uuid || null;
+    let localEmpId = liq.empleado_id || null;
 
-    const info = stmt.run(
-      liq.empleado_id,
-      liq.mes,
-      liq.horas_trabajadas || 0,
-      liq.valor_hora || 0,
-      liq.adicionales || 0,
-      liq.descuentos || 0,
-      liq.total_generado || 0,
-      liq.total_liquidacion || 0
-    );
+    if (!empUuid && localEmpId) {
+      const emp = db.prepare('SELECT uuid FROM empleados WHERE id = ?').get(localEmpId);
+      if (emp) empUuid = emp.uuid;
+    }
+    if (!localEmpId && empUuid) {
+      const emp = db.prepare('SELECT id FROM empleados WHERE uuid = ?').get(empUuid);
+      if (emp) localEmpId = emp.id;
+    }
 
-    const liqId = info.lastInsertRowid || db.prepare('SELECT id FROM empleado_liquidaciones WHERE empleado_id = ? AND mes = ?').get(liq.empleado_id, liq.mes)?.id;
+    if (!localEmpId) return { success: false, error: 'Empleado local no encontrado para liquidación.' };
+
+    let existingLiq = null;
+    if (liq.uuid) {
+      existingLiq = db.prepare('SELECT id, uuid FROM empleado_liquidaciones WHERE uuid = ?').get(liq.uuid);
+    }
+    if (!existingLiq) {
+      existingLiq = db.prepare('SELECT id, uuid FROM empleado_liquidaciones WHERE empleado_id = ? AND mes = ?').get(localEmpId, liq.mes);
+    }
+
+    const liqUuid = liq.uuid || (existingLiq ? existingLiq.uuid : null) || crypto.randomUUID();
+
+    if (existingLiq) {
+      db.prepare(`
+        UPDATE empleado_liquidaciones SET
+          uuid = ?,
+          empleado_uuid = ?,
+          horas_trabajadas = ?,
+          valor_hora = ?,
+          adicionales = ?,
+          descuentos = ?,
+          total_generado = ?,
+          total_liquidacion = ?
+        WHERE id = ?
+      `).run(
+        liqUuid,
+        empUuid,
+        liq.horas_trabajadas || 0,
+        liq.valor_hora || 0,
+        liq.adicionales || 0,
+        liq.descuentos || 0,
+        liq.total_generado || 0,
+        liq.total_liquidacion || 0,
+        existingLiq.id
+      );
+    } else {
+      db.prepare(`
+        INSERT INTO empleado_liquidaciones (
+          uuid, empleado_id, empleado_uuid, mes, horas_trabajadas, valor_hora, adicionales, descuentos, total_generado, total_liquidacion
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        liqUuid,
+        localEmpId,
+        empUuid,
+        liq.mes,
+        liq.horas_trabajadas || 0,
+        liq.valor_hora || 0,
+        liq.adicionales || 0,
+        liq.descuentos || 0,
+        liq.total_generado || 0,
+        liq.total_liquidacion || 0
+      );
+    }
+
+    const liqId = existingLiq ? existingLiq.id : db.prepare('SELECT id FROM empleado_liquidaciones WHERE uuid = ?').get(liqUuid)?.id;
 
     if (typeof registrarAccion === 'function') {
-      const emp = db.prepare('SELECT nombre, apellido FROM empleados WHERE id = ?').get(liq.empleado_id);
-      const empName = emp ? `${emp.apellido}, ${emp.nombre}` : `ID ${liq.empleado_id}`;
+      const emp = db.prepare('SELECT nombre, apellido FROM empleados WHERE id = ?').get(localEmpId);
+      const empName = emp ? `${emp.apellido}, ${emp.nombre}` : `ID ${localEmpId}`;
       registrarAccion('Guardar Liquidación Empleado', `Liquidación de ${empName} para el mes ${liq.mes}. Total: $${liq.total_liquidacion}`);
     }
 
     const payload = {
       id: liqId,
-      empleado_id: Number(liq.empleado_id),
+      uuid: liqUuid,
+      empleado_id: Number(localEmpId),
+      empleado_uuid: empUuid,
       mes: liq.mes,
       horas_trabajadas: Number(liq.horas_trabajadas || 0),
       valor_hora: Number(liq.valor_hora || 0),
@@ -733,37 +812,29 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
       payload
     );
 
-    return { success: true, id: liqId };
+    return { success: true, id: liqId, uuid: liqUuid };
   }
 
   function deletePayroll(id) {
     if (!id) return { success: false, error: 'ID de liquidación requerido.' };
 
+    const existing = db.prepare('SELECT uuid FROM empleado_liquidaciones WHERE id = ?').get(id);
     db.prepare('DELETE FROM empleado_liquidaciones WHERE id = ?').run(id);
 
+    const payload = { id: Number(id) };
+    if (existing && existing.uuid) payload.uuid = existing.uuid;
+
     handleDualWrite(
-      supabaseEmployeeService.deletePayroll(id),
+      supabaseEmployeeService.deletePayroll(id, existing ? existing.uuid : null),
       'empleado_liquidaciones',
       'DELETE',
-      { id: Number(id) }
+      payload
     );
 
     return { success: true };
   }
 
   function upsertPayroll(liq) {
-    if (!liq || !liq.id) return { success: false, error: 'ID de liquidación requerido.' };
-
-    const stmt = db.prepare(`
-      INSERT INTO empleado_liquidaciones (id, empleado_id, mes, horas_trabajadas, valor_hora, adicionales, descuentos, total_generado, total_liquidacion)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        empleado_id = excluded.empleado_id,
-        mes = excluded.mes,
-        horas_trabajadas = excluded.horas_trabajadas,
-        valor_hora = excluded.valor_hora,
-        adicionales = excluded.adicionales,
-        descuentos = excluded.descuentos,
         total_generado = excluded.total_generado,
         total_liquidacion = excluded.total_liquidacion
     `);

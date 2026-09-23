@@ -42,15 +42,20 @@ function createExpenseService(db, registrarAccion, syncManager = null) {
    * Devuelve todos los gastos ordenados por fecha y ID de manera descendente desde SQLite local.
    * @returns {Array} Lista de gastos.
    */
+  // ── getExpenses ───────────────────────────────────────────────────────────
+  /**
+   * Devuelve todos los gastos ordenados por fecha y ID de manera descendente desde SQLite local.
+   * @returns {Array} Lista de gastos.
+   */
   function getExpenses() {
-    return db.prepare('SELECT id, fecha, concepto, categoria, monto, observacion, estado FROM gastos ORDER BY datetime(fecha) DESC, id DESC').all();
+    return db.prepare('SELECT id, uuid, fecha, concepto, categoria, monto, observacion, estado FROM gastos ORDER BY datetime(fecha) DESC, id DESC').all();
   }
 
   // ── saveExpense ───────────────────────────────────────────────────────────
   /**
    * Guarda o actualiza un gasto en SQLite local y dispara Dual Write hacia Supabase.
    * @param {object} data - Datos del gasto.
-   * @returns {{ success: boolean, id?: number, error?: string }}
+   * @returns {{ success: boolean, id?: number, uuid?: string, error?: string }}
    */
   function saveExpense(data) {
     const fecha = data.fecha || new Date().toISOString().split('T')[0];
@@ -61,12 +66,16 @@ function createExpenseService(db, registrarAccion, syncManager = null) {
     const estado = data.estado || 'Pendiente';
 
     if (data.id) {
+      const existing = db.prepare('SELECT uuid FROM gastos WHERE id = ?').get(data.id);
+      const uuid = data.uuid || (existing ? existing.uuid : null) || crypto.randomUUID();
+
       const stmt = db.prepare(`
         UPDATE gastos
-        SET fecha = ?, concepto = ?, categoria = ?, monto = ?, observacion = ?, estado = ?
+        SET uuid = ?, fecha = ?, concepto = ?, categoria = ?, monto = ?, observacion = ?, estado = ?
         WHERE id = ?
       `);
       stmt.run(
+        uuid,
         fecha,
         concepto,
         categoria,
@@ -82,6 +91,7 @@ function createExpenseService(db, registrarAccion, syncManager = null) {
 
       const payload = {
         id: Number(data.id),
+        uuid,
         fecha,
         concepto,
         categoria,
@@ -97,14 +107,16 @@ function createExpenseService(db, registrarAccion, syncManager = null) {
         payload
       );
 
-      return { success: true, id: data.id };
+      return { success: true, id: data.id, uuid };
 
     } else {
+      const uuid = data.uuid || crypto.randomUUID();
       const stmt = db.prepare(`
-        INSERT INTO gastos (fecha, concepto, categoria, monto, observacion, estado)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO gastos (uuid, fecha, concepto, categoria, monto, observacion, estado)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `);
       const info = stmt.run(
+        uuid,
         fecha,
         concepto,
         categoria,
@@ -121,6 +133,7 @@ function createExpenseService(db, registrarAccion, syncManager = null) {
 
       const payload = {
         id: expenseId,
+        uuid,
         fecha,
         concepto,
         categoria,
@@ -136,7 +149,7 @@ function createExpenseService(db, registrarAccion, syncManager = null) {
         payload
       );
 
-      return { success: true, id: expenseId };
+      return { success: true, id: expenseId, uuid };
     }
   }
 
@@ -149,17 +162,21 @@ function createExpenseService(db, registrarAccion, syncManager = null) {
   function deleteExpense(id) {
     if (!id) return { success: false, error: 'ID de gasto requerido.' };
 
+    const existing = db.prepare('SELECT uuid FROM gastos WHERE id = ?').get(id);
     db.prepare('DELETE FROM gastos WHERE id = ?').run(id);
 
     if (typeof registrarAccion === 'function') {
       registrarAccion('Eliminación Gasto', `Gasto ID ${id} eliminado.`);
     }
 
+    const payload = { id: Number(id) };
+    if (existing && existing.uuid) payload.uuid = existing.uuid;
+
     handleDualWrite(
-      supabaseExpenseService.deleteExpense(id),
+      supabaseExpenseService.deleteExpense(id, existing ? existing.uuid : null),
       'gastos',
       'DELETE',
-      { id: Number(id) }
+      payload
     );
 
     return { success: true };
@@ -167,40 +184,67 @@ function createExpenseService(db, registrarAccion, syncManager = null) {
 
   // ── upsertExpense (LOCAL SQLITE PURA SIN DUAL WRITE NI ENCOLADO) ──────────
   /**
-   * Inserta o actualiza (UPSERT) un gasto en SQLite local basándose en su ID.
+   * Inserta o actualiza (UPSERT) un gasto en SQLite local basándose en su UUID o ID.
    * Utilizado para sincronización entrante desde Supabase hacia la base de datos local.
    * 
-   * @param {object} gasto - Objeto con datos del gasto (debe contener id).
+   * @param {object} gasto - Objeto con datos del gasto.
    * @returns {{ success: boolean, id?: number, error?: string }}
    */
   function upsertExpense(gasto) {
-    if (!gasto || !gasto.id) {
-      return { success: false, error: 'ID de gasto requerido para UPSERT.' };
+    if (!gasto || (!gasto.id && !gasto.uuid)) {
+      return { success: false, error: 'ID o UUID de gasto requerido para UPSERT.' };
     }
 
-    const stmt = db.prepare(`
-      INSERT INTO gastos (id, fecha, concepto, categoria, monto, observacion, estado)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        fecha = excluded.fecha,
-        concepto = excluded.concepto,
-        categoria = excluded.categoria,
-        monto = excluded.monto,
-        observacion = excluded.observacion,
-        estado = excluded.estado
-    `);
+    let existing = null;
+    if (gasto.uuid) {
+      existing = db.prepare('SELECT id FROM gastos WHERE uuid = ?').get(gasto.uuid);
+    }
+    if (!existing && gasto.id) {
+      existing = db.prepare('SELECT id FROM gastos WHERE id = ?').get(gasto.id);
+    }
 
-    stmt.run(
-      Number(gasto.id),
-      gasto.fecha || new Date().toISOString().split('T')[0],
-      gasto.concepto || '',
-      gasto.categoria || '',
-      gasto.monto !== undefined ? Number(gasto.monto) : 0,
-      gasto.observacion || '',
-      gasto.estado || 'Pendiente'
-    );
+    const uuid = gasto.uuid || (existing ? existing.uuid : null) || crypto.randomUUID();
 
-    return { success: true, id: Number(gasto.id) };
+    if (existing) {
+      const stmt = db.prepare(`
+        UPDATE gastos SET
+          uuid = ?,
+          fecha = ?,
+          concepto = ?,
+          categoria = ?,
+          monto = ?,
+          observacion = ?,
+          estado = ?
+        WHERE id = ?
+      `);
+      stmt.run(
+        uuid,
+        gasto.fecha || new Date().toISOString().split('T')[0],
+        gasto.concepto || '',
+        gasto.categoria || '',
+        gasto.monto !== undefined ? Number(gasto.monto) : 0,
+        gasto.observacion || '',
+        gasto.estado || 'Pendiente',
+        existing.id
+      );
+      return { success: true, id: existing.id, uuid };
+    } else {
+      const stmt = db.prepare(`
+        INSERT INTO gastos (id, uuid, fecha, concepto, categoria, monto, observacion, estado)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      const info = stmt.run(
+        gasto.id ? Number(gasto.id) : null,
+        uuid,
+        gasto.fecha || new Date().toISOString().split('T')[0],
+        gasto.concepto || '',
+        gasto.categoria || '',
+        gasto.monto !== undefined ? Number(gasto.monto) : 0,
+        gasto.observacion || '',
+        gasto.estado || 'Pendiente'
+      );
+      return { success: true, id: info.lastInsertRowid, uuid };
+    }
   }
 
   // ── API pública del servicio ───────────────────────────────────────────────

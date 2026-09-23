@@ -275,10 +275,12 @@ const supabaseEmployeeService = {
         costo_mensual: config.costo_mensual !== undefined ? Number(config.costo_mensual) : 0,
         estado: config.estado || 'Activo'
       };
+      if (config.empleado_uuid) payload.empleado_uuid = config.empleado_uuid;
 
+      const onConflictTarget = config.empleado_uuid ? 'empleado_uuid' : 'empleado_id';
       const { error } = await client
         .from('empleado_liquidacion_config')
-        .upsert(payload, { onConflict: 'empleado_id' });
+        .upsert(payload, { onConflict: onConflictTarget });
 
       if (error) {
         console.error('[SupabaseEmployeeService] Error al guardar config de liquidación:', error.message);
@@ -335,10 +337,13 @@ const supabaseEmployeeService = {
       };
 
       if (liq.id) payload.id = Number(liq.id);
+      if (liq.uuid) payload.uuid = liq.uuid;
+      if (liq.empleado_uuid) payload.empleado_uuid = liq.empleado_uuid;
 
+      const onConflictTarget = liq.uuid ? 'uuid' : 'id';
       const { error } = await client
         .from('empleado_liquidaciones')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: onConflictTarget });
 
       if (error) {
         console.error('[SupabaseEmployeeService] Error al guardar liquidación:', error.message);
@@ -352,27 +357,31 @@ const supabaseEmployeeService = {
     }
   },
 
-  async deletePayroll(id) {
-    if (!id) return { success: false, error: 'ID de liquidación requerido.' };
+  async deletePayroll(id, uuid = null) {
+    if (!id && !uuid) return { success: false, error: 'ID o UUID de liquidación requerido.' };
     if (!isSupabaseConfigured()) return { success: false, error: 'Supabase no configurado' };
 
     const client = getSupabaseClient();
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
-      const { error } = await client
-        .from('empleado_liquidaciones')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('empleado_liquidaciones').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else {
+        query = query.eq('id', Number(id));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseEmployeeService] Error al eliminar liquidación ID ${id}:`, error.message);
+        console.error(`[SupabaseEmployeeService] Error al eliminar liquidación (UUID: ${uuid}, ID: ${id}):`, error.message);
         return { success: false, error: error.message };
       }
 
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseEmployeeService] Excepción al eliminar liquidación ID ${id}:`, err.message);
+      console.error(`[SupabaseEmployeeService] Excepción al eliminar liquidación (UUID: ${uuid}, ID: ${id}):`, err.message);
       return { success: false, error: err.message };
     }
   }

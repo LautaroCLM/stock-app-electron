@@ -144,6 +144,10 @@ db.prepare(`
 try {
   db.prepare("ALTER TABLE ajustes_caja ADD COLUMN venta_id INTEGER").run();
 } catch (err) {}
+try { db.prepare("ALTER TABLE ajustes_caja ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE ajustes_caja ADD COLUMN venta_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_ajustes_caja_uuid ON ajustes_caja(uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_ajustes_caja_venta_uuid ON ajustes_caja(venta_uuid)").run(); } catch (err) {}
 
 // Módulo de Empleados - Tablas
 db.prepare(`
@@ -497,6 +501,14 @@ db.prepare(`
     FOREIGN KEY (empleado_id) REFERENCES empleados(id) ON DELETE CASCADE
   )
 `).run();
+
+try { db.prepare("ALTER TABLE empleado_liquidacion_config ADD COLUMN empleado_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_empleado_liq_cfg_emp_uuid ON empleado_liquidacion_config(empleado_uuid)").run(); } catch (err) {}
+
+try { db.prepare("ALTER TABLE empleado_liquidaciones ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE empleado_liquidaciones ADD COLUMN empleado_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_empleado_liquidaciones_uuid ON empleado_liquidaciones(uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_empleado_liquidaciones_emp_uuid ON empleado_liquidaciones(empleado_uuid)").run(); } catch (err) {}
 
 
 // ====================
@@ -1350,6 +1362,8 @@ db.prepare(`
     estado TEXT
   )
 `).run();
+try { db.prepare("ALTER TABLE gastos ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_gastos_uuid ON gastos(uuid)").run(); } catch (err) {}
 
 // Guardar/Actualizar gasto
 ipcMain.handle('save-gasto', (event, data) => {

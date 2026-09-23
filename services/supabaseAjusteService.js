@@ -80,17 +80,20 @@ const supabaseAjusteService = {
       if (ajuste.id !== undefined && ajuste.id !== null && ajuste.id !== '') {
         payload.id = Number(ajuste.id);
       }
+      if (ajuste.uuid) payload.uuid = ajuste.uuid;
+      if (ajuste.venta_uuid) payload.venta_uuid = ajuste.venta_uuid;
 
+      const onConflictTarget = ajuste.uuid ? 'uuid' : 'id';
       const { error } = await client
         .from('ajustes_caja')
-        .upsert([payload], { onConflict: 'id' });
+        .upsert([payload], { onConflict: onConflictTarget });
 
       if (error) {
         console.error('[SupabaseAjusteService] Error al realizar upsert en ajustes_caja:', error.message);
         return { success: false, error: error.message };
       }
 
-      console.log(`[SupabaseAjusteService] Ajuste guardado exitosamente en Supabase (ID: ${payload.id || 'N/A'})`);
+      console.log(`[SupabaseAjusteService] Ajuste guardado exitosamente en Supabase (UUID: ${payload.uuid || 'N/A'}, ID: ${payload.id || 'N/A'})`);
       return { success: true };
     } catch (err) {
       console.error('[SupabaseAjusteService] Excepción al realizar upsert en ajustes_caja:', err.message);
@@ -99,14 +102,15 @@ const supabaseAjusteService = {
   },
 
   /**
-   * Elimina un ajuste por su ID de la tabla 'ajustes_caja' en Supabase.
+   * Elimina un ajuste por su UUID o ID de la tabla 'ajustes_caja' en Supabase.
    * 
    * @param {number|string} id - ID del ajuste a eliminar.
+   * @param {string} [uuid] - UUID opcional del ajuste a eliminar.
    * @returns {Promise<{ success: boolean, error?: string }>}
    */
-  async deleteAjuste(id) {
-    if (!id) {
-      return { success: false, error: 'ID de ajuste no especificado.' };
+  async deleteAjuste(id, uuid = null) {
+    if (!id && !uuid) {
+      return { success: false, error: 'ID o UUID de ajuste no especificado.' };
     }
 
     if (!isSupabaseConfigured()) {
@@ -121,21 +125,24 @@ const supabaseAjusteService = {
     }
 
     try {
-      const numericId = Number(id);
-      const { error } = await client
-        .from('ajustes_caja')
-        .delete()
-        .eq('id', numericId);
+      let query = client.from('ajustes_caja').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else {
+        query = query.eq('id', Number(id));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseAjusteService] Error al eliminar ajuste con ID ${numericId} en Supabase:`, error.message);
+        console.error(`[SupabaseAjusteService] Error al eliminar ajuste (UUID: ${uuid}, ID: ${id}):`, error.message);
         return { success: false, error: error.message };
       }
 
-      console.log(`[SupabaseAjusteService] Ajuste eliminado exitosamente de Supabase (ID: ${numericId})`);
+      console.log(`[SupabaseAjusteService] Ajuste eliminado exitosamente de Supabase (UUID: ${uuid}, ID: ${id})`);
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseAjusteService] Excepción al eliminar ajuste con ID ${id}:`, err.message);
+      console.error(`[SupabaseAjusteService] Excepción al eliminar ajuste (UUID: ${uuid}, ID: ${id}):`, err.message);
       return { success: false, error: err.message };
     }
   }

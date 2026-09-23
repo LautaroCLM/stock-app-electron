@@ -660,29 +660,68 @@ class RealtimeManager {
     const deletedId = (oldRow && oldRow.id !== undefined && oldRow.id !== null) ? Number(oldRow.id) : null;
     if (this.db) {
       try {
-        if ((eventType === 'INSERT' || eventType === 'UPDATE') && newRow?.id) {
-          const stmt = this.db.prepare(`
-            INSERT INTO ajustes_caja (id, fecha, tipo, motivo, monto, observacion, venta_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET
-              fecha = excluded.fecha,
-              tipo = excluded.tipo,
-              motivo = excluded.motivo,
-              monto = excluded.monto,
-              observacion = excluded.observacion,
-              venta_id = excluded.venta_id
-          `);
-          stmt.run(
-            Number(newRow.id),
-            newRow.fecha,
-            newRow.tipo,
-            newRow.motivo,
-            Number(newRow.monto || 0),
-            newRow.observacion,
-            newRow.venta_id || null
-          );
-        } else if (eventType === 'DELETE' && deletedId) {
-          this.db.prepare('DELETE FROM ajustes_caja WHERE id = ?').run(deletedId);
+        if ((eventType === 'INSERT' || eventType === 'UPDATE') && (newRow?.id || newRow?.uuid)) {
+          let localVentaId = newRow.venta_id ? Number(newRow.venta_id) : null;
+          if (!localVentaId && newRow.venta_uuid) {
+            const matchedVenta = this.db.prepare('SELECT id FROM ventas WHERE uuid = ?').get(newRow.venta_uuid);
+            if (matchedVenta) localVentaId = matchedVenta.id;
+          }
+
+          let existing = null;
+          if (newRow.uuid) {
+            existing = this.db.prepare('SELECT id FROM ajustes_caja WHERE uuid = ?').get(newRow.uuid);
+          }
+          if (!existing && newRow.id) {
+            existing = this.db.prepare('SELECT id FROM ajustes_caja WHERE id = ?').get(Number(newRow.id));
+          }
+
+          if (existing) {
+            const stmt = this.db.prepare(`
+              UPDATE ajustes_caja SET
+                uuid = ?,
+                venta_uuid = ?,
+                fecha = ?,
+                tipo = ?,
+                motivo = ?,
+                monto = ?,
+                observacion = ?,
+                venta_id = ?
+              WHERE id = ?
+            `);
+            stmt.run(
+              newRow.uuid || null,
+              newRow.venta_uuid || null,
+              newRow.fecha,
+              newRow.tipo,
+              newRow.motivo,
+              Number(newRow.monto || 0),
+              newRow.observacion,
+              localVentaId,
+              existing.id
+            );
+          } else {
+            const stmt = this.db.prepare(`
+              INSERT INTO ajustes_caja (id, uuid, venta_uuid, fecha, tipo, motivo, monto, observacion, venta_id)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+            stmt.run(
+              newRow.id ? Number(newRow.id) : null,
+              newRow.uuid || null,
+              newRow.venta_uuid || null,
+              newRow.fecha,
+              newRow.tipo,
+              newRow.motivo,
+              Number(newRow.monto || 0),
+              newRow.observacion,
+              localVentaId
+            );
+          }
+        } else if (eventType === 'DELETE' && (deletedId || oldRow?.uuid)) {
+          if (oldRow?.uuid) {
+            this.db.prepare('DELETE FROM ajustes_caja WHERE uuid = ?').run(oldRow.uuid);
+          } else if (deletedId) {
+            this.db.prepare('DELETE FROM ajustes_caja WHERE id = ?').run(deletedId);
+          }
         }
       } catch (err) {
         console.warn('[RealtimeManager] Error actualizando ajustes_caja en SQLite:', err.message);
