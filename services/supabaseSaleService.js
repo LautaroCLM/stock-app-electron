@@ -74,10 +74,15 @@ const supabaseSaleService = {
 
       if (venta.id) payload.id = Number(venta.id);
       if (venta.client_transaction_id) payload.client_transaction_id = venta.client_transaction_id;
+      if (venta.uuid) payload.uuid = venta.uuid;
+      if (venta.producto_uuid) payload.producto_uuid = venta.producto_uuid;
+      if (venta.ticket_uuid) payload.ticket_uuid = venta.ticket_uuid;
+
+      const onConflictTarget = payload.id ? 'id' : (payload.uuid ? 'uuid' : 'id');
 
       const { error } = await client
         .from('ventas')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: onConflictTarget });
 
       if (error) {
         console.error('[SupabaseSaleService] Error al insertar venta en Supabase:', error.message);
@@ -160,6 +165,9 @@ const supabaseSaleService = {
         };
         if (item.nombre) mapped.nombre = item.nombre;
         if (item.precio !== undefined && item.precio !== null) mapped.precio = Number(item.precio);
+        if (item.producto_uuid) mapped.producto_uuid = item.producto_uuid;
+        if (item.uuid) mapped.uuid = item.uuid;
+        if (item.ticket_uuid) mapped.ticket_uuid = item.ticket_uuid;
         return mapped;
       });
 

@@ -102,7 +102,7 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
           let pNombre = item.nombre || null;
           let pPrecio = Number(item.precio || 0);
           const pCantidad = Number(item.cantidad || 1);
-          let pUuid = item.uuid || null;
+          let pUuid = item.uuid || item.producto_uuid || null;
           let pRemoteId = null;
 
           try {
@@ -110,7 +110,7 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
             if (dbProd) {
               if (!pNombre) pNombre = dbProd.nombre;
               if (!pPrecio || pPrecio === 0) pPrecio = Number(dbProd.precio || 0);
-              if (!pUuid) pUuid = dbProd.uuid;
+              if (!pUuid && dbProd.uuid) pUuid = dbProd.uuid;
             }
           } catch (e) {}
 
@@ -118,12 +118,15 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
             pRemoteId = await supabaseProductService.resolveRemoteProductIdByUuid(pUuid);
           }
 
+          const itemVentaUuid = item.venta_uuid || crypto.randomUUID();
           const itemSubtotal = pPrecio * pCantidad;
           subtotalVenta += itemSubtotal;
           validItems.push({
             producto_id: pRemoteId || pId,
             local_producto_id: pId,
-            uuid: pUuid,
+            uuid: itemVentaUuid,
+            producto_uuid: pUuid,
+            ticket_uuid: clientTransactionId,
             nombre: pNombre || `Producto #${pId}`,
             precio: pPrecio,
             cantidad: pCantidad,
@@ -163,7 +166,11 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
           }
 
           payloadItems.push({
+            id: item.local_producto_id,
             producto_id: item.producto_id,
+            producto_uuid: item.producto_uuid || null,
+            uuid: item.uuid,
+            ticket_uuid: item.ticket_uuid,
             nombre: item.nombre,
             precio: item.precio || (item.cantidad ? Math.round((totalItem / item.cantidad) * 100) / 100 : 0),
             cantidad: item.cantidad,
@@ -206,20 +213,20 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
             try {
               const runOfflineSaleTransaction = db.transaction(() => {
                 const insertVenta = db.prepare(`
-                  INSERT INTO ventas (producto_id, cantidad, total, metodo_pago, cliente, client_transaction_id)
-                  VALUES (?, ?, ?, ?, ?, ?)
+                  INSERT INTO ventas (producto_id, cantidad, total, metodo_pago, cliente, client_transaction_id, uuid, producto_uuid, ticket_uuid)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `);
                 const updateStock = db.prepare('UPDATE productos SET stock = stock - ? WHERE id = ?');
 
                 for (const item of payloadItems) {
-                  insertVenta.run(item.producto_id, item.cantidad, item.total, metodo_pago, 'Consumidor Final', clientTransactionId);
+                  insertVenta.run(item.producto_id, item.cantidad, item.total, metodo_pago, 'Consumidor Final', clientTransactionId, item.uuid, item.producto_uuid || null, clientTransactionId);
                   updateStock.run(item.cantidad, item.producto_id);
                 }
 
                 const descuentoMonto = subtotalVenta > totalFinalVenta ? (subtotalVenta - totalFinalVenta) : 0;
                 const insertTicket = db.prepare(`
-                  INSERT INTO tickets (fecha, metodo_pago, total, productos, tipo, descuento, subtotal, cliente, client_transaction_id)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  INSERT INTO tickets (fecha, metodo_pago, total, productos, tipo, descuento, subtotal, cliente, client_transaction_id, uuid)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `);
                 const ticketInfo = insertTicket.run(
                   new Date().toISOString(),
@@ -230,6 +237,7 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
                   descuentoMonto,
                   subtotalVenta,
                   'Consumidor Final',
+                  clientTransactionId,
                   clientTransactionId
                 );
                 const localTicketId = ticketInfo.lastInsertRowid;
@@ -272,22 +280,27 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
         }
 
         const ticketId = result.data?.ticket_id || result.data?.id || null;
+        const ticketUuid = result.data?.ticket_uuid || clientTransactionId;
 
         try {
           for (const item of payloadItems) {
             db.prepare('UPDATE productos SET stock = stock - ? WHERE id = ?').run(item.cantidad, item.producto_id);
-            db.prepare('INSERT INTO ventas (producto_id, cantidad, total, metodo_pago, client_transaction_id) VALUES (?, ?, ?, ?, ?)').run(
+            db.prepare('INSERT INTO ventas (producto_id, cantidad, total, metodo_pago, client_transaction_id, uuid, producto_uuid, ticket_uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(
               item.producto_id,
               item.cantidad,
               item.total,
               metodo_pago,
-              clientTransactionId
+              clientTransactionId,
+              item.uuid,
+              item.producto_uuid || null,
+              ticketUuid
             );
           }
 
           if (ticketService && ticketId) {
             ticketService.upsertTicket({
               id: ticketId,
+              uuid: ticketUuid,
               client_transaction_id: clientTransactionId,
               fecha: new Date().toISOString(),
               metodo_pago,
@@ -539,6 +552,9 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
 
     const prodId = venta.producto_id ? Number(venta.producto_id) : null;
     const clientTxId = venta.client_transaction_id || null;
+    const vUuid = venta.uuid || null;
+    const prodUuid = venta.producto_uuid || null;
+    const ticketUuid = venta.ticket_uuid || null;
 
     if (clientTxId) {
       try {
@@ -554,8 +570,8 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
           db.transaction(() => {
             db.prepare('DELETE FROM ventas WHERE id = ?').run(localId);
             const stmt = db.prepare(`
-              INSERT INTO ventas (id, producto_id, cantidad, total, metodo_pago, cliente, fecha, client_transaction_id)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+              INSERT INTO ventas (id, producto_id, cantidad, total, metodo_pago, cliente, fecha, client_transaction_id, uuid, producto_uuid, ticket_uuid)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               ON CONFLICT(id) DO UPDATE SET
                 producto_id = excluded.producto_id,
                 cantidad = excluded.cantidad,
@@ -563,7 +579,10 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
                 metodo_pago = excluded.metodo_pago,
                 cliente = excluded.cliente,
                 fecha = excluded.fecha,
-                client_transaction_id = excluded.client_transaction_id
+                client_transaction_id = excluded.client_transaction_id,
+                uuid = COALESCE(excluded.uuid, ventas.uuid),
+                producto_uuid = COALESCE(excluded.producto_uuid, ventas.producto_uuid),
+                ticket_uuid = COALESCE(excluded.ticket_uuid, ventas.ticket_uuid)
             `);
             stmt.run(
               remoteId,
@@ -573,7 +592,10 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
               venta.metodo_pago || 'Efectivo',
               venta.cliente || 'Consumidor Final',
               venta.fecha || new Date().toISOString(),
-              clientTxId
+              clientTxId,
+              vUuid,
+              prodUuid,
+              ticketUuid
             );
           })();
 
@@ -586,8 +608,8 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
     }
 
     const stmt = db.prepare(`
-      INSERT INTO ventas (id, producto_id, cantidad, total, metodo_pago, cliente, fecha, client_transaction_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO ventas (id, producto_id, cantidad, total, metodo_pago, cliente, fecha, client_transaction_id, uuid, producto_uuid, ticket_uuid)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         producto_id = excluded.producto_id,
         cantidad = excluded.cantidad,
@@ -595,7 +617,10 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
         metodo_pago = excluded.metodo_pago,
         cliente = excluded.cliente,
         fecha = excluded.fecha,
-        client_transaction_id = excluded.client_transaction_id
+        client_transaction_id = excluded.client_transaction_id,
+        uuid = COALESCE(excluded.uuid, ventas.uuid),
+        producto_uuid = COALESCE(excluded.producto_uuid, ventas.producto_uuid),
+        ticket_uuid = COALESCE(excluded.ticket_uuid, ventas.ticket_uuid)
     `);
 
     stmt.run(
@@ -606,7 +631,10 @@ function createSaleService(db, registrarAccion, syncManager = null, ticketServic
       venta.metodo_pago || 'Efectivo',
       venta.cliente || 'Consumidor Final',
       venta.fecha || new Date().toISOString(),
-      clientTxId
+      clientTxId,
+      vUuid,
+      prodUuid,
+      ticketUuid
     );
 
     return { success: true, id: Number(venta.id) };

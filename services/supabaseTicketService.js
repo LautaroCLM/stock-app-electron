@@ -84,10 +84,14 @@ const supabaseTicketService = {
 
       if (ticket.id) payload.id = Number(ticket.id);
       if (ticket.client_transaction_id) payload.client_transaction_id = ticket.client_transaction_id;
+      if (ticket.uuid || ticket.client_transaction_id) payload.uuid = ticket.uuid || ticket.client_transaction_id;
+      if (ticket.cliente_uuid) payload.cliente_uuid = ticket.cliente_uuid;
+
+      const onConflictTarget = payload.id ? 'id' : (payload.uuid ? 'uuid' : 'id');
 
       const { error } = await client
         .from('tickets')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: onConflictTarget });
 
       if (error) {
         console.error('[SupabaseTicketService] Error al insertar ticket en Supabase:', error.message);

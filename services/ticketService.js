@@ -54,7 +54,7 @@ function createTicketService(db, syncManager = null) {
    */
   function getTickets() {
     const rows = db.prepare(`
-      SELECT t.id, t.fecha, t.metodo_pago, t.total, t.productos, t.tipo, t.descuento, t.subtotal, t.cliente, t.client_transaction_id,
+      SELECT t.id, t.fecha, t.metodo_pago, t.total, t.productos, t.tipo, t.descuento, t.subtotal, t.cliente, t.client_transaction_id, t.uuid, t.cliente_uuid,
              (SELECT COUNT(*) FROM ajustes_caja a WHERE a.venta_id = t.id AND a.tipo = 'Venta anulada') > 0 AS anulado
       FROM tickets t
       ORDER BY datetime(t.fecha) DESC
@@ -133,10 +133,12 @@ function createTicketService(db, syncManager = null) {
     const descuento = data.descuento || 0;
     const subtotal = data.subtotal || 0;
     const clientTransactionId = data.client_transaction_id || null;
+    const ticketUuid = data.uuid || clientTransactionId || null;
+    const clienteUuid = data.cliente_uuid || null;
 
     const info = db.prepare(`
-      INSERT INTO tickets (fecha, metodo_pago, total, productos, tipo, descuento, subtotal, client_transaction_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO tickets (fecha, metodo_pago, total, productos, tipo, descuento, subtotal, client_transaction_id, uuid, cliente_uuid)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       fecha,
       metodoPago,
@@ -145,13 +147,17 @@ function createTicketService(db, syncManager = null) {
       tipo,
       descuento,
       subtotal,
-      clientTransactionId
+      clientTransactionId,
+      ticketUuid,
+      clienteUuid
     );
 
     const ticketId = info.lastInsertRowid;
 
     const payload = {
       id: ticketId,
+      uuid: ticketUuid,
+      cliente_uuid: clienteUuid,
       fecha,
       metodo_pago: metodoPago,
       total,
@@ -208,6 +214,8 @@ function createTicketService(db, syncManager = null) {
     }
 
     const clientTxId = ticket.client_transaction_id || null;
+    const ticketUuid = ticket.uuid || clientTxId || null;
+    const clienteUuid = ticket.cliente_uuid || null;
 
     if (clientTxId) {
       try {
@@ -230,8 +238,8 @@ function createTicketService(db, syncManager = null) {
 
             // 3. Insertar/Actualizar la fila definitiva con ID remoto
             const stmt = db.prepare(`
-              INSERT INTO tickets (id, fecha, metodo_pago, total, productos, tipo, descuento, subtotal, cliente, client_transaction_id)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              INSERT INTO tickets (id, fecha, metodo_pago, total, productos, tipo, descuento, subtotal, cliente, client_transaction_id, uuid, cliente_uuid)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               ON CONFLICT(id) DO UPDATE SET
                 fecha = excluded.fecha,
                 metodo_pago = excluded.metodo_pago,
@@ -241,7 +249,9 @@ function createTicketService(db, syncManager = null) {
                 descuento = excluded.descuento,
                 subtotal = excluded.subtotal,
                 cliente = excluded.cliente,
-                client_transaction_id = excluded.client_transaction_id
+                client_transaction_id = excluded.client_transaction_id,
+                uuid = COALESCE(excluded.uuid, tickets.uuid),
+                cliente_uuid = COALESCE(excluded.cliente_uuid, tickets.cliente_uuid)
             `);
 
             stmt.run(
@@ -254,7 +264,9 @@ function createTicketService(db, syncManager = null) {
               ticket.descuento !== undefined ? Number(ticket.descuento) : 0,
               ticket.subtotal !== undefined ? Number(ticket.subtotal) : 0,
               ticket.cliente !== undefined ? ticket.cliente : null,
-              clientTxId
+              clientTxId,
+              ticketUuid,
+              clienteUuid
             );
           })();
 
@@ -267,8 +279,8 @@ function createTicketService(db, syncManager = null) {
     }
 
     const stmt = db.prepare(`
-      INSERT INTO tickets (id, fecha, metodo_pago, total, productos, tipo, descuento, subtotal, cliente, client_transaction_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO tickets (id, fecha, metodo_pago, total, productos, tipo, descuento, subtotal, cliente, client_transaction_id, uuid, cliente_uuid)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         fecha = excluded.fecha,
         metodo_pago = excluded.metodo_pago,
@@ -278,7 +290,9 @@ function createTicketService(db, syncManager = null) {
         descuento = excluded.descuento,
         subtotal = excluded.subtotal,
         cliente = excluded.cliente,
-        client_transaction_id = excluded.client_transaction_id
+        client_transaction_id = excluded.client_transaction_id,
+        uuid = COALESCE(excluded.uuid, tickets.uuid),
+        cliente_uuid = COALESCE(excluded.cliente_uuid, tickets.cliente_uuid)
     `);
 
     stmt.run(
@@ -291,7 +305,9 @@ function createTicketService(db, syncManager = null) {
       ticket.descuento !== undefined ? Number(ticket.descuento) : 0,
       ticket.subtotal !== undefined ? Number(ticket.subtotal) : 0,
       ticket.cliente !== undefined ? ticket.cliente : null,
-      clientTxId
+      clientTxId,
+      ticketUuid,
+      clienteUuid
     );
 
     return { success: true, id: Number(ticket.id) };
