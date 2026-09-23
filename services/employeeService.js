@@ -835,6 +835,18 @@ function createEmployeeService(db, registrarAccion, syncManager = null) {
   }
 
   function upsertPayroll(liq) {
+    if (!liq || !liq.id) return { success: false, error: 'ID de liquidación requerido.' };
+
+    const stmt = db.prepare(`
+      INSERT INTO empleado_liquidaciones (id, empleado_id, mes, horas_trabajadas, valor_hora, adicionales, descuentos, total_generado, total_liquidacion)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        empleado_id = excluded.empleado_id,
+        mes = excluded.mes,
+        horas_trabajadas = excluded.horas_trabajadas,
+        valor_hora = excluded.valor_hora,
+        adicionales = excluded.adicionales,
+        descuentos = excluded.descuentos,
         total_generado = excluded.total_generado,
         total_liquidacion = excluded.total_liquidacion
     `);
