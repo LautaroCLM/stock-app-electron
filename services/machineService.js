@@ -5,6 +5,7 @@
 
 'use strict';
 
+const crypto = require('crypto');
 const supabaseMachineService = require('./supabaseMachineService');
 
 /**
@@ -43,12 +44,14 @@ function createMachineService(db, registrarAccion, syncManager = null) {
   }
 
   function addMachine(data) {
+    const uuid = data.uuid || crypto.randomUUID();
     const stmt = db.prepare(`
-      INSERT INTO maquinas (nombre, tipo, marca, modelo, anio, numero_serie, valor_hora, horas_totales, estado, observaciones)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO maquinas (uuid, nombre, tipo, marca, modelo, anio, numero_serie, valor_hora, horas_totales, estado, observaciones)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const info = stmt.run(
+      uuid,
       data.nombre || '',
       data.tipo || '',
       data.marca || '',
@@ -69,6 +72,7 @@ function createMachineService(db, registrarAccion, syncManager = null) {
 
     const payload = {
       id: machineId,
+      uuid,
       nombre: data.nombre || '',
       tipo: data.tipo || '',
       marca: data.marca || '',
@@ -89,17 +93,29 @@ function createMachineService(db, registrarAccion, syncManager = null) {
       payload
     );
 
-    return { success: true, id: machineId };
+    return { success: true, id: machineId, uuid };
   }
 
   function updateMachine(data) {
-    if (!data || !data.id) return { success: false, error: 'ID de máquina requerido.' };
+    if (!data || (!data.id && !data.uuid)) return { success: false, error: 'ID o UUID de máquina requerido.' };
+
+    let existing = null;
+    if (data.uuid) {
+      existing = db.prepare('SELECT id, uuid FROM maquinas WHERE uuid = ?').get(data.uuid);
+    }
+    if (!existing && data.id) {
+      existing = db.prepare('SELECT id, uuid FROM maquinas WHERE id = ?').get(Number(data.id));
+    }
+
+    const uuid = data.uuid || (existing ? existing.uuid : null) || crypto.randomUUID();
+    const targetId = existing ? existing.id : Number(data.id);
 
     const stmt = db.prepare(`
-      UPDATE maquinas SET nombre=?, tipo=?, marca=?, modelo=?, anio=?, numero_serie=?, valor_hora=?, estado=?, observaciones=? WHERE id=?
+      UPDATE maquinas SET uuid=?, nombre=?, tipo=?, marca=?, modelo=?, anio=?, numero_serie=?, valor_hora=?, estado=?, observaciones=? WHERE id=?
     `);
 
     stmt.run(
+      uuid,
       data.nombre || '',
       data.tipo || '',
       data.marca || '',
@@ -109,14 +125,14 @@ function createMachineService(db, registrarAccion, syncManager = null) {
       parseFloat(data.valor_hora) || 0,
       data.estado || 'Disponible',
       data.observaciones || '',
-      data.id
+      targetId
     );
 
     if (typeof registrarAccion === 'function') {
-      registrarAccion('Edición Máquina', `Máquina ID ${data.id} actualizada.`);
+      registrarAccion('Edición Máquina', `Máquina ID ${targetId} actualizada.`);
     }
 
-    const updatedMachine = db.prepare('SELECT * FROM maquinas WHERE id = ?').get(data.id);
+    const updatedMachine = db.prepare('SELECT * FROM maquinas WHERE id = ?').get(targetId);
     if (updatedMachine) {
       handleDualWrite(
         supabaseMachineService.updateMachine(updatedMachine),
@@ -126,64 +142,104 @@ function createMachineService(db, registrarAccion, syncManager = null) {
       );
     }
 
-    return { success: true };
+    return { success: true, id: targetId, uuid };
   }
 
   function deleteMachine(id) {
     if (!id) return { success: false, error: 'ID de máquina requerido.' };
 
+    const existing = db.prepare('SELECT uuid FROM maquinas WHERE id=?').get(id);
     db.prepare('DELETE FROM maquinas WHERE id=?').run(id);
 
     if (typeof registrarAccion === 'function') {
       registrarAccion('Eliminación Máquina', `Máquina ID ${id} eliminada.`);
     }
 
+    const payload = { id: Number(id) };
+    if (existing && existing.uuid) payload.uuid = existing.uuid;
+
     handleDualWrite(
-      supabaseMachineService.deleteMachine(id),
+      supabaseMachineService.deleteMachine(id, existing ? existing.uuid : null),
       'maquinas',
       'DELETE',
-      { id: Number(id) }
+      payload
     );
 
     return { success: true };
   }
 
   function upsertMachine(maquina) {
-    if (!maquina || !maquina.id) return { success: false, error: 'ID de máquina requerido.' };
+    if (!maquina || (!maquina.id && !maquina.uuid)) return { success: false, error: 'ID o UUID de máquina requerido.' };
 
-    const stmt = db.prepare(`
-      INSERT INTO maquinas (id, nombre, tipo, marca, modelo, anio, numero_serie, valor_hora, horas_totales, ultimo_servicio, estado, observaciones)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        nombre = excluded.nombre,
-        tipo = excluded.tipo,
-        marca = excluded.marca,
-        modelo = excluded.modelo,
-        anio = excluded.anio,
-        numero_serie = excluded.numero_serie,
-        valor_hora = excluded.valor_hora,
-        horas_totales = excluded.horas_totales,
-        ultimo_servicio = excluded.ultimo_servicio,
-        estado = excluded.estado,
-        observaciones = excluded.observaciones
-    `);
+    let existing = null;
+    if (maquina.uuid) {
+      existing = db.prepare('SELECT id, uuid FROM maquinas WHERE uuid = ?').get(maquina.uuid);
+    }
+    if (!existing && maquina.id) {
+      existing = db.prepare('SELECT id, uuid FROM maquinas WHERE id = ?').get(Number(maquina.id));
+    }
 
-    stmt.run(
-      Number(maquina.id),
-      maquina.nombre || '',
-      maquina.tipo || '',
-      maquina.marca || '',
-      maquina.modelo || '',
-      maquina.anio ? Number(maquina.anio) : null,
-      maquina.numero_serie || '',
-      maquina.valor_hora !== undefined ? Number(maquina.valor_hora) : 0,
-      maquina.horas_totales !== undefined ? Number(maquina.horas_totales) : 0,
-      maquina.ultimo_servicio || null,
-      maquina.estado || 'Disponible',
-      maquina.observaciones || ''
-    );
+    const uuid = maquina.uuid || (existing ? existing.uuid : null) || crypto.randomUUID();
 
-    return { success: true, id: Number(maquina.id) };
+    if (existing) {
+      const stmt = db.prepare(`
+        UPDATE maquinas SET
+          uuid = ?,
+          nombre = ?,
+          tipo = ?,
+          marca = ?,
+          modelo = ?,
+          anio = ?,
+          numero_serie = ?,
+          valor_hora = ?,
+          horas_totales = ?,
+          ultimo_servicio = ?,
+          estado = ?,
+          observaciones = ?
+        WHERE id = ?
+      `);
+
+      stmt.run(
+        uuid,
+        maquina.nombre || '',
+        maquina.tipo || '',
+        maquina.marca || '',
+        maquina.modelo || '',
+        maquina.anio ? Number(maquina.anio) : null,
+        maquina.numero_serie || '',
+        maquina.valor_hora !== undefined ? Number(maquina.valor_hora) : 0,
+        maquina.horas_totales !== undefined ? Number(maquina.horas_totales) : 0,
+        maquina.ultimo_servicio || null,
+        maquina.estado || 'Disponible',
+        maquina.observaciones || '',
+        existing.id
+      );
+
+      return { success: true, id: existing.id, uuid };
+    } else {
+      const stmt = db.prepare(`
+        INSERT INTO maquinas (id, uuid, nombre, tipo, marca, modelo, anio, numero_serie, valor_hora, horas_totales, ultimo_servicio, estado, observaciones)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const info = stmt.run(
+        maquina.id ? Number(maquina.id) : null,
+        uuid,
+        maquina.nombre || '',
+        maquina.tipo || '',
+        maquina.marca || '',
+        maquina.modelo || '',
+        maquina.anio ? Number(maquina.anio) : null,
+        maquina.numero_serie || '',
+        maquina.valor_hora !== undefined ? Number(maquina.valor_hora) : 0,
+        maquina.horas_totales !== undefined ? Number(maquina.horas_totales) : 0,
+        maquina.ultimo_servicio || null,
+        maquina.estado || 'Disponible',
+        maquina.observaciones || ''
+      );
+
+      return { success: true, id: info.lastInsertRowid, uuid };
+    }
   }
 
   // ── TRABAJOS MAQUINAS ──────────────────────────────────────────────────────
@@ -200,15 +256,29 @@ function createMachineService(db, registrarAccion, syncManager = null) {
 
   function addWorkLog(t) {
     const transaction = db.transaction(() => {
+      let maquina = null;
+      if (t.maquina_uuid) {
+        maquina = db.prepare('SELECT id, uuid FROM maquinas WHERE uuid = ?').get(t.maquina_uuid);
+      }
+      if (!maquina && t.maquina_id) {
+        maquina = db.prepare('SELECT id, uuid FROM maquinas WHERE id = ?').get(t.maquina_id);
+      }
+
+      const maquinaId = maquina ? maquina.id : Number(t.maquina_id);
+      const maquinaUuid = maquina ? maquina.uuid : (t.maquina_uuid || null);
+
       const horas = parseFloat(t.horas) || 0;
       const precioHora = parseFloat(t.precio_hora) || 0;
       const total = parseFloat(t.total) || (horas * precioHora);
+      const uuid = t.uuid || crypto.randomUUID();
 
       const info = db.prepare(`
-        INSERT INTO trabajos_maquinas (maquina_id, fecha, cliente, operador, horas, precio_hora, total, observaciones)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO trabajos_maquinas (uuid, maquina_id, maquina_uuid, fecha, cliente, operador, horas, precio_hora, total, observaciones)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
-        t.maquina_id,
+        uuid,
+        maquinaId,
+        maquinaUuid,
         t.fecha || new Date().toISOString().split('T')[0],
         t.cliente || '',
         t.operador || '',
@@ -220,15 +290,19 @@ function createMachineService(db, registrarAccion, syncManager = null) {
 
       const workId = info.lastInsertRowid;
 
-      db.prepare('UPDATE maquinas SET horas_totales=horas_totales+? WHERE id=?').run(horas, t.maquina_id);
+      if (maquinaId) {
+        db.prepare('UPDATE maquinas SET horas_totales=horas_totales+? WHERE id=?').run(horas, maquinaId);
+      }
 
       if (typeof registrarAccion === 'function') {
-        registrarAccion('Trabajo Máquina', `Trabajo de ${horas}hs en Máquina ID ${t.maquina_id}`);
+        registrarAccion('Trabajo Máquina', `Trabajo de ${horas}hs en Máquina ID ${maquinaId}`);
       }
 
       const payload = {
         id: workId,
-        maquina_id: Number(t.maquina_id),
+        uuid,
+        maquina_id: maquinaId,
+        maquina_uuid: maquinaUuid,
         fecha: t.fecha || new Date().toISOString().split('T')[0],
         cliente: t.cliente || '',
         operador: t.operador || '',
@@ -246,17 +320,19 @@ function createMachineService(db, registrarAccion, syncManager = null) {
       );
 
       // Replicar actualización de horas_totales de la máquina
-      const updatedMachine = db.prepare('SELECT * FROM maquinas WHERE id = ?').get(t.maquina_id);
-      if (updatedMachine) {
-        handleDualWrite(
-          supabaseMachineService.updateMachine(updatedMachine),
-          'maquinas',
-          'UPDATE',
-          updatedMachine
-        );
+      if (maquinaId) {
+        const updatedMachine = db.prepare('SELECT * FROM maquinas WHERE id = ?').get(maquinaId);
+        if (updatedMachine) {
+          handleDualWrite(
+            supabaseMachineService.updateMachine(updatedMachine),
+            'maquinas',
+            'UPDATE',
+            updatedMachine
+          );
+        }
       }
 
-      return { success: true, id: workId };
+      return { success: true, id: workId, uuid };
     });
 
     return transaction();
@@ -266,7 +342,7 @@ function createMachineService(db, registrarAccion, syncManager = null) {
     if (!id) return { success: false, error: 'ID de trabajo requerido.' };
 
     const transaction = db.transaction(() => {
-      const tr = db.prepare('SELECT maquina_id, horas FROM trabajos_maquinas WHERE id=?').get(id);
+      const tr = db.prepare('SELECT uuid, maquina_id, horas FROM trabajos_maquinas WHERE id=?').get(id);
       db.prepare('DELETE FROM trabajos_maquinas WHERE id=?').run(id);
       if (tr) {
         db.prepare('UPDATE maquinas SET horas_totales=MAX(0, horas_totales-?) WHERE id=?').run(tr.horas, tr.maquina_id);
@@ -281,11 +357,14 @@ function createMachineService(db, registrarAccion, syncManager = null) {
         }
       }
 
+      const payload = { id: Number(id) };
+      if (tr && tr.uuid) payload.uuid = tr.uuid;
+
       handleDualWrite(
-        supabaseMachineService.deleteWorkLog(id),
+        supabaseMachineService.deleteWorkLog(id, tr ? tr.uuid : null),
         'trabajos_maquinas',
         'DELETE',
-        { id: Number(id) }
+        payload
       );
 
       return { success: true };
@@ -295,35 +374,83 @@ function createMachineService(db, registrarAccion, syncManager = null) {
   }
 
   function upsertWorkLog(trabajo) {
-    if (!trabajo || !trabajo.id) return { success: false, error: 'ID de trabajo requerido.' };
+    if (!trabajo || (!trabajo.id && !trabajo.uuid)) return { success: false, error: 'ID o UUID de trabajo requerido.' };
 
-    const stmt = db.prepare(`
-      INSERT INTO trabajos_maquinas (id, maquina_id, fecha, cliente, operador, horas, precio_hora, total, observaciones)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        maquina_id = excluded.maquina_id,
-        fecha = excluded.fecha,
-        cliente = excluded.cliente,
-        operador = excluded.operador,
-        horas = excluded.horas,
-        precio_hora = excluded.precio_hora,
-        total = excluded.total,
-        observaciones = excluded.observaciones
-    `);
+    let existing = null;
+    if (trabajo.uuid) {
+      existing = db.prepare('SELECT id, uuid FROM trabajos_maquinas WHERE uuid = ?').get(trabajo.uuid);
+    }
+    if (!existing && trabajo.id) {
+      existing = db.prepare('SELECT id, uuid FROM trabajos_maquinas WHERE id = ?').get(Number(trabajo.id));
+    }
 
-    stmt.run(
-      Number(trabajo.id),
-      Number(trabajo.maquina_id),
-      trabajo.fecha || new Date().toISOString().split('T')[0],
-      trabajo.cliente || '',
-      trabajo.operador || '',
-      trabajo.horas !== undefined ? Number(trabajo.horas) : 0,
-      trabajo.precio_hora !== undefined ? Number(trabajo.precio_hora) : 0,
-      trabajo.total !== undefined ? Number(trabajo.total) : 0,
-      trabajo.observaciones || ''
-    );
+    const uuid = trabajo.uuid || (existing ? existing.uuid : null) || crypto.randomUUID();
 
-    return { success: true, id: Number(trabajo.id) };
+    let localMaquinaId = trabajo.maquina_id ? Number(trabajo.maquina_id) : null;
+    let maquinaUuid = trabajo.maquina_uuid || null;
+
+    if (!localMaquinaId && maquinaUuid) {
+      const parentM = db.prepare('SELECT id FROM maquinas WHERE uuid = ?').get(maquinaUuid);
+      if (parentM) localMaquinaId = parentM.id;
+    }
+    if (!maquinaUuid && localMaquinaId) {
+      const parentM = db.prepare('SELECT uuid FROM maquinas WHERE id = ?').get(localMaquinaId);
+      if (parentM) maquinaUuid = parentM.uuid;
+    }
+
+    if (existing) {
+      const stmt = db.prepare(`
+        UPDATE trabajos_maquinas SET
+          uuid = ?,
+          maquina_id = ?,
+          maquina_uuid = ?,
+          fecha = ?,
+          cliente = ?,
+          operador = ?,
+          horas = ?,
+          precio_hora = ?,
+          total = ?,
+          observaciones = ?
+        WHERE id = ?
+      `);
+
+      stmt.run(
+        uuid,
+        localMaquinaId,
+        maquinaUuid,
+        trabajo.fecha || new Date().toISOString().split('T')[0],
+        trabajo.cliente || '',
+        trabajo.operador || '',
+        trabajo.horas !== undefined ? Number(trabajo.horas) : 0,
+        trabajo.precio_hora !== undefined ? Number(trabajo.precio_hora) : 0,
+        trabajo.total !== undefined ? Number(trabajo.total) : 0,
+        trabajo.observaciones || '',
+        existing.id
+      );
+
+      return { success: true, id: existing.id, uuid };
+    } else {
+      const stmt = db.prepare(`
+        INSERT INTO trabajos_maquinas (id, uuid, maquina_id, maquina_uuid, fecha, cliente, operador, horas, precio_hora, total, observaciones)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const info = stmt.run(
+        trabajo.id ? Number(trabajo.id) : null,
+        uuid,
+        localMaquinaId,
+        maquinaUuid,
+        trabajo.fecha || new Date().toISOString().split('T')[0],
+        trabajo.cliente || '',
+        trabajo.operador || '',
+        trabajo.horas !== undefined ? Number(trabajo.horas) : 0,
+        trabajo.precio_hora !== undefined ? Number(trabajo.precio_hora) : 0,
+        trabajo.total !== undefined ? Number(trabajo.total) : 0,
+        trabajo.observaciones || ''
+      );
+
+      return { success: true, id: info.lastInsertRowid, uuid };
+    }
   }
 
   // ── COMBUSTIBLE MAQUINAS ───────────────────────────────────────────────────
@@ -339,17 +466,31 @@ function createMachineService(db, registrarAccion, syncManager = null) {
   }
 
   function addFuelLog(c) {
+    let maquina = null;
+    if (c.maquina_uuid) {
+      maquina = db.prepare('SELECT id, uuid FROM maquinas WHERE uuid = ?').get(c.maquina_uuid);
+    }
+    if (!maquina && c.maquina_id) {
+      maquina = db.prepare('SELECT id, uuid FROM maquinas WHERE id = ?').get(c.maquina_id);
+    }
+
+    const maquinaId = maquina ? maquina.id : Number(c.maquina_id);
+    const maquinaUuid = maquina ? maquina.uuid : (c.maquina_uuid || null);
+
     const litros = parseFloat(c.litros) || 0;
     const precioLitro = parseFloat(c.precio_litro) || 0;
     const total = parseFloat(c.total) || (litros * precioLitro);
+    const uuid = c.uuid || crypto.randomUUID();
 
     const stmt = db.prepare(`
-      INSERT INTO combustible_maquinas (maquina_id, fecha, litros, precio_litro, total, observaciones)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO combustible_maquinas (uuid, maquina_id, maquina_uuid, fecha, litros, precio_litro, total, observaciones)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const info = stmt.run(
-      c.maquina_id,
+      uuid,
+      maquinaId,
+      maquinaUuid,
       c.fecha || new Date().toISOString().split('T')[0],
       litros,
       precioLitro,
@@ -360,12 +501,14 @@ function createMachineService(db, registrarAccion, syncManager = null) {
     const fuelId = info.lastInsertRowid;
 
     if (typeof registrarAccion === 'function') {
-      registrarAccion('Combustible Máquina', `Carga de ${litros}L en Máquina ID ${c.maquina_id}`);
+      registrarAccion('Combustible Máquina', `Carga de ${litros}L en Máquina ID ${maquinaId}`);
     }
 
     const payload = {
       id: fuelId,
-      maquina_id: Number(c.maquina_id),
+      uuid,
+      maquina_id: maquinaId,
+      maquina_uuid: maquinaUuid,
       fecha: c.fecha || new Date().toISOString().split('T')[0],
       litros,
       precio_litro: precioLitro,
@@ -380,50 +523,100 @@ function createMachineService(db, registrarAccion, syncManager = null) {
       payload
     );
 
-    return { success: true, id: fuelId };
+    return { success: true, id: fuelId, uuid };
   }
 
   function deleteFuelLog(id) {
     if (!id) return { success: false, error: 'ID de combustible requerido.' };
 
+    const existing = db.prepare('SELECT uuid FROM combustible_maquinas WHERE id=?').get(id);
     db.prepare('DELETE FROM combustible_maquinas WHERE id=?').run(id);
 
+    const payload = { id: Number(id) };
+    if (existing && existing.uuid) payload.uuid = existing.uuid;
+
     handleDualWrite(
-      supabaseMachineService.deleteFuelLog(id),
+      supabaseMachineService.deleteFuelLog(id, existing ? existing.uuid : null),
       'combustible_maquinas',
       'DELETE',
-      { id: Number(id) }
+      payload
     );
 
     return { success: true };
   }
 
   function upsertFuelLog(combustible) {
-    if (!combustible || !combustible.id) return { success: false, error: 'ID de combustible requerido.' };
+    if (!combustible || (!combustible.id && !combustible.uuid)) return { success: false, error: 'ID o UUID de combustible requerido.' };
 
-    const stmt = db.prepare(`
-      INSERT INTO combustible_maquinas (id, maquina_id, fecha, litros, precio_litro, total, observaciones)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        maquina_id = excluded.maquina_id,
-        fecha = excluded.fecha,
-        litros = excluded.litros,
-        precio_litro = excluded.precio_litro,
-        total = excluded.total,
-        observaciones = excluded.observaciones
-    `);
+    let existing = null;
+    if (combustible.uuid) {
+      existing = db.prepare('SELECT id, uuid FROM combustible_maquinas WHERE uuid = ?').get(combustible.uuid);
+    }
+    if (!existing && combustible.id) {
+      existing = db.prepare('SELECT id, uuid FROM combustible_maquinas WHERE id = ?').get(Number(combustible.id));
+    }
 
-    stmt.run(
-      Number(combustible.id),
-      Number(combustible.maquina_id),
-      combustible.fecha || new Date().toISOString().split('T')[0],
-      combustible.litros !== undefined ? Number(combustible.litros) : 0,
-      combustible.precio_litro !== undefined ? Number(combustible.precio_litro) : 0,
-      combustible.total !== undefined ? Number(combustible.total) : 0,
-      combustible.observaciones || ''
-    );
+    const uuid = combustible.uuid || (existing ? existing.uuid : null) || crypto.randomUUID();
 
-    return { success: true, id: Number(combustible.id) };
+    let localMaquinaId = combustible.maquina_id ? Number(combustible.maquina_id) : null;
+    let maquinaUuid = combustible.maquina_uuid || null;
+
+    if (!localMaquinaId && maquinaUuid) {
+      const parentM = db.prepare('SELECT id FROM maquinas WHERE uuid = ?').get(maquinaUuid);
+      if (parentM) localMaquinaId = parentM.id;
+    }
+    if (!maquinaUuid && localMaquinaId) {
+      const parentM = db.prepare('SELECT uuid FROM maquinas WHERE id = ?').get(localMaquinaId);
+      if (parentM) maquinaUuid = parentM.uuid;
+    }
+
+    if (existing) {
+      const stmt = db.prepare(`
+        UPDATE combustible_maquinas SET
+          uuid = ?,
+          maquina_id = ?,
+          maquina_uuid = ?,
+          fecha = ?,
+          litros = ?,
+          precio_litro = ?,
+          total = ?,
+          observaciones = ?
+        WHERE id = ?
+      `);
+
+      stmt.run(
+        uuid,
+        localMaquinaId,
+        maquinaUuid,
+        combustible.fecha || new Date().toISOString().split('T')[0],
+        combustible.litros !== undefined ? Number(combustible.litros) : 0,
+        combustible.precio_litro !== undefined ? Number(combustible.precio_litro) : 0,
+        combustible.total !== undefined ? Number(combustible.total) : 0,
+        combustible.observaciones || '',
+        existing.id
+      );
+
+      return { success: true, id: existing.id, uuid };
+    } else {
+      const stmt = db.prepare(`
+        INSERT INTO combustible_maquinas (id, uuid, maquina_id, maquina_uuid, fecha, litros, precio_litro, total, observaciones)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const info = stmt.run(
+        combustible.id ? Number(combustible.id) : null,
+        uuid,
+        localMaquinaId,
+        maquinaUuid,
+        combustible.fecha || new Date().toISOString().split('T')[0],
+        combustible.litros !== undefined ? Number(combustible.litros) : 0,
+        combustible.precio_litro !== undefined ? Number(combustible.precio_litro) : 0,
+        combustible.total !== undefined ? Number(combustible.total) : 0,
+        combustible.observaciones || ''
+      );
+
+      return { success: true, id: info.lastInsertRowid, uuid };
+    }
   }
 
   // ── MANTENIMIENTO MAQUINAS ─────────────────────────────────────────────────
@@ -440,13 +633,27 @@ function createMachineService(db, registrarAccion, syncManager = null) {
 
   function addMaintenanceLog(mt) {
     const transaction = db.transaction(() => {
+      let maquina = null;
+      if (mt.maquina_uuid) {
+        maquina = db.prepare('SELECT id, uuid FROM maquinas WHERE uuid = ?').get(mt.maquina_uuid);
+      }
+      if (!maquina && mt.maquina_id) {
+        maquina = db.prepare('SELECT id, uuid FROM maquinas WHERE id = ?').get(mt.maquina_id);
+      }
+
+      const maquinaId = maquina ? maquina.id : Number(mt.maquina_id);
+      const maquinaUuid = maquina ? maquina.uuid : (mt.maquina_uuid || null);
+
       const costo = parseFloat(mt.costo) || 0;
+      const uuid = mt.uuid || crypto.randomUUID();
 
       const info = db.prepare(`
-        INSERT INTO mantenimiento_maquinas (maquina_id, fecha, tipo, descripcion, costo, taller, estado)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO mantenimiento_maquinas (uuid, maquina_id, maquina_uuid, fecha, tipo, descripcion, costo, taller, estado)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
-        mt.maquina_id,
+        uuid,
+        maquinaId,
+        maquinaUuid,
         mt.fecha || new Date().toISOString().split('T')[0],
         mt.tipo || 'Preventivo',
         mt.descripcion || '',
@@ -457,15 +664,19 @@ function createMachineService(db, registrarAccion, syncManager = null) {
 
       const mantId = info.lastInsertRowid;
 
-      db.prepare('UPDATE maquinas SET ultimo_servicio=? WHERE id=?').run(mt.fecha, mt.maquina_id);
+      if (maquinaId) {
+        db.prepare('UPDATE maquinas SET ultimo_servicio=? WHERE id=?').run(mt.fecha, maquinaId);
+      }
 
       if (typeof registrarAccion === 'function') {
-        registrarAccion('Mantenimiento Máquina', `Mantenimiento en Máquina ID ${mt.maquina_id}`);
+        registrarAccion('Mantenimiento Máquina', `Mantenimiento en Máquina ID ${maquinaId}`);
       }
 
       const payload = {
         id: mantId,
-        maquina_id: Number(mt.maquina_id),
+        uuid,
+        maquina_id: maquinaId,
+        maquina_uuid: maquinaUuid,
         fecha: mt.fecha || new Date().toISOString().split('T')[0],
         tipo: mt.tipo || 'Preventivo',
         descripcion: mt.descripcion || '',
@@ -481,17 +692,19 @@ function createMachineService(db, registrarAccion, syncManager = null) {
         payload
       );
 
-      const updatedMachine = db.prepare('SELECT * FROM maquinas WHERE id = ?').get(mt.maquina_id);
-      if (updatedMachine) {
-        handleDualWrite(
-          supabaseMachineService.updateMachine(updatedMachine),
-          'maquinas',
-          'UPDATE',
-          updatedMachine
-        );
+      if (maquinaId) {
+        const updatedMachine = db.prepare('SELECT * FROM maquinas WHERE id = ?').get(maquinaId);
+        if (updatedMachine) {
+          handleDualWrite(
+            supabaseMachineService.updateMachine(updatedMachine),
+            'maquinas',
+            'UPDATE',
+            updatedMachine
+          );
+        }
       }
 
-      return { success: true, id: mantId };
+      return { success: true, id: mantId, uuid };
     });
 
     return transaction();
@@ -500,46 +713,97 @@ function createMachineService(db, registrarAccion, syncManager = null) {
   function deleteMaintenanceLog(id) {
     if (!id) return { success: false, error: 'ID de mantenimiento requerido.' };
 
+    const existing = db.prepare('SELECT uuid FROM mantenimiento_maquinas WHERE id=?').get(id);
     db.prepare('DELETE FROM mantenimiento_maquinas WHERE id=?').run(id);
 
+    const payload = { id: Number(id) };
+    if (existing && existing.uuid) payload.uuid = existing.uuid;
+
     handleDualWrite(
-      supabaseMachineService.deleteMaintenanceLog(id),
+      supabaseMachineService.deleteMaintenanceLog(id, existing ? existing.uuid : null),
       'mantenimiento_maquinas',
       'DELETE',
-      { id: Number(id) }
+      payload
     );
 
     return { success: true };
   }
 
   function upsertMaintenanceLog(mantenimiento) {
-    if (!mantenimiento || !mantenimiento.id) return { success: false, error: 'ID de mantenimiento requerido.' };
+    if (!mantenimiento || (!mantenimiento.id && !mantenimiento.uuid)) return { success: false, error: 'ID o UUID de mantenimiento requerido.' };
 
-    const stmt = db.prepare(`
-      INSERT INTO mantenimiento_maquinas (id, maquina_id, fecha, tipo, descripcion, costo, taller, estado)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        maquina_id = excluded.maquina_id,
-        fecha = excluded.fecha,
-        tipo = excluded.tipo,
-        descripcion = excluded.descripcion,
-        costo = excluded.costo,
-        taller = excluded.taller,
-        estado = excluded.estado
-    `);
+    let existing = null;
+    if (mantenimiento.uuid) {
+      existing = db.prepare('SELECT id, uuid FROM mantenimiento_maquinas WHERE uuid = ?').get(mantenimiento.uuid);
+    }
+    if (!existing && mantenimiento.id) {
+      existing = db.prepare('SELECT id, uuid FROM mantenimiento_maquinas WHERE id = ?').get(Number(mantenimiento.id));
+    }
 
-    stmt.run(
-      Number(mantenimiento.id),
-      Number(mantenimiento.maquina_id),
-      mantenimiento.fecha || new Date().toISOString().split('T')[0],
-      mantenimiento.tipo || 'Preventivo',
-      mantenimiento.descripcion || '',
-      mantenimiento.costo !== undefined ? Number(mantenimiento.costo) : 0,
-      mantenimiento.taller || '',
-      mantenimiento.estado || 'Realizado'
-    );
+    const uuid = mantenimiento.uuid || (existing ? existing.uuid : null) || crypto.randomUUID();
 
-    return { success: true, id: Number(mantenimiento.id) };
+    let localMaquinaId = mantenimiento.maquina_id ? Number(mantenimiento.maquina_id) : null;
+    let maquinaUuid = mantenimiento.maquina_uuid || null;
+
+    if (!localMaquinaId && maquinaUuid) {
+      const parentM = db.prepare('SELECT id FROM maquinas WHERE uuid = ?').get(maquinaUuid);
+      if (parentM) localMaquinaId = parentM.id;
+    }
+    if (!maquinaUuid && localMaquinaId) {
+      const parentM = db.prepare('SELECT uuid FROM maquinas WHERE id = ?').get(localMaquinaId);
+      if (parentM) maquinaUuid = parentM.uuid;
+    }
+
+    if (existing) {
+      const stmt = db.prepare(`
+        UPDATE mantenimiento_maquinas SET
+          uuid = ?,
+          maquina_id = ?,
+          maquina_uuid = ?,
+          fecha = ?,
+          tipo = ?,
+          descripcion = ?,
+          costo = ?,
+          taller = ?,
+          estado = ?
+        WHERE id = ?
+      `);
+
+      stmt.run(
+        uuid,
+        localMaquinaId,
+        maquinaUuid,
+        mantenimiento.fecha || new Date().toISOString().split('T')[0],
+        mantenimiento.tipo || 'Preventivo',
+        mantenimiento.descripcion || '',
+        mantenimiento.costo !== undefined ? Number(mantenimiento.costo) : 0,
+        mantenimiento.taller || '',
+        mantenimiento.estado || 'Realizado',
+        existing.id
+      );
+
+      return { success: true, id: existing.id, uuid };
+    } else {
+      const stmt = db.prepare(`
+        INSERT INTO mantenimiento_maquinas (id, uuid, maquina_id, maquina_uuid, fecha, tipo, descripcion, costo, taller, estado)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const info = stmt.run(
+        mantenimiento.id ? Number(mantenimiento.id) : null,
+        uuid,
+        localMaquinaId,
+        maquinaUuid,
+        mantenimiento.fecha || new Date().toISOString().split('T')[0],
+        mantenimiento.tipo || 'Preventivo',
+        mantenimiento.descripcion || '',
+        mantenimiento.costo !== undefined ? Number(mantenimiento.costo) : 0,
+        mantenimiento.taller || '',
+        mantenimiento.estado || 'Realizado'
+      );
+
+      return { success: true, id: info.lastInsertRowid, uuid };
+    }
   }
 
   // ── METRICAS Y RENTABILIDAD ────────────────────────────────────────────────

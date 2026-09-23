@@ -50,6 +50,7 @@ const supabaseAtmosfericoService = {
     try {
       const montoNum = Number(orderData.monto || 0);
       const payload = {
+        uuid: orderData.uuid || null,
         fecha: orderData.fecha || new Date().toISOString().split('T')[0],
         cliente: String(orderData.cliente || '').trim(),
         direccion: String(orderData.direccion || '').trim(),
@@ -67,9 +68,10 @@ const supabaseAtmosfericoService = {
         payload.id = Number(orderData.id);
       }
 
+      const onConflictColumn = orderData.uuid ? 'uuid' : 'id';
       const { data, error } = await client
         .from('atmos_ordenes')
-        .upsert(payload, { onConflict: 'id' })
+        .upsert(payload, { onConflict: onConflictColumn })
         .select()
         .single();
 
@@ -88,9 +90,10 @@ const supabaseAtmosfericoService = {
   /**
    * Elimina una orden atmosférica y sus pagos asociados en Supabase.
    * @param {number|string} id
+   * @param {string} [uuid]
    * @returns {Promise<object>}
    */
-  async deleteOrder(id) {
+  async deleteOrder(id, uuid = null) {
     if (!isSupabaseConfigured()) {
       return { success: false, error: 'Supabase no está configurado.' };
     }
@@ -98,21 +101,29 @@ const supabaseAtmosfericoService = {
     if (!client) return { success: false, error: 'Cliente Supabase no disponible.' };
 
     try {
-      await client.from('atmos_pagos').delete().eq('orden_id', Number(id));
+      if (uuid) {
+        await client.from('atmos_pagos').delete().eq('orden_uuid', uuid);
+      } else if (id) {
+        await client.from('atmos_pagos').delete().eq('orden_id', Number(id));
+      }
 
-      const { error } = await client
-        .from('atmos_ordenes')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('atmos_ordenes').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else {
+        query = query.eq('id', Number(id));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseAtmosfericoService] Error al eliminar orden ID ${id}:`, error.message);
+        console.error(`[SupabaseAtmosfericoService] Error al eliminar orden ID/UUID ${uuid || id}:`, error.message);
         return { success: false, error: error.message };
       }
 
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseAtmosfericoService] Excepción al eliminar orden ID ${id}:`, err.message);
+      console.error(`[SupabaseAtmosfericoService] Excepción al eliminar orden ID/UUID ${uuid || id}:`, err.message);
       return { success: false, error: err.message };
     }
   },
@@ -158,7 +169,9 @@ const supabaseAtmosfericoService = {
 
     try {
       const payload = {
-        orden_id: Number(pagoData.orden_id),
+        uuid: pagoData.uuid || null,
+        orden_id: pagoData.orden_id ? Number(pagoData.orden_id) : null,
+        orden_uuid: pagoData.orden_uuid || null,
         fecha: pagoData.fecha || new Date().toISOString().split('T')[0],
         monto: Number(pagoData.monto),
         metodo_pago: pagoData.metodo_pago || 'Efectivo',
@@ -169,9 +182,10 @@ const supabaseAtmosfericoService = {
         payload.id = Number(pagoData.id);
       }
 
+      const onConflictColumn = pagoData.uuid ? 'uuid' : 'id';
       const { data, error } = await client
         .from('atmos_pagos')
-        .upsert(payload, { onConflict: 'id' })
+        .upsert(payload, { onConflict: onConflictColumn })
         .select()
         .single();
 
@@ -180,7 +194,7 @@ const supabaseAtmosfericoService = {
         return { success: false, error: error.message };
       }
 
-      await this.recalculateServiceBalance(pagoData.orden_id);
+      await this.recalculateServiceBalance(pagoData.orden_id || pagoData.orden_uuid);
 
       return { success: true, data };
     } catch (err) {
@@ -193,9 +207,10 @@ const supabaseAtmosfericoService = {
    * Elimina un pago de servicio atmosférico y recalcula el saldo pendiente.
    * @param {number|string} pagoId
    * @param {number|string} ordenId
+   * @param {string} [uuid]
    * @returns {Promise<object>}
    */
-  async deletePayment(pagoId, ordenId) {
+  async deletePayment(pagoId, ordenId, uuid = null) {
     if (!isSupabaseConfigured()) {
       return { success: false, error: 'Supabase no está configurado.' };
     }
@@ -203,13 +218,17 @@ const supabaseAtmosfericoService = {
     if (!client) return { success: false, error: 'Cliente Supabase no disponible.' };
 
     try {
-      const { error } = await client
-        .from('atmos_pagos')
-        .delete()
-        .eq('id', Number(pagoId));
+      let query = client.from('atmos_pagos').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else {
+        query = query.eq('id', Number(pagoId));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseAtmosfericoService] Error al eliminar pago ID ${pagoId}:`, error.message);
+        console.error(`[SupabaseAtmosfericoService] Error al eliminar pago ID/UUID ${uuid || pagoId}:`, error.message);
         return { success: false, error: error.message };
       }
 
@@ -219,33 +238,39 @@ const supabaseAtmosfericoService = {
 
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseAtmosfericoService] Excepción al eliminar pago ID ${pagoId}:`, err.message);
+      console.error(`[SupabaseAtmosfericoService] Excepción al eliminar pago ID/UUID ${uuid || pagoId}:`, err.message);
       return { success: false, error: err.message };
     }
   },
 
   /**
    * Recalcula el saldo pendiente y el estado de la orden en Supabase.
-   * @param {number|string} ordenId
+   * @param {number|string} ordenIdOrUuid
    */
-  async recalculateServiceBalance(ordenId) {
-    if (!isSupabaseConfigured() || !ordenId) return;
+  async recalculateServiceBalance(ordenIdOrUuid) {
+    if (!isSupabaseConfigured() || !ordenIdOrUuid) return;
     const client = getSupabaseClient();
     if (!client) return;
 
     try {
-      const { data: orden } = await client
-        .from('atmos_ordenes')
-        .select('monto')
-        .eq('id', Number(ordenId))
-        .single();
+      let queryOrden = client.from('atmos_ordenes').select('id, uuid, monto');
+      if (typeof ordenIdOrUuid === 'string' && ordenIdOrUuid.length > 20) {
+        queryOrden = queryOrden.eq('uuid', ordenIdOrUuid);
+      } else {
+        queryOrden = queryOrden.eq('id', Number(ordenIdOrUuid));
+      }
 
+      const { data: orden } = await queryOrden.single();
       if (!orden) return;
 
-      const { data: pagos } = await client
-        .from('atmos_pagos')
-        .select('monto')
-        .eq('orden_id', Number(ordenId));
+      let queryPagos = client.from('atmos_pagos').select('monto');
+      if (orden.uuid) {
+        queryPagos = queryPagos.eq('orden_uuid', orden.uuid);
+      } else {
+        queryPagos = queryPagos.eq('orden_id', Number(orden.id));
+      }
+
+      const { data: pagos } = await queryPagos;
 
       const totalPagado = (pagos || []).reduce((acc, p) => acc + Number(p.monto || 0), 0);
       const montoOrden = Number(orden.monto || 0);
@@ -258,15 +283,18 @@ const supabaseAtmosfericoService = {
         nuevoEstado = 'Pago parcial';
       }
 
-      await client
-        .from('atmos_ordenes')
-        .update({
-          saldo_pendiente: nuevoSaldo,
-          estado: nuevoEstado,
-        })
-        .eq('id', Number(ordenId));
+      let updateQuery = client.from('atmos_ordenes').update({
+        saldo_pendiente: nuevoSaldo,
+        estado: nuevoEstado,
+      });
+
+      if (orden.uuid) {
+        await updateQuery.eq('uuid', orden.uuid);
+      } else {
+        await updateQuery.eq('id', Number(orden.id));
+      }
     } catch (err) {
-      console.error(`[SupabaseAtmosfericoService] Error recalculando saldo orden ${ordenId}:`, err.message);
+      console.error(`[SupabaseAtmosfericoService] Error recalculando saldo orden ${ordenIdOrUuid}:`, err.message);
     }
   },
 };

@@ -2,6 +2,7 @@
 const { app, BrowserWindow, ipcMain, dialog, Notification } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const XLSX = require('xlsx');
 const Database = require('better-sqlite3');
 const createProductService = require('./services/productService');
@@ -411,9 +412,9 @@ db.prepare(`
   )
 `).run();
 
-try {
-  db.prepare("ALTER TABLE municipio_ordenes ADD COLUMN productos TEXT").run();
-} catch (err) {}
+try { db.prepare("ALTER TABLE municipio_ordenes ADD COLUMN productos TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE municipio_ordenes ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_municipio_ordenes_uuid ON municipio_ordenes(uuid)").run(); } catch (err) {}
 
 db.prepare(`
   CREATE TABLE IF NOT EXISTS municipio_orden_items (
@@ -428,6 +429,12 @@ db.prepare(`
   )
 `).run();
 
+try { db.prepare("ALTER TABLE municipio_orden_items ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE municipio_orden_items ADD COLUMN orden_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE municipio_orden_items ADD COLUMN producto_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_municipio_orden_items_uuid ON municipio_orden_items(uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_municipio_orden_items_orden_uuid ON municipio_orden_items(orden_uuid)").run(); } catch (err) {}
+
 db.prepare(`
   CREATE TABLE IF NOT EXISTS municipio_pagos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -440,6 +447,11 @@ db.prepare(`
     FOREIGN KEY (orden_id) REFERENCES municipio_ordenes(id) ON DELETE CASCADE
   )
 `).run();
+
+try { db.prepare("ALTER TABLE municipio_pagos ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE municipio_pagos ADD COLUMN orden_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_municipio_pagos_uuid ON municipio_pagos(uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_municipio_pagos_orden_uuid ON municipio_pagos(orden_uuid)").run(); } catch (err) {}
 
 db.prepare(`
   CREATE TABLE IF NOT EXISTS atmos_ordenes (
@@ -459,6 +471,9 @@ db.prepare(`
   )
 `).run();
 
+try { db.prepare("ALTER TABLE atmos_ordenes ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_atmos_ordenes_uuid ON atmos_ordenes(uuid)").run(); } catch (err) {}
+
 db.prepare(`
   CREATE TABLE IF NOT EXISTS atmos_pagos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -471,6 +486,11 @@ db.prepare(`
     FOREIGN KEY (orden_id) REFERENCES atmos_ordenes(id) ON DELETE CASCADE
   )
 `).run();
+
+try { db.prepare("ALTER TABLE atmos_pagos ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("ALTER TABLE atmos_pagos ADD COLUMN orden_uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_atmos_pagos_uuid ON atmos_pagos(uuid)").run(); } catch (err) {}
+try { db.prepare("CREATE INDEX IF NOT EXISTS idx_atmos_pagos_orden_uuid ON atmos_pagos(orden_uuid)").run(); } catch (err) {}
 
 // ====================
 // Módulo Liquidación de Empleados - Tablas
@@ -1072,6 +1092,8 @@ try {
 try {
   db.prepare("ALTER TABLE presupuestos ADD COLUMN total REAL").run();
 } catch (err) {}
+try { db.prepare("ALTER TABLE presupuestos ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_presupuestos_uuid ON presupuestos(uuid)").run(); } catch (err) {}
 
 // Guardar presupuesto
 ipcMain.handle('save-presupuesto', (event, data) => {
@@ -1159,6 +1181,8 @@ try {
 try {
   db.prepare("ALTER TABLE remitos ADD COLUMN total REAL").run();
 } catch (err) {}
+try { db.prepare("ALTER TABLE remitos ADD COLUMN uuid TEXT").run(); } catch (err) {}
+try { db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_remitos_uuid ON remitos(uuid)").run(); } catch (err) {}
 
 // Guardar remito
 ipcMain.handle('save-remito', (event, data) => {
@@ -2802,10 +2826,12 @@ ipcMain.handle('atmos-get-orders', () => {
 
 ipcMain.handle('atmos-add-order', (event, order) => {
   try {
+    const orderUuid = order.uuid || crypto.randomUUID();
     const info = db.prepare(`
-      INSERT INTO atmos_ordenes (fecha, cliente, direccion, telefono, tipo_servicio, descripcion, monto, saldo_pendiente, estado, observaciones, fecha_estimada_cobro)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO atmos_ordenes (uuid, fecha, cliente, direccion, telefono, tipo_servicio, descripcion, monto, saldo_pendiente, estado, observaciones, fecha_estimada_cobro)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
+      orderUuid,
       order.fecha,
       order.cliente,
       order.direccion,
@@ -2822,7 +2848,7 @@ ipcMain.handle('atmos-add-order', (event, order) => {
     const orderId = info.lastInsertRowid;
     registrarAccion('Venta Atmosférico', `Servicio #${orderId} registrado para ${order.cliente} por $${order.monto}.`);
 
-    const payload = { ...order, id: orderId, saldo_pendiente: parseFloat(order.monto) || 0, estado: 'Pendiente' };
+    const payload = { ...order, id: orderId, uuid: orderUuid, saldo_pendiente: parseFloat(order.monto) || 0, estado: 'Pendiente' };
     handleDualWrite(
       supabaseAtmosfericoService.addOrder(payload),
       'atmos_ordenes',
@@ -2830,7 +2856,7 @@ ipcMain.handle('atmos-add-order', (event, order) => {
       payload
     );
 
-    return { success: true, id: orderId };
+    return { success: true, id: orderId, uuid: orderUuid };
   } catch (err) {
     console.error('Error en atmos-add-order:', err);
     return { success: false, error: err.message };
@@ -2848,17 +2874,23 @@ ipcMain.handle('atmos-get-payments', (event, ordenId) => {
 
 ipcMain.handle('atmos-add-payment', (event, pago) => {
   let paymentId = null;
+  const paymentUuid = pago.uuid || crypto.randomUUID();
+  let ordenUuid = null;
+
   const transaction = db.transaction(() => {
-    const orden = db.prepare('SELECT monto, saldo_pendiente FROM atmos_ordenes WHERE id = ?').get(pago.orden_id);
+    const orden = db.prepare('SELECT uuid, monto, saldo_pendiente FROM atmos_ordenes WHERE id = ?').get(pago.orden_id);
     if (!orden) {
       throw new Error('Servicio no encontrado');
     }
+    ordenUuid = orden.uuid || null;
 
     const info = db.prepare(`
-      INSERT INTO atmos_pagos (orden_id, fecha, monto, metodo_pago, observaciones)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO atmos_pagos (uuid, orden_id, orden_uuid, fecha, monto, metodo_pago, observaciones)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(
+      paymentUuid,
       pago.orden_id,
+      ordenUuid,
       pago.fecha,
       parseFloat(pago.monto) || 0,
       pago.metodo_pago || 'Transferencia',
@@ -2886,13 +2918,13 @@ ipcMain.handle('atmos-add-payment', (event, pago) => {
       `Cobro de $${pago.monto} registrado para el Servicio Atmosférico #${pago.orden_id}. Saldo restante: $${nuevoSaldo}`
     );
 
-    return { success: true, id: paymentId };
+    return { success: true, id: paymentId, uuid: paymentUuid };
   });
 
   try {
     const res = transaction();
     if (res.success && paymentId) {
-      const payload = { ...pago, id: paymentId };
+      const payload = { ...pago, id: paymentId, uuid: paymentUuid, orden_uuid: ordenUuid };
       handleDualWrite(
         supabaseAtmosfericoService.addPayment(payload),
         'atmos_pagos',

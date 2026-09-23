@@ -41,6 +41,7 @@ const supabaseMachineService = {
 
     try {
       const payload = {
+        uuid: maquina.uuid || null,
         nombre: maquina.nombre || '',
         tipo: maquina.tipo || '',
         marca: maquina.marca || '',
@@ -56,16 +57,17 @@ const supabaseMachineService = {
 
       if (maquina.id) payload.id = Number(maquina.id);
 
+      const onConflictColumn = maquina.uuid ? 'uuid' : 'id';
       const { error } = await client
         .from('maquinas')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: onConflictColumn });
 
       if (error) {
         console.error('[SupabaseMachineService] Error al guardar máquina:', error.message);
         return { success: false, error: error.message };
       }
 
-      console.log('[SupabaseMachineService] Máquina guardada en Supabase ID:', payload.id || 'N/A');
+      console.log('[SupabaseMachineService] Máquina guardada en Supabase ID/UUID:', payload.id || payload.uuid || 'N/A');
       return { success: true };
     } catch (err) {
       console.error('[SupabaseMachineService] Excepción al guardar máquina:', err.message);
@@ -77,28 +79,32 @@ const supabaseMachineService = {
     return this.addMachine(maquina);
   },
 
-  async deleteMachine(id) {
-    if (!id) return { success: false, error: 'ID de máquina requerido.' };
+  async deleteMachine(id, uuid = null) {
+    if (!id && !uuid) return { success: false, error: 'ID o UUID de máquina requerido.' };
     if (!isSupabaseConfigured()) return { success: false, error: 'Supabase no configurado' };
 
     const client = getSupabaseClient();
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
-      const { error } = await client
-        .from('maquinas')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('maquinas').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else {
+        query = query.eq('id', Number(id));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseMachineService] Error al eliminar máquina ID ${id}:`, error.message);
+        console.error(`[SupabaseMachineService] Error al eliminar máquina ID/UUID ${uuid || id}:`, error.message);
         return { success: false, error: error.message };
       }
 
-      console.log(`[SupabaseMachineService] Máquina ID ${id} eliminada en Supabase.`);
+      console.log(`[SupabaseMachineService] Máquina ID/UUID ${uuid || id} eliminada en Supabase.`);
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseMachineService] Excepción al eliminar máquina ID ${id}:`, err.message);
+      console.error(`[SupabaseMachineService] Excepción al eliminar máquina ID/UUID ${uuid || id}:`, err.message);
       return { success: false, error: err.message };
     }
   },
@@ -135,7 +141,9 @@ const supabaseMachineService = {
 
     try {
       const payload = {
-        maquina_id: Number(trabajo.maquina_id),
+        uuid: trabajo.uuid || null,
+        maquina_id: trabajo.maquina_id ? Number(trabajo.maquina_id) : null,
+        maquina_uuid: trabajo.maquina_uuid || null,
         fecha: trabajo.fecha || new Date().toISOString().split('T')[0],
         cliente: trabajo.cliente || '',
         operador: trabajo.operador || '',
@@ -147,9 +155,10 @@ const supabaseMachineService = {
 
       if (trabajo.id) payload.id = Number(trabajo.id);
 
+      const onConflictColumn = trabajo.uuid ? 'uuid' : 'id';
       const { error } = await client
         .from('trabajos_maquinas')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: onConflictColumn });
 
       if (error) {
         console.error('[SupabaseMachineService] Error al guardar trabajo de máquina:', error.message);
@@ -163,27 +172,31 @@ const supabaseMachineService = {
     }
   },
 
-  async deleteWorkLog(id) {
-    if (!id) return { success: false, error: 'ID de trabajo requerido.' };
+  async deleteWorkLog(id, uuid = null) {
+    if (!id && !uuid) return { success: false, error: 'ID o UUID de trabajo requerido.' };
     if (!isSupabaseConfigured()) return { success: false, error: 'Supabase no configurado' };
 
     const client = getSupabaseClient();
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
-      const { error } = await client
-        .from('trabajos_maquinas')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('trabajos_maquinas').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else {
+        query = query.eq('id', Number(id));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseMachineService] Error al eliminar trabajo_maquinas ID ${id}:`, error.message);
+        console.error(`[SupabaseMachineService] Error al eliminar trabajo_maquinas ID/UUID ${uuid || id}:`, error.message);
         return { success: false, error: error.message };
       }
 
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseMachineService] Excepción al eliminar trabajo_maquinas ID ${id}:`, err.message);
+      console.error(`[SupabaseMachineService] Excepción al eliminar trabajo_maquinas ID/UUID ${uuid || id}:`, err.message);
       return { success: false, error: err.message };
     }
   },
@@ -220,7 +233,9 @@ const supabaseMachineService = {
 
     try {
       const payload = {
-        maquina_id: Number(combustible.maquina_id),
+        uuid: combustible.uuid || null,
+        maquina_id: combustible.maquina_id ? Number(combustible.maquina_id) : null,
+        maquina_uuid: combustible.maquina_uuid || null,
         fecha: combustible.fecha || new Date().toISOString().split('T')[0],
         litros: combustible.litros !== undefined ? Number(combustible.litros) : 0,
         precio_litro: combustible.precio_litro !== undefined ? Number(combustible.precio_litro) : 0,
@@ -230,9 +245,10 @@ const supabaseMachineService = {
 
       if (combustible.id) payload.id = Number(combustible.id);
 
+      const onConflictColumn = combustible.uuid ? 'uuid' : 'id';
       const { error } = await client
         .from('combustible_maquinas')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: onConflictColumn });
 
       if (error) {
         console.error('[SupabaseMachineService] Error al guardar combustible_maquinas:', error.message);
@@ -246,27 +262,31 @@ const supabaseMachineService = {
     }
   },
 
-  async deleteFuelLog(id) {
-    if (!id) return { success: false, error: 'ID de combustible requerido.' };
+  async deleteFuelLog(id, uuid = null) {
+    if (!id && !uuid) return { success: false, error: 'ID o UUID de combustible requerido.' };
     if (!isSupabaseConfigured()) return { success: false, error: 'Supabase no configurado' };
 
     const client = getSupabaseClient();
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
-      const { error } = await client
-        .from('combustible_maquinas')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('combustible_maquinas').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else {
+        query = query.eq('id', Number(id));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseMachineService] Error al eliminar combustible_maquinas ID ${id}:`, error.message);
+        console.error(`[SupabaseMachineService] Error al eliminar combustible_maquinas ID/UUID ${uuid || id}:`, error.message);
         return { success: false, error: error.message };
       }
 
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseMachineService] Excepción al eliminar combustible_maquinas ID ${id}:`, err.message);
+      console.error(`[SupabaseMachineService] Excepción al eliminar combustible_maquinas ID/UUID ${uuid || id}:`, err.message);
       return { success: false, error: err.message };
     }
   },
@@ -303,7 +323,9 @@ const supabaseMachineService = {
 
     try {
       const payload = {
-        maquina_id: Number(mantenimiento.maquina_id),
+        uuid: mantenimiento.uuid || null,
+        maquina_id: mantenimiento.maquina_id ? Number(mantenimiento.maquina_id) : null,
+        maquina_uuid: mantenimiento.maquina_uuid || null,
         fecha: mantenimiento.fecha || new Date().toISOString().split('T')[0],
         tipo: mantenimiento.tipo || '',
         descripcion: mantenimiento.descripcion || '',
@@ -314,9 +336,10 @@ const supabaseMachineService = {
 
       if (mantenimiento.id) payload.id = Number(mantenimiento.id);
 
+      const onConflictColumn = mantenimiento.uuid ? 'uuid' : 'id';
       const { error } = await client
         .from('mantenimiento_maquinas')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: onConflictColumn });
 
       if (error) {
         console.error('[SupabaseMachineService] Error al guardar mantenimiento_maquinas:', error.message);
@@ -330,27 +353,31 @@ const supabaseMachineService = {
     }
   },
 
-  async deleteMaintenanceLog(id) {
-    if (!id) return { success: false, error: 'ID de mantenimiento requerido.' };
+  async deleteMaintenanceLog(id, uuid = null) {
+    if (!id && !uuid) return { success: false, error: 'ID o UUID de mantenimiento requerido.' };
     if (!isSupabaseConfigured()) return { success: false, error: 'Supabase no configurado' };
 
     const client = getSupabaseClient();
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
-      const { error } = await client
-        .from('mantenimiento_maquinas')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('mantenimiento_maquinas').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else {
+        query = query.eq('id', Number(id));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseMachineService] Error al eliminar mantenimiento_maquinas ID ${id}:`, error.message);
+        console.error(`[SupabaseMachineService] Error al eliminar mantenimiento_maquinas ID/UUID ${uuid || id}:`, error.message);
         return { success: false, error: error.message };
       }
 
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseMachineService] Excepción al eliminar mantenimiento_maquinas ID ${id}:`, err.message);
+      console.error(`[SupabaseMachineService] Excepción al eliminar mantenimiento_maquinas ID/UUID ${uuid || id}:`, err.message);
       return { success: false, error: err.message };
     }
   }

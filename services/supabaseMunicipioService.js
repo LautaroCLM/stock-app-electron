@@ -63,6 +63,7 @@ const supabaseMunicipioService = {
       }
 
       const payload = {
+        uuid: order.uuid || null,
         fecha: order.fecha || new Date().toISOString().split('T')[0],
         expediente: order.expediente || null,
         orden_compra: order.orden_compra || null,
@@ -76,16 +77,17 @@ const supabaseMunicipioService = {
 
       if (order.id) payload.id = Number(order.id);
 
+      const onConflictColumn = order.uuid ? 'uuid' : 'id';
       const { error } = await client
         .from('municipio_ordenes')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: onConflictColumn });
 
       if (error) {
         console.error('[SupabaseMunicipioService] Error al insertar/actualizar orden:', error.message);
         return { success: false, error: error.message };
       }
 
-      console.log('[SupabaseMunicipioService] Orden municipio guardada en Supabase ID:', payload.id || 'N/A');
+      console.log('[SupabaseMunicipioService] Orden municipio guardada en Supabase ID/UUID:', payload.id || payload.uuid || 'N/A');
       return { success: true };
     } catch (err) {
       console.error('[SupabaseMunicipioService] Excepción al guardar orden municipio:', err.message);
@@ -94,32 +96,37 @@ const supabaseMunicipioService = {
   },
 
   /**
-   * Elimina una orden de municipio por su ID en Supabase.
+   * Elimina una orden de municipio por su ID/UUID en Supabase.
    * @param {number|string} id
+   * @param {string} [uuid]
    * @returns {Promise<{ success: boolean, error?: string }>}
    */
-  async deleteOrder(id) {
-    if (!id) return { success: false, error: 'ID de orden requerido.' };
+  async deleteOrder(id, uuid = null) {
+    if (!id && !uuid) return { success: false, error: 'ID o UUID de orden requerido.' };
     if (!isSupabaseConfigured()) return { success: false, error: 'Supabase no configurado' };
 
     const client = getSupabaseClient();
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
-      const { error } = await client
-        .from('municipio_ordenes')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('municipio_ordenes').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else {
+        query = query.eq('id', Number(id));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseMunicipioService] Error al eliminar orden ID ${id}:`, error.message);
+        console.error(`[SupabaseMunicipioService] Error al eliminar orden ID/UUID ${uuid || id}:`, error.message);
         return { success: false, error: error.message };
       }
 
-      console.log(`[SupabaseMunicipioService] Orden ID ${id} eliminada en Supabase.`);
+      console.log(`[SupabaseMunicipioService] Orden ID/UUID ${uuid || id} eliminada en Supabase.`);
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseMunicipioService] Excepción al eliminar orden ID ${id}:`, err.message);
+      console.error(`[SupabaseMunicipioService] Excepción al eliminar orden ID/UUID ${uuid || id}:`, err.message);
       return { success: false, error: err.message };
     }
   },
@@ -166,7 +173,9 @@ const supabaseMunicipioService = {
 
     try {
       const payload = {
-        orden_id: Number(pago.orden_id),
+        uuid: pago.uuid || null,
+        orden_id: pago.orden_id ? Number(pago.orden_id) : null,
+        orden_uuid: pago.orden_uuid || null,
         fecha: pago.fecha || new Date().toISOString().split('T')[0],
         monto: pago.monto !== undefined ? Number(pago.monto) : 0,
         metodo_pago: pago.metodo_pago || 'Transferencia',
@@ -175,16 +184,17 @@ const supabaseMunicipioService = {
 
       if (pago.id) payload.id = Number(pago.id);
 
+      const onConflictColumn = pago.uuid ? 'uuid' : 'id';
       const { error } = await client
         .from('municipio_pagos')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: onConflictColumn });
 
       if (error) {
         console.error('[SupabaseMunicipioService] Error al guardar pago municipio:', error.message);
         return { success: false, error: error.message };
       }
 
-      console.log('[SupabaseMunicipioService] Pago municipio guardado en Supabase ID:', payload.id || 'N/A');
+      console.log('[SupabaseMunicipioService] Pago municipio guardado en Supabase ID/UUID:', payload.id || payload.uuid || 'N/A');
       return { success: true };
     } catch (err) {
       console.error('[SupabaseMunicipioService] Excepción al guardar pago municipio:', err.message);
@@ -193,31 +203,36 @@ const supabaseMunicipioService = {
   },
 
   /**
-   * Elimina un pago de municipio por ID en Supabase.
+   * Elimina un pago de municipio por ID/UUID en Supabase.
    * @param {number|string} id
+   * @param {string} [uuid]
    * @returns {Promise<{ success: boolean, error?: string }>}
    */
-  async deletePayment(id) {
-    if (!id) return { success: false, error: 'ID de pago requerido.' };
+  async deletePayment(id, uuid = null) {
+    if (!id && !uuid) return { success: false, error: 'ID o UUID de pago requerido.' };
     if (!isSupabaseConfigured()) return { success: false, error: 'Supabase no configurado' };
 
     const client = getSupabaseClient();
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
-      const { error } = await client
-        .from('municipio_pagos')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('municipio_pagos').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else {
+        query = query.eq('id', Number(id));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseMunicipioService] Error al eliminar pago municipio ID ${id}:`, error.message);
+        console.error(`[SupabaseMunicipioService] Error al eliminar pago municipio ID/UUID ${uuid || id}:`, error.message);
         return { success: false, error: error.message };
       }
 
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseMunicipioService] Excepción al eliminar pago municipio ID ${id}:`, err.message);
+      console.error(`[SupabaseMunicipioService] Excepción al eliminar pago municipio ID/UUID ${uuid || id}:`, err.message);
       return { success: false, error: err.message };
     }
   }

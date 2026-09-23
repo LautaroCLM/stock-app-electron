@@ -44,6 +44,7 @@ const supabaseRemitoService = {
       }
 
       const payload = {
+        uuid: remito.uuid || null,
         fecha: remito.fecha || new Date().toISOString(),
         cliente: remito.cliente || '',
         direccion: remito.direccion || '',
@@ -56,16 +57,17 @@ const supabaseRemitoService = {
 
       if (remito.id) payload.id = Number(remito.id);
 
+      const onConflictColumn = remito.uuid ? 'uuid' : 'id';
       const { error } = await client
         .from('remitos')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: onConflictColumn });
 
       if (error) {
         console.error('[SupabaseRemitoService] Error al guardar remito:', error.message);
         return { success: false, error: error.message };
       }
 
-      console.log('[SupabaseRemitoService] Remito guardado en Supabase ID:', payload.id || 'N/A');
+      console.log('[SupabaseRemitoService] Remito guardado en Supabase ID/UUID:', payload.id || payload.uuid || 'N/A');
       return { success: true };
     } catch (err) {
       console.error('[SupabaseRemitoService] Excepción al guardar remito:', err.message);
@@ -73,27 +75,31 @@ const supabaseRemitoService = {
     }
   },
 
-  async deleteRemito(id) {
-    if (!id) return { success: false, error: 'ID de remito requerido.' };
+  async deleteRemito(id, uuid = null) {
+    if (!id && !uuid) return { success: false, error: 'ID o UUID de remito requerido.' };
     if (!isSupabaseConfigured()) return { success: false, error: 'Supabase no configurado' };
 
     const client = getSupabaseClient();
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
-      const { error } = await client
-        .from('remitos')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('remitos').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else {
+        query = query.eq('id', Number(id));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseRemitoService] Error al eliminar remito ID ${id}:`, error.message);
+        console.error(`[SupabaseRemitoService] Error al eliminar remito ID/UUID ${uuid || id}:`, error.message);
         return { success: false, error: error.message };
       }
 
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseRemitoService] Excepción al eliminar remito ID ${id}:`, err.message);
+      console.error(`[SupabaseRemitoService] Excepción al eliminar remito ID/UUID ${uuid || id}:`, err.message);
       return { success: false, error: err.message };
     }
   }

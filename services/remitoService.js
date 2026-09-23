@@ -5,6 +5,7 @@
 
 'use strict';
 
+const crypto = require('crypto');
 const supabaseRemitoService = require('./supabaseRemitoService');
 
 /**
@@ -39,7 +40,7 @@ function createRemitoService(db, syncManager = null) {
   // ── getRemitos ────────────────────────────────────────────────────────────
   function getRemitos() {
     const rows = db.prepare(`
-      SELECT id, numero_remito, fecha, cliente, direccion, localidad, cuit, telefono, vendedor, observaciones, transporte, productos, total
+      SELECT id, uuid, numero_remito, fecha, cliente, direccion, localidad, cuit, telefono, vendedor, observaciones, transporte, productos, total
       FROM remitos
       ORDER BY datetime(fecha) DESC
     `).all();
@@ -55,13 +56,15 @@ function createRemitoService(db, syncManager = null) {
     const prodsArr = Array.isArray(data.productos) ? data.productos : [];
     const prodsStr = JSON.stringify(prodsArr);
     const fecha = data.fecha || new Date().toISOString();
+    const uuid = data.uuid || crypto.randomUUID();
 
     const stmt = db.prepare(`
-      INSERT INTO remitos (numero_remito, fecha, cliente, direccion, localidad, cuit, telefono, vendedor, observaciones, transporte, productos, total)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO remitos (uuid, numero_remito, fecha, cliente, direccion, localidad, cuit, telefono, vendedor, observaciones, transporte, productos, total)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const info = stmt.run(
+      uuid,
       data.numero_remito || '',
       fecha,
       data.cliente || '',
@@ -80,6 +83,7 @@ function createRemitoService(db, syncManager = null) {
 
     const payload = {
       id: remitoId,
+      uuid,
       numero_remito: data.numero_remito || '',
       fecha,
       cliente: data.cliente || '',
@@ -101,20 +105,24 @@ function createRemitoService(db, syncManager = null) {
       payload
     );
 
-    return { success: true, id: remitoId };
+    return { success: true, id: remitoId, uuid };
   }
 
   // ── deleteRemito ──────────────────────────────────────────────────────────
   function deleteRemito(id) {
     if (!id) return { success: false, error: 'ID de remito requerido.' };
 
+    const existing = db.prepare('SELECT uuid FROM remitos WHERE id = ?').get(id);
     db.prepare('DELETE FROM remitos WHERE id = ?').run(id);
 
+    const payload = { id: Number(id) };
+    if (existing && existing.uuid) payload.uuid = existing.uuid;
+
     handleDualWrite(
-      supabaseRemitoService.deleteRemito(id),
+      supabaseRemitoService.deleteRemito(id, existing ? existing.uuid : null),
       'remitos',
       'DELETE',
-      { id: Number(id) }
+      payload
     );
 
     return { success: true };
@@ -122,7 +130,17 @@ function createRemitoService(db, syncManager = null) {
 
   // ── upsertRemito ──────────────────────────────────────────────────────────
   function upsertRemito(remito) {
-    if (!remito || !remito.id) return { success: false, error: 'ID de remito requerido.' };
+    if (!remito || (!remito.id && !remito.uuid)) return { success: false, error: 'ID o UUID de remito requerido.' };
+
+    let existing = null;
+    if (remito.uuid) {
+      existing = db.prepare('SELECT id, uuid FROM remitos WHERE uuid = ?').get(remito.uuid);
+    }
+    if (!existing && remito.id) {
+      existing = db.prepare('SELECT id, uuid FROM remitos WHERE id = ?').get(Number(remito.id));
+    }
+
+    const uuid = remito.uuid || (existing ? existing.uuid : null) || crypto.randomUUID();
 
     let prodsStr = '[]';
     if (typeof remito.productos === 'string') {
@@ -131,41 +149,68 @@ function createRemitoService(db, syncManager = null) {
       prodsStr = JSON.stringify(remito.productos || []);
     }
 
-    const stmt = db.prepare(`
-      INSERT INTO remitos (id, numero_remito, fecha, cliente, direccion, localidad, cuit, telefono, vendedor, observaciones, transporte, productos, total)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        numero_remito = excluded.numero_remito,
-        fecha = excluded.fecha,
-        cliente = excluded.cliente,
-        direccion = excluded.direccion,
-        localidad = excluded.localidad,
-        cuit = excluded.cuit,
-        telefono = excluded.telefono,
-        vendedor = excluded.vendedor,
-        observaciones = excluded.observaciones,
-        transporte = excluded.transporte,
-        productos = excluded.productos,
-        total = excluded.total
-    `);
+    if (existing) {
+      const stmt = db.prepare(`
+        UPDATE remitos SET
+          uuid = ?,
+          numero_remito = ?,
+          fecha = ?,
+          cliente = ?,
+          direccion = ?,
+          localidad = ?,
+          cuit = ?,
+          telefono = ?,
+          vendedor = ?,
+          observaciones = ?,
+          transporte = ?,
+          productos = ?,
+          total = ?
+        WHERE id = ?
+      `);
 
-    stmt.run(
-      Number(remito.id),
-      remito.numero_remito || '',
-      remito.fecha || new Date().toISOString(),
-      remito.cliente || '',
-      remito.direccion || '',
-      remito.localidad || '',
-      remito.cuit || '',
-      remito.telefono || '',
-      remito.vendedor || '',
-      remito.observaciones || '',
-      remito.transporte || '',
-      prodsStr,
-      remito.total !== undefined ? Number(remito.total) : 0
-    );
+      stmt.run(
+        uuid,
+        remito.numero_remito || '',
+        remito.fecha || new Date().toISOString(),
+        remito.cliente || '',
+        remito.direccion || '',
+        remito.localidad || '',
+        remito.cuit || '',
+        remito.telefono || '',
+        remito.vendedor || '',
+        remito.observaciones || '',
+        remito.transporte || '',
+        prodsStr,
+        remito.total !== undefined ? Number(remito.total) : 0,
+        existing.id
+      );
 
-    return { success: true, id: Number(remito.id) };
+      return { success: true, id: existing.id, uuid };
+    } else {
+      const stmt = db.prepare(`
+        INSERT INTO remitos (id, uuid, numero_remito, fecha, cliente, direccion, localidad, cuit, telefono, vendedor, observaciones, transporte, productos, total)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const info = stmt.run(
+        remito.id ? Number(remito.id) : null,
+        uuid,
+        remito.numero_remito || '',
+        remito.fecha || new Date().toISOString(),
+        remito.cliente || '',
+        remito.direccion || '',
+        remito.localidad || '',
+        remito.cuit || '',
+        remito.telefono || '',
+        remito.vendedor || '',
+        remito.observaciones || '',
+        remito.transporte || '',
+        prodsStr,
+        remito.total !== undefined ? Number(remito.total) : 0
+      );
+
+      return { success: true, id: info.lastInsertRowid, uuid };
+    }
   }
 
   // ── API pública del servicio ───────────────────────────────────────────────

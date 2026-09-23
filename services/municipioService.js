@@ -5,6 +5,7 @@
 
 'use strict';
 
+const crypto = require('crypto');
 const supabaseMunicipioService = require('./supabaseMunicipioService');
 const supabaseProductService = require('./supabaseProductService');
 
@@ -47,11 +48,13 @@ function createMunicipioService(db, registrarAccion, syncManager = null) {
     const transaction = db.transaction(() => {
       const total = parseFloat(order.total) || 0;
       const productosArr = Array.isArray(order.productos) ? order.productos : [];
+      const uuid = order.uuid || crypto.randomUUID();
 
       const info = db.prepare(`
-        INSERT INTO municipio_ordenes (fecha, expediente, orden_compra, fecha_estimada_cobro, observaciones, total, saldo_pendiente, estado, productos)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO municipio_ordenes (uuid, fecha, expediente, orden_compra, fecha_estimada_cobro, observaciones, total, saldo_pendiente, estado, productos)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
+        uuid,
         order.fecha,
         order.expediente || null,
         order.orden_compra || null,
@@ -67,11 +70,18 @@ function createMunicipioService(db, registrarAccion, syncManager = null) {
 
       // Descontar stock de productos localmente y disparar Dual Write de stock
       for (const p of productosArr) {
-        if (p.id) {
-          const currentProd = db.prepare('SELECT uuid, stock, nombre FROM productos WHERE id = ?').get(p.id);
+        if (p.id || p.uuid) {
+          let currentProd = null;
+          if (p.uuid) {
+            currentProd = db.prepare('SELECT id, uuid, stock, nombre FROM productos WHERE uuid = ?').get(p.uuid);
+          }
+          if (!currentProd && p.id) {
+            currentProd = db.prepare('SELECT id, uuid, stock, nombre FROM productos WHERE id = ?').get(p.id);
+          }
+
           if (currentProd) {
             const newStock = Math.max(0, currentProd.stock - p.cantidad);
-            db.prepare('UPDATE productos SET stock = ? WHERE id = ?').run(newStock, p.id);
+            db.prepare('UPDATE productos SET stock = ? WHERE id = ?').run(newStock, currentProd.id);
             
             if (typeof registrarAccion === 'function') {
               registrarAccion(
@@ -85,7 +95,7 @@ function createMunicipioService(db, registrarAccion, syncManager = null) {
                 supabaseProductService.updateStockByUuid(currentProd.uuid, newStock),
                 'productos',
                 'UPDATE_STOCK',
-                { uuid: currentProd.uuid, stock: newStock, id: p.id }
+                { uuid: currentProd.uuid, stock: newStock, id: currentProd.id }
               );
             }
           }
@@ -94,6 +104,7 @@ function createMunicipioService(db, registrarAccion, syncManager = null) {
 
       const payload = {
         id: orderId,
+        uuid,
         fecha: order.fecha,
         expediente: order.expediente || null,
         orden_compra: order.orden_compra || null,
@@ -112,7 +123,7 @@ function createMunicipioService(db, registrarAccion, syncManager = null) {
         payload
       );
 
-      return { success: true, id: orderId };
+      return { success: true, id: orderId, uuid };
     });
 
     return transaction();
@@ -121,24 +132,40 @@ function createMunicipioService(db, registrarAccion, syncManager = null) {
   function deleteOrder(id) {
     if (!id) return { success: false, error: 'ID de orden requerido.' };
 
+    const existing = db.prepare('SELECT uuid FROM municipio_ordenes WHERE id = ?').get(id);
     db.prepare('DELETE FROM municipio_ordenes WHERE id = ?').run(id);
 
     if (typeof registrarAccion === 'function') {
       registrarAccion('Eliminación Orden Municipio', `Orden #${id} eliminada.`);
     }
 
+    const payload = { id: Number(id) };
+    if (existing && existing.uuid) payload.uuid = existing.uuid;
+
     handleDualWrite(
-      supabaseMunicipioService.deleteOrder(id),
+      supabaseMunicipioService.deleteOrder(id, existing ? existing.uuid : null),
       'municipio_ordenes',
       'DELETE',
-      { id: Number(id) }
+      payload
     );
 
     return { success: true };
   }
 
   function upsertOrder(order) {
-    if (!order || !order.id) return { success: false, error: 'ID de orden requerido.' };
+    if (!order || (!order.id && !order.uuid)) {
+      return { success: false, error: 'ID o UUID de orden requerido.' };
+    }
+
+    let existing = null;
+    if (order.uuid) {
+      existing = db.prepare('SELECT id, uuid FROM municipio_ordenes WHERE uuid = ?').get(order.uuid);
+    }
+    if (!existing && order.id) {
+      existing = db.prepare('SELECT id, uuid FROM municipio_ordenes WHERE id = ?').get(Number(order.id));
+    }
+
+    const uuid = order.uuid || (existing ? existing.uuid : null) || crypto.randomUUID();
 
     let productosStr = '[]';
     if (typeof order.productos === 'string') {
@@ -147,56 +174,94 @@ function createMunicipioService(db, registrarAccion, syncManager = null) {
       productosStr = JSON.stringify(order.productos || []);
     }
 
-    const stmt = db.prepare(`
-      INSERT INTO municipio_ordenes (id, fecha, expediente, orden_compra, fecha_estimada_cobro, observaciones, total, saldo_pendiente, estado, productos)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        fecha = excluded.fecha,
-        expediente = excluded.expediente,
-        orden_compra = excluded.orden_compra,
-        fecha_estimada_cobro = excluded.fecha_estimada_cobro,
-        observaciones = excluded.observaciones,
-        total = excluded.total,
-        saldo_pendiente = excluded.saldo_pendiente,
-        estado = excluded.estado,
-        productos = excluded.productos
-    `);
+    if (existing) {
+      const stmt = db.prepare(`
+        UPDATE municipio_ordenes SET
+          uuid = ?,
+          fecha = ?,
+          expediente = ?,
+          orden_compra = ?,
+          fecha_estimada_cobro = ?,
+          observaciones = ?,
+          total = ?,
+          saldo_pendiente = ?,
+          estado = ?,
+          productos = ?
+        WHERE id = ?
+      `);
 
-    stmt.run(
-      Number(order.id),
-      order.fecha || new Date().toISOString().split('T')[0],
-      order.expediente || null,
-      order.orden_compra || null,
-      order.fecha_estimada_cobro || null,
-      order.observaciones || null,
-      order.total !== undefined ? Number(order.total) : 0,
-      order.saldo_pendiente !== undefined ? Number(order.saldo_pendiente) : Number(order.total || 0),
-      order.estado || 'Pendiente',
-      productosStr
-    );
+      stmt.run(
+        uuid,
+        order.fecha || new Date().toISOString().split('T')[0],
+        order.expediente || null,
+        order.orden_compra || null,
+        order.fecha_estimada_cobro || null,
+        order.observaciones || null,
+        order.total !== undefined ? Number(order.total) : 0,
+        order.saldo_pendiente !== undefined ? Number(order.saldo_pendiente) : Number(order.total || 0),
+        order.estado || 'Pendiente',
+        productosStr,
+        existing.id
+      );
 
-    return { success: true, id: Number(order.id) };
+      return { success: true, id: existing.id, uuid };
+    } else {
+      const stmt = db.prepare(`
+        INSERT INTO municipio_ordenes (id, uuid, fecha, expediente, orden_compra, fecha_estimada_cobro, observaciones, total, saldo_pendiente, estado, productos)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const info = stmt.run(
+        order.id ? Number(order.id) : null,
+        uuid,
+        order.fecha || new Date().toISOString().split('T')[0],
+        order.expediente || null,
+        order.orden_compra || null,
+        order.fecha_estimada_cobro || null,
+        order.observaciones || null,
+        order.total !== undefined ? Number(order.total) : 0,
+        order.saldo_pendiente !== undefined ? Number(order.saldo_pendiente) : Number(order.total || 0),
+        order.estado || 'Pendiente',
+        productosStr
+      );
+
+      return { success: true, id: info.lastInsertRowid, uuid };
+    }
   }
 
   // ── PAGOS MUNICIPIO ────────────────────────────────────────────────────────
   function getPayments(ordenId) {
+    if (typeof ordenId === 'string' && ordenId.length > 20) {
+      return db.prepare('SELECT * FROM municipio_pagos WHERE orden_uuid = ? ORDER BY fecha DESC, created_at DESC').all(ordenId);
+    }
     return db.prepare('SELECT * FROM municipio_pagos WHERE orden_id = ? ORDER BY fecha DESC, created_at DESC').all(ordenId);
   }
 
   function addPayment(pago) {
     const transaction = db.transaction(() => {
-      const orden = db.prepare('SELECT total, saldo_pendiente FROM municipio_ordenes WHERE id = ?').get(pago.orden_id);
+      let orden = null;
+      if (pago.orden_uuid) {
+        orden = db.prepare('SELECT id, uuid, total, saldo_pendiente FROM municipio_ordenes WHERE uuid = ?').get(pago.orden_uuid);
+      }
+      if (!orden && pago.orden_id) {
+        orden = db.prepare('SELECT id, uuid, total, saldo_pendiente FROM municipio_ordenes WHERE id = ?').get(pago.orden_id);
+      }
+
       if (!orden) {
         throw new Error('Orden no encontrada');
       }
 
       const monto = parseFloat(pago.monto) || 0;
+      const uuid = pago.uuid || crypto.randomUUID();
+      const ordenUuid = orden.uuid || pago.orden_uuid || null;
 
       const info = db.prepare(`
-        INSERT INTO municipio_pagos (orden_id, fecha, monto, metodo_pago, observaciones)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO municipio_pagos (uuid, orden_id, orden_uuid, fecha, monto, metodo_pago, observaciones)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `).run(
-        pago.orden_id,
+        uuid,
+        orden.id,
+        ordenUuid,
         pago.fecha,
         monto,
         pago.metodo_pago || 'Transferencia',
@@ -217,18 +282,20 @@ function createMunicipioService(db, registrarAccion, syncManager = null) {
         UPDATE municipio_ordenes
         SET saldo_pendiente = ?, estado = ?
         WHERE id = ?
-      `).run(nuevoSaldo, nuevoEstado, pago.orden_id);
+      `).run(nuevoSaldo, nuevoEstado, orden.id);
 
       if (typeof registrarAccion === 'function') {
         registrarAccion(
           'Cobro Municipio', 
-          `Cobro de $${monto} registrado para la Orden #${pago.orden_id}. Saldo restante: $${nuevoSaldo}`
+          `Cobro de $${monto} registrado para la Orden #${orden.id}. Saldo restante: $${nuevoSaldo}`
         );
       }
 
       const payloadPago = {
         id: pagoId,
-        orden_id: Number(pago.orden_id),
+        uuid,
+        orden_id: orden.id,
+        orden_uuid: ordenUuid,
         fecha: pago.fecha,
         monto,
         metodo_pago: pago.metodo_pago || 'Transferencia',
@@ -243,7 +310,7 @@ function createMunicipioService(db, registrarAccion, syncManager = null) {
       );
 
       // Replicar actualización del estado/saldo de la orden en Supabase
-      const ordenActualizada = db.prepare('SELECT * FROM municipio_ordenes WHERE id = ?').get(pago.orden_id);
+      const ordenActualizada = db.prepare('SELECT * FROM municipio_ordenes WHERE id = ?').get(orden.id);
       if (ordenActualizada) {
         handleDualWrite(
           supabaseMunicipioService.addOrder(ordenActualizada),
@@ -253,7 +320,7 @@ function createMunicipioService(db, registrarAccion, syncManager = null) {
         );
       }
 
-      return { success: true, id: pagoId };
+      return { success: true, id: pagoId, uuid };
     });
 
     return transaction();
@@ -262,42 +329,93 @@ function createMunicipioService(db, registrarAccion, syncManager = null) {
   function deletePayment(id) {
     if (!id) return { success: false, error: 'ID de pago requerido.' };
 
+    const existing = db.prepare('SELECT uuid FROM municipio_pagos WHERE id = ?').get(id);
     db.prepare('DELETE FROM municipio_pagos WHERE id = ?').run(id);
 
+    const payload = { id: Number(id) };
+    if (existing && existing.uuid) payload.uuid = existing.uuid;
+
     handleDualWrite(
-      supabaseMunicipioService.deletePayment(id),
+      supabaseMunicipioService.deletePayment(id, existing ? existing.uuid : null),
       'municipio_pagos',
       'DELETE',
-      { id: Number(id) }
+      payload
     );
 
     return { success: true };
   }
 
   function upsertPayment(pago) {
-    if (!pago || !pago.id) return { success: false, error: 'ID de pago requerido.' };
+    if (!pago || (!pago.id && !pago.uuid)) {
+      return { success: false, error: 'ID o UUID de pago requerido.' };
+    }
 
-    const stmt = db.prepare(`
-      INSERT INTO municipio_pagos (id, orden_id, fecha, monto, metodo_pago, observaciones)
-      VALUES (?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        orden_id = excluded.orden_id,
-        fecha = excluded.fecha,
-        monto = excluded.monto,
-        metodo_pago = excluded.metodo_pago,
-        observaciones = excluded.observaciones
-    `);
+    let existing = null;
+    if (pago.uuid) {
+      existing = db.prepare('SELECT id, uuid FROM municipio_pagos WHERE uuid = ?').get(pago.uuid);
+    }
+    if (!existing && pago.id) {
+      existing = db.prepare('SELECT id, uuid FROM municipio_pagos WHERE id = ?').get(Number(pago.id));
+    }
 
-    stmt.run(
-      Number(pago.id),
-      Number(pago.orden_id),
-      pago.fecha || new Date().toISOString().split('T')[0],
-      pago.monto !== undefined ? Number(pago.monto) : 0,
-      pago.metodo_pago || 'Transferencia',
-      pago.observaciones || null
-    );
+    const uuid = pago.uuid || (existing ? existing.uuid : null) || crypto.randomUUID();
 
-    return { success: true, id: Number(pago.id) };
+    let localOrdenId = pago.orden_id ? Number(pago.orden_id) : null;
+    let ordenUuid = pago.orden_uuid || null;
+
+    if (!localOrdenId && ordenUuid) {
+      const parentOrd = db.prepare('SELECT id FROM municipio_ordenes WHERE uuid = ?').get(ordenUuid);
+      if (parentOrd) localOrdenId = parentOrd.id;
+    }
+    if (!ordenUuid && localOrdenId) {
+      const parentOrd = db.prepare('SELECT uuid FROM municipio_ordenes WHERE id = ?').get(localOrdenId);
+      if (parentOrd) ordenUuid = parentOrd.uuid;
+    }
+
+    if (existing) {
+      const stmt = db.prepare(`
+        UPDATE municipio_pagos SET
+          uuid = ?,
+          orden_id = ?,
+          orden_uuid = ?,
+          fecha = ?,
+          monto = ?,
+          metodo_pago = ?,
+          observaciones = ?
+        WHERE id = ?
+      `);
+
+      stmt.run(
+        uuid,
+        localOrdenId,
+        ordenUuid,
+        pago.fecha || new Date().toISOString().split('T')[0],
+        pago.monto !== undefined ? Number(pago.monto) : 0,
+        pago.metodo_pago || 'Transferencia',
+        pago.observaciones || null,
+        existing.id
+      );
+
+      return { success: true, id: existing.id, uuid };
+    } else {
+      const stmt = db.prepare(`
+        INSERT INTO municipio_pagos (id, uuid, orden_id, orden_uuid, fecha, monto, metodo_pago, observaciones)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const info = stmt.run(
+        pago.id ? Number(pago.id) : null,
+        uuid,
+        localOrdenId,
+        ordenUuid,
+        pago.fecha || new Date().toISOString().split('T')[0],
+        pago.monto !== undefined ? Number(pago.monto) : 0,
+        pago.metodo_pago || 'Transferencia',
+        pago.observaciones || null
+      );
+
+      return { success: true, id: info.lastInsertRowid, uuid };
+    }
   }
 
   // ── METRICAS Y PROXIMOS COBROS ──────────────────────────────────────────────

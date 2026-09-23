@@ -5,6 +5,7 @@
 
 'use strict';
 
+const crypto = require('crypto');
 const supabaseBudgetService = require('./supabaseBudgetService');
 
 /**
@@ -39,7 +40,7 @@ function createBudgetService(db, syncManager = null) {
   // ── getBudgets ────────────────────────────────────────────────────────────
   function getBudgets() {
     const rows = db.prepare(`
-      SELECT id, fecha, cliente, direccion, localidad, cuit, telefono, productos, total
+      SELECT id, uuid, fecha, cliente, direccion, localidad, cuit, telefono, productos, total
       FROM presupuestos
       ORDER BY datetime(fecha) DESC
     `).all();
@@ -55,13 +56,15 @@ function createBudgetService(db, syncManager = null) {
     const prodsArr = Array.isArray(data.productos) ? data.productos : [];
     const prodsStr = JSON.stringify(prodsArr);
     const fecha = data.fecha || new Date().toISOString();
+    const uuid = data.uuid || crypto.randomUUID();
 
     const stmt = db.prepare(`
-      INSERT INTO presupuestos (fecha, cliente, direccion, localidad, cuit, telefono, productos, total)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO presupuestos (uuid, fecha, cliente, direccion, localidad, cuit, telefono, productos, total)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const info = stmt.run(
+      uuid,
       fecha,
       data.cliente || '',
       data.direccion || '',
@@ -76,6 +79,7 @@ function createBudgetService(db, syncManager = null) {
 
     const payload = {
       id: budgetId,
+      uuid,
       fecha,
       cliente: data.cliente || '',
       direccion: data.direccion || '',
@@ -93,20 +97,24 @@ function createBudgetService(db, syncManager = null) {
       payload
     );
 
-    return { success: true, id: budgetId };
+    return { success: true, id: budgetId, uuid };
   }
 
   // ── deleteBudget ──────────────────────────────────────────────────────────
   function deleteBudget(id) {
     if (!id) return { success: false, error: 'ID de presupuesto requerido.' };
 
+    const existing = db.prepare('SELECT uuid FROM presupuestos WHERE id = ?').get(id);
     db.prepare('DELETE FROM presupuestos WHERE id = ?').run(id);
 
+    const payload = { id: Number(id) };
+    if (existing && existing.uuid) payload.uuid = existing.uuid;
+
     handleDualWrite(
-      supabaseBudgetService.deleteBudget(id),
+      supabaseBudgetService.deleteBudget(id, existing ? existing.uuid : null),
       'presupuestos',
       'DELETE',
-      { id: Number(id) }
+      payload
     );
 
     return { success: true };
@@ -114,7 +122,17 @@ function createBudgetService(db, syncManager = null) {
 
   // ── upsertBudget ──────────────────────────────────────────────────────────
   function upsertBudget(budget) {
-    if (!budget || !budget.id) return { success: false, error: 'ID de presupuesto requerido.' };
+    if (!budget || (!budget.id && !budget.uuid)) return { success: false, error: 'ID o UUID de presupuesto requerido.' };
+
+    let existing = null;
+    if (budget.uuid) {
+      existing = db.prepare('SELECT id, uuid FROM presupuestos WHERE uuid = ?').get(budget.uuid);
+    }
+    if (!existing && budget.id) {
+      existing = db.prepare('SELECT id, uuid FROM presupuestos WHERE id = ?').get(Number(budget.id));
+    }
+
+    const uuid = budget.uuid || (existing ? existing.uuid : null) || crypto.randomUUID();
 
     let prodsStr = '[]';
     if (typeof budget.productos === 'string') {
@@ -123,33 +141,56 @@ function createBudgetService(db, syncManager = null) {
       prodsStr = JSON.stringify(budget.productos || []);
     }
 
-    const stmt = db.prepare(`
-      INSERT INTO presupuestos (id, fecha, cliente, direccion, localidad, cuit, telefono, productos, total)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        fecha = excluded.fecha,
-        cliente = excluded.cliente,
-        direccion = excluded.direccion,
-        localidad = excluded.localidad,
-        cuit = excluded.cuit,
-        telefono = excluded.telefono,
-        productos = excluded.productos,
-        total = excluded.total
-    `);
+    if (existing) {
+      const stmt = db.prepare(`
+        UPDATE presupuestos SET
+          uuid = ?,
+          fecha = ?,
+          cliente = ?,
+          direccion = ?,
+          localidad = ?,
+          cuit = ?,
+          telefono = ?,
+          productos = ?,
+          total = ?
+        WHERE id = ?
+      `);
 
-    stmt.run(
-      Number(budget.id),
-      budget.fecha || new Date().toISOString(),
-      budget.cliente || '',
-      budget.direccion || '',
-      budget.localidad || '',
-      budget.cuit || '',
-      budget.telefono || '',
-      prodsStr,
-      budget.total !== undefined ? Number(budget.total) : 0
-    );
+      stmt.run(
+        uuid,
+        budget.fecha || new Date().toISOString(),
+        budget.cliente || '',
+        budget.direccion || '',
+        budget.localidad || '',
+        budget.cuit || '',
+        budget.telefono || '',
+        prodsStr,
+        budget.total !== undefined ? Number(budget.total) : 0,
+        existing.id
+      );
 
-    return { success: true, id: Number(budget.id) };
+      return { success: true, id: existing.id, uuid };
+    } else {
+      const stmt = db.prepare(`
+        INSERT INTO presupuestos (id, uuid, fecha, cliente, direccion, localidad, cuit, telefono, productos, total)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const info = stmt.run(
+        budget.id ? Number(budget.id) : null,
+        uuid,
+        budget.fecha || new Date().toISOString(),
+        budget.cliente || '',
+        budget.direccion || '',
+        budget.localidad || '',
+        budget.cuit || '',
+        budget.telefono || '',
+        prodsStr,
+        budget.total !== undefined ? Number(budget.total) : 0
+      );
+
+      return { success: true, id: info.lastInsertRowid, uuid };
+    }
   }
 
   // ── API pública del servicio ───────────────────────────────────────────────

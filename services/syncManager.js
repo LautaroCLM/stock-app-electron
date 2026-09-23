@@ -363,73 +363,73 @@ class SyncManager {
           if (action === 'INSERT' || action === 'UPDATE') {
             result = await supabaseAtmosfericoService.addOrder(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseAtmosfericoService.deleteOrder(payload.id);
+            result = await supabaseAtmosfericoService.deleteOrder(payload.id, payload.uuid);
           }
         } else if (entity === 'atmos_pagos') {
           if (action === 'INSERT') {
             result = await supabaseAtmosfericoService.addPayment(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseAtmosfericoService.deletePayment(payload.id, payload.orden_id);
+            result = await supabaseAtmosfericoService.deletePayment(payload.id, payload.orden_id, payload.uuid);
           }
         } else if (entity === 'gastos') {
           if (action === 'INSERT' || action === 'UPDATE') {
             result = await supabaseExpenseService.addExpense(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseExpenseService.deleteExpense(payload.id);
+            result = await supabaseExpenseService.deleteExpense(payload.id, payload.uuid);
           }
         } else if (entity === 'ajustes_caja') {
           if (action === 'INSERT' || action === 'UPDATE') {
             result = await supabaseAjusteService.addAjuste(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseAjusteService.deleteAjuste(payload.id);
+            result = await supabaseAjusteService.deleteAjuste(payload.id, payload.uuid);
           }
         } else if (entity === 'municipio_ordenes') {
           if (action === 'INSERT' || action === 'UPDATE') {
             result = await supabaseMunicipioService.addOrder(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseMunicipioService.deleteOrder(payload.id);
+            result = await supabaseMunicipioService.deleteOrder(payload.id, payload.uuid);
           }
         } else if (entity === 'municipio_pagos') {
           if (action === 'INSERT') {
             result = await supabaseMunicipioService.addPayment(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseMunicipioService.deletePayment(payload.id);
+            result = await supabaseMunicipioService.deletePayment(payload.id, payload.uuid);
           }
         } else if (entity === 'maquinas') {
           if (action === 'INSERT' || action === 'UPDATE') {
             result = await supabaseMachineService.addMachine(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseMachineService.deleteMachine(payload.id);
+            result = await supabaseMachineService.deleteMachine(payload.id, payload.uuid);
           }
         } else if (entity === 'trabajos_maquinas') {
           if (action === 'INSERT') {
             result = await supabaseMachineService.addWorkLog(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseMachineService.deleteWorkLog(payload.id);
+            result = await supabaseMachineService.deleteWorkLog(payload.id, payload.uuid);
           }
         } else if (entity === 'combustible_maquinas') {
           if (action === 'INSERT') {
             result = await supabaseMachineService.addFuelLog(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseMachineService.deleteFuelLog(payload.id);
+            result = await supabaseMachineService.deleteFuelLog(payload.id, payload.uuid);
           }
         } else if (entity === 'mantenimiento_maquinas') {
           if (action === 'INSERT') {
             result = await supabaseMachineService.addMaintenanceLog(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseMachineService.deleteMaintenanceLog(payload.id);
+            result = await supabaseMachineService.deleteMaintenanceLog(payload.id, payload.uuid);
           }
         } else if (entity === 'empleados') {
           if (action === 'INSERT' || action === 'UPDATE') {
             result = await supabaseEmployeeService.addEmployee(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseEmployeeService.deleteEmployee(payload.id);
+            result = await supabaseEmployeeService.deleteEmployee(payload.id, payload.uuid);
           }
         } else if (entity === 'asistencias') {
           if (action === 'INSERT') {
             result = await supabaseEmployeeService.addAttendance(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseEmployeeService.deleteAttendance(payload.id);
+            result = await supabaseEmployeeService.deleteAttendance(payload.id, payload.uuid);
           }
         } else if (entity === 'empleado_liquidacion_config') {
           if (action === 'INSERT' || action === 'UPDATE') {
@@ -439,19 +439,19 @@ class SyncManager {
           if (action === 'INSERT') {
             result = await supabaseEmployeeService.addPayroll(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseEmployeeService.deletePayroll(payload.id);
+            result = await supabaseEmployeeService.deletePayroll(payload.id, payload.uuid);
           }
         } else if (entity === 'presupuestos') {
           if (action === 'INSERT' || action === 'UPDATE') {
             result = await supabaseBudgetService.addBudget(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseBudgetService.deleteBudget(payload.id);
+            result = await supabaseBudgetService.deleteBudget(payload.id, payload.uuid);
           }
         } else if (entity === 'remitos') {
           if (action === 'INSERT' || action === 'UPDATE') {
             result = await supabaseRemitoService.addRemito(payload);
           } else if (action === 'DELETE') {
-            result = await supabaseRemitoService.deleteRemito(payload.id);
+            result = await supabaseRemitoService.deleteRemito(payload.id, payload.uuid);
           }
         }
       } catch (err) {
@@ -534,64 +534,135 @@ class SyncManager {
   }
 
   upsertAtmosOrder(ao) {
-    if (!this.db || !ao || !ao.id) return;
+    if (!this.db || !ao || (!ao.id && !ao.uuid)) return;
     try {
-      const stmt = this.db.prepare(`
-        INSERT INTO atmos_ordenes (id, fecha, cliente, direccion, telefono, tipo_servicio, descripcion, monto, saldo_pendiente, estado, observaciones, fecha_estimada_cobro)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-          fecha = excluded.fecha,
-          cliente = excluded.cliente,
-          direccion = excluded.direccion,
-          telefono = excluded.telefono,
-          tipo_servicio = excluded.tipo_servicio,
-          descripcion = excluded.descripcion,
-          monto = excluded.monto,
-          saldo_pendiente = excluded.saldo_pendiente,
-          estado = excluded.estado,
-          observaciones = excluded.observaciones,
-          fecha_estimada_cobro = excluded.fecha_estimada_cobro
-      `);
-      stmt.run(
-        Number(ao.id),
-        ao.fecha,
-        String(ao.cliente || ''),
-        String(ao.direccion || ''),
-        ao.telefono || null,
-        String(ao.tipo_servicio || 'Desagote'),
-        ao.descripcion || null,
-        Number(ao.monto || 0),
-        Number(ao.saldo_pendiente ?? ao.monto ?? 0),
-        ao.estado || 'Pendiente',
-        ao.observaciones || null,
-        ao.fecha_estimada_cobro || null
-      );
+      let existing = null;
+      if (ao.uuid) {
+        existing = this.db.prepare('SELECT id, uuid FROM atmos_ordenes WHERE uuid = ?').get(ao.uuid);
+      }
+      if (!existing && ao.id) {
+        existing = this.db.prepare('SELECT id, uuid FROM atmos_ordenes WHERE id = ?').get(Number(ao.id));
+      }
+
+      const uuid = ao.uuid || (existing ? existing.uuid : null) || null;
+
+      if (existing) {
+        this.db.prepare(`
+          UPDATE atmos_ordenes SET
+            uuid = ?,
+            fecha = ?,
+            cliente = ?,
+            direccion = ?,
+            telefono = ?,
+            tipo_servicio = ?,
+            descripcion = ?,
+            monto = ?,
+            saldo_pendiente = ?,
+            estado = ?,
+            observaciones = ?,
+            fecha_estimada_cobro = ?
+          WHERE id = ?
+        `).run(
+          uuid,
+          ao.fecha,
+          String(ao.cliente || ''),
+          String(ao.direccion || ''),
+          ao.telefono || null,
+          String(ao.tipo_servicio || 'Desagote'),
+          ao.descripcion || null,
+          Number(ao.monto || 0),
+          Number(ao.saldo_pendiente ?? ao.monto ?? 0),
+          ao.estado || 'Pendiente',
+          ao.observaciones || null,
+          ao.fecha_estimada_cobro || null,
+          existing.id
+        );
+      } else {
+        this.db.prepare(`
+          INSERT INTO atmos_ordenes (id, uuid, fecha, cliente, direccion, telefono, tipo_servicio, descripcion, monto, saldo_pendiente, estado, observaciones, fecha_estimada_cobro)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          ao.id ? Number(ao.id) : null,
+          uuid,
+          ao.fecha,
+          String(ao.cliente || ''),
+          String(ao.direccion || ''),
+          ao.telefono || null,
+          String(ao.tipo_servicio || 'Desagote'),
+          ao.descripcion || null,
+          Number(ao.monto || 0),
+          Number(ao.saldo_pendiente ?? ao.monto ?? 0),
+          ao.estado || 'Pendiente',
+          ao.observaciones || null,
+          ao.fecha_estimada_cobro || null
+        );
+      }
     } catch (err) {
       console.warn('[SyncManager] Error al upsert local de orden atmosférico:', err.message);
     }
   }
 
   upsertAtmosPayment(ap) {
-    if (!this.db || !ap || !ap.id) return;
+    if (!this.db || !ap || (!ap.id && !ap.uuid)) return;
     try {
-      const stmt = this.db.prepare(`
-        INSERT INTO atmos_pagos (id, orden_id, fecha, monto, metodo_pago, observaciones)
-        VALUES (?, ?, ?, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-          orden_id = excluded.orden_id,
-          fecha = excluded.fecha,
-          monto = excluded.monto,
-          metodo_pago = excluded.metodo_pago,
-          observaciones = excluded.observaciones
-      `);
-      stmt.run(
-        Number(ap.id),
-        Number(ap.orden_id),
-        ap.fecha,
-        Number(ap.monto || 0),
-        String(ap.metodo_pago || 'Efectivo'),
-        ap.observaciones || null
-      );
+      let existing = null;
+      if (ap.uuid) {
+        existing = this.db.prepare('SELECT id, uuid FROM atmos_pagos WHERE uuid = ?').get(ap.uuid);
+      }
+      if (!existing && ap.id) {
+        existing = this.db.prepare('SELECT id, uuid FROM atmos_pagos WHERE id = ?').get(Number(ap.id));
+      }
+
+      const uuid = ap.uuid || (existing ? existing.uuid : null) || null;
+
+      let localOrdenId = ap.orden_id ? Number(ap.orden_id) : null;
+      let ordenUuid = ap.orden_uuid || null;
+
+      if (!localOrdenId && ordenUuid) {
+        const parentOrd = this.db.prepare('SELECT id FROM atmos_ordenes WHERE uuid = ?').get(ordenUuid);
+        if (parentOrd) localOrdenId = parentOrd.id;
+      }
+      if (!ordenUuid && localOrdenId) {
+        const parentOrd = this.db.prepare('SELECT uuid FROM atmos_ordenes WHERE id = ?').get(localOrdenId);
+        if (parentOrd) ordenUuid = parentOrd.uuid;
+      }
+
+      if (existing) {
+        this.db.prepare(`
+          UPDATE atmos_pagos SET
+            uuid = ?,
+            orden_id = ?,
+            orden_uuid = ?,
+            fecha = ?,
+            monto = ?,
+            metodo_pago = ?,
+            observaciones = ?
+          WHERE id = ?
+        `).run(
+          uuid,
+          localOrdenId,
+          ordenUuid,
+          ap.fecha,
+          Number(ap.monto || 0),
+          String(ap.metodo_pago || 'Efectivo'),
+          ap.observaciones || null,
+          existing.id
+        );
+      } else {
+        this.db.prepare(`
+          INSERT INTO atmos_pagos (id, uuid, orden_id, orden_uuid, fecha, monto, metodo_pago, observaciones)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          ap.id ? Number(ap.id) : null,
+          uuid,
+          localOrdenId,
+          ordenUuid,
+          ap.fecha,
+          Number(ap.monto || 0),
+          String(ap.metodo_pago || 'Efectivo'),
+          ap.observaciones || null
+        );
+      }
     } catch (err) {
       console.warn('[SyncManager] Error al upsert local de pago atmosférico:', err.message);
     }

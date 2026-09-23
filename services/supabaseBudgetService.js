@@ -44,6 +44,7 @@ const supabaseBudgetService = {
       }
 
       const payload = {
+        uuid: budget.uuid || null,
         fecha: budget.fecha || new Date().toISOString(),
         cliente: budget.cliente || '',
         direccion: budget.direccion || '',
@@ -56,16 +57,17 @@ const supabaseBudgetService = {
 
       if (budget.id) payload.id = Number(budget.id);
 
+      const onConflictColumn = budget.uuid ? 'uuid' : 'id';
       const { error } = await client
         .from('presupuestos')
-        .upsert(payload, { onConflict: 'id' });
+        .upsert(payload, { onConflict: onConflictColumn });
 
       if (error) {
         console.error('[SupabaseBudgetService] Error al guardar presupuesto:', error.message);
         return { success: false, error: error.message };
       }
 
-      console.log('[SupabaseBudgetService] Presupuesto guardado en Supabase ID:', payload.id || 'N/A');
+      console.log('[SupabaseBudgetService] Presupuesto guardado en Supabase ID/UUID:', payload.id || payload.uuid || 'N/A');
       return { success: true };
     } catch (err) {
       console.error('[SupabaseBudgetService] Excepción al guardar presupuesto:', err.message);
@@ -73,27 +75,31 @@ const supabaseBudgetService = {
     }
   },
 
-  async deleteBudget(id) {
-    if (!id) return { success: false, error: 'ID de presupuesto requerido.' };
+  async deleteBudget(id, uuid = null) {
+    if (!id && !uuid) return { success: false, error: 'ID o UUID de presupuesto requerido.' };
     if (!isSupabaseConfigured()) return { success: false, error: 'Supabase no configurado' };
 
     const client = getSupabaseClient();
     if (!client) return { success: false, error: 'Cliente Supabase no disponible' };
 
     try {
-      const { error } = await client
-        .from('presupuestos')
-        .delete()
-        .eq('id', Number(id));
+      let query = client.from('presupuestos').delete();
+      if (uuid) {
+        query = query.eq('uuid', uuid);
+      } else {
+        query = query.eq('id', Number(id));
+      }
+
+      const { error } = await query;
 
       if (error) {
-        console.error(`[SupabaseBudgetService] Error al eliminar presupuesto ID ${id}:`, error.message);
+        console.error(`[SupabaseBudgetService] Error al eliminar presupuesto ID/UUID ${uuid || id}:`, error.message);
         return { success: false, error: error.message };
       }
 
       return { success: true };
     } catch (err) {
-      console.error(`[SupabaseBudgetService] Excepción al eliminar presupuesto ID ${id}:`, err.message);
+      console.error(`[SupabaseBudgetService] Excepción al eliminar presupuesto ID/UUID ${uuid || id}:`, err.message);
       return { success: false, error: err.message };
     }
   }

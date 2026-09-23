@@ -405,6 +405,7 @@ class RealtimeManager {
     const { eventType, new: newRow, old: oldRow } = payload;
     console.log('[RealtimeManager] Procesando evento "municipio_ordenes":', { eventType, newRow, oldRow });
 
+    const deletedUuid = oldRow?.uuid || newRow?.uuid || null;
     const deletedId = (oldRow && oldRow.id !== undefined && oldRow.id !== null)
       ? Number(oldRow.id)
       : (payload && payload.old && payload.old.id !== undefined && payload.old.id !== null)
@@ -413,36 +414,74 @@ class RealtimeManager {
 
     if (this.db) {
       try {
-        if ((eventType === 'INSERT' || eventType === 'UPDATE') && newRow?.id) {
-          const stmt = this.db.prepare(`
-            INSERT INTO municipio_ordenes (id, numero_orden, fecha, concepto, total, saldo_pendiente, estado, observaciones)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET
-              numero_orden = excluded.numero_orden,
-              fecha = excluded.fecha,
-              concepto = excluded.concepto,
-              total = excluded.total,
-              saldo_pendiente = excluded.saldo_pendiente,
-              estado = excluded.estado,
-              observaciones = excluded.observaciones
-          `);
-          const res = stmt.run(
-            Number(newRow.id),
-            String(newRow.numero_orden || ''),
-            newRow.fecha,
-            newRow.concepto || null,
-            Number(newRow.total || 0),
-            Number(newRow.saldo_pendiente ?? newRow.total ?? 0),
-            newRow.estado || 'Pendiente',
-            newRow.observaciones || null
-          );
-          console.log('[RealtimeManager] SQLite actualizado en municipio_ordenes:', { id: newRow.id, changes: res.changes });
-        } else if (eventType === 'DELETE') {
-          if (deletedId) {
-            const res = this.db.prepare('DELETE FROM municipio_ordenes WHERE id = ?').run(deletedId);
-            console.log('[RealtimeManager] Orden Municipio eliminada de SQLite por Realtime:', { id: deletedId, changes: res.changes });
+        if ((eventType === 'INSERT' || eventType === 'UPDATE') && (newRow?.uuid || newRow?.id)) {
+          let existing = null;
+          if (newRow.uuid) {
+            existing = this.db.prepare('SELECT id, uuid FROM municipio_ordenes WHERE uuid = ?').get(String(newRow.uuid));
+          }
+          if (!existing && newRow.id) {
+            existing = this.db.prepare('SELECT id, uuid FROM municipio_ordenes WHERE id = ?').get(Number(newRow.id));
+          }
+
+          const uuid = newRow.uuid || (existing ? existing.uuid : null) || null;
+          const productosStr = typeof newRow.productos === 'string' ? newRow.productos : JSON.stringify(newRow.productos || []);
+
+          if (existing) {
+            const stmt = this.db.prepare(`
+              UPDATE municipio_ordenes SET
+                uuid = ?,
+                fecha = ?,
+                expediente = ?,
+                orden_compra = ?,
+                fecha_estimada_cobro = ?,
+                observaciones = ?,
+                total = ?,
+                saldo_pendiente = ?,
+                estado = ?,
+                productos = ?
+              WHERE id = ?
+            `);
+            const res = stmt.run(
+              uuid,
+              newRow.fecha,
+              newRow.expediente || null,
+              newRow.orden_compra || null,
+              newRow.fecha_estimada_cobro || null,
+              newRow.observaciones || null,
+              Number(newRow.total || 0),
+              Number(newRow.saldo_pendiente ?? newRow.total ?? 0),
+              newRow.estado || 'Pendiente',
+              productosStr,
+              existing.id
+            );
+            console.log('[RealtimeManager] SQLite actualizado en municipio_ordenes:', { id: existing.id, uuid, changes: res.changes });
           } else {
-            console.warn('[RealtimeManager] DELETE de municipio_ordenes recibido pero sin ID en payload.old:', payload);
+            const stmt = this.db.prepare(`
+              INSERT INTO municipio_ordenes (id, uuid, fecha, expediente, orden_compra, fecha_estimada_cobro, observaciones, total, saldo_pendiente, estado, productos)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+            const res = stmt.run(
+              newRow.id ? Number(newRow.id) : null,
+              uuid,
+              newRow.fecha,
+              newRow.expediente || null,
+              newRow.orden_compra || null,
+              newRow.fecha_estimada_cobro || null,
+              newRow.observaciones || null,
+              Number(newRow.total || 0),
+              Number(newRow.saldo_pendiente ?? newRow.total ?? 0),
+              newRow.estado || 'Pendiente',
+              productosStr
+            );
+            console.log('[RealtimeManager] SQLite insertado en municipio_ordenes:', { id: res.lastInsertRowid, uuid });
+          }
+        } else if (eventType === 'DELETE') {
+          if (deletedUuid) {
+            const res = this.db.prepare('DELETE FROM municipio_ordenes WHERE uuid = ?').run(deletedUuid);
+            console.log('[RealtimeManager] Orden Municipio eliminada de SQLite por UUID:', { uuid: deletedUuid, changes: res.changes });
+          } else if (deletedId) {
+            const res = this.db.prepare('DELETE FROM municipio_ordenes WHERE id = ?').run(deletedId);
+            console.log('[RealtimeManager] Orden Municipio eliminada de SQLite por ID:', { id: deletedId, changes: res.changes });
           }
         }
       } catch (dbErr) {
@@ -457,6 +496,7 @@ class RealtimeManager {
     const { eventType, new: newRow, old: oldRow } = payload;
     console.log('[RealtimeManager] Procesando evento "atmos_ordenes":', { eventType, newRow, oldRow });
 
+    const deletedUuid = oldRow?.uuid || newRow?.uuid || null;
     const deletedId = (oldRow && oldRow.id !== undefined && oldRow.id !== null)
       ? Number(oldRow.id)
       : (payload && payload.old && payload.old.id !== undefined && payload.old.id !== null)
@@ -465,44 +505,79 @@ class RealtimeManager {
 
     if (this.db) {
       try {
-        if ((eventType === 'INSERT' || eventType === 'UPDATE') && newRow?.id) {
-          const stmt = this.db.prepare(`
-            INSERT INTO atmos_ordenes (id, fecha, cliente, direccion, telefono, tipo_servicio, descripcion, monto, saldo_pendiente, estado, observaciones, fecha_estimada_cobro)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET
-              fecha = excluded.fecha,
-              cliente = excluded.cliente,
-              direccion = excluded.direccion,
-              telefono = excluded.telefono,
-              tipo_servicio = excluded.tipo_servicio,
-              descripcion = excluded.descripcion,
-              monto = excluded.monto,
-              saldo_pendiente = excluded.saldo_pendiente,
-              estado = excluded.estado,
-              observaciones = excluded.observaciones,
-              fecha_estimada_cobro = excluded.fecha_estimada_cobro
-          `);
-          const res = stmt.run(
-            Number(newRow.id),
-            newRow.fecha,
-            String(newRow.cliente || ''),
-            String(newRow.direccion || ''),
-            newRow.telefono || null,
-            String(newRow.tipo_servicio || 'Desagote'),
-            newRow.descripcion || null,
-            Number(newRow.monto || 0),
-            Number(newRow.saldo_pendiente ?? newRow.monto ?? 0),
-            newRow.estado || 'Pendiente',
-            newRow.observaciones || null,
-            newRow.fecha_estimada_cobro || null
-          );
-          console.log('[RealtimeManager] SQLite actualizado en atmos_ordenes:', { id: newRow.id, changes: res.changes });
-        } else if (eventType === 'DELETE') {
-          if (deletedId) {
-            const res = this.db.prepare('DELETE FROM atmos_ordenes WHERE id = ?').run(deletedId);
-            console.log('[RealtimeManager] Orden Atmosférico eliminada de SQLite por Realtime:', { id: deletedId, changes: res.changes });
+        if ((eventType === 'INSERT' || eventType === 'UPDATE') && (newRow?.uuid || newRow?.id)) {
+          let existing = null;
+          if (newRow.uuid) {
+            existing = this.db.prepare('SELECT id, uuid FROM atmos_ordenes WHERE uuid = ?').get(String(newRow.uuid));
+          }
+          if (!existing && newRow.id) {
+            existing = this.db.prepare('SELECT id, uuid FROM atmos_ordenes WHERE id = ?').get(Number(newRow.id));
+          }
+
+          const uuid = newRow.uuid || (existing ? existing.uuid : null) || null;
+
+          if (existing) {
+            const stmt = this.db.prepare(`
+              UPDATE atmos_ordenes SET
+                uuid = ?,
+                fecha = ?,
+                cliente = ?,
+                direccion = ?,
+                telefono = ?,
+                tipo_servicio = ?,
+                descripcion = ?,
+                monto = ?,
+                saldo_pendiente = ?,
+                estado = ?,
+                observaciones = ?,
+                fecha_estimada_cobro = ?
+              WHERE id = ?
+            `);
+            const res = stmt.run(
+              uuid,
+              newRow.fecha,
+              String(newRow.cliente || ''),
+              String(newRow.direccion || ''),
+              newRow.telefono || null,
+              String(newRow.tipo_servicio || 'Desagote'),
+              newRow.descripcion || null,
+              Number(newRow.monto || 0),
+              Number(newRow.saldo_pendiente ?? newRow.monto ?? 0),
+              newRow.estado || 'Pendiente',
+              newRow.observaciones || null,
+              newRow.fecha_estimada_cobro || null,
+              existing.id
+            );
+            console.log('[RealtimeManager] SQLite actualizado en atmos_ordenes:', { id: existing.id, uuid, changes: res.changes });
           } else {
-            console.warn('[RealtimeManager] DELETE de atmos_ordenes recibido pero sin ID en payload.old:', payload);
+            const stmt = this.db.prepare(`
+              INSERT INTO atmos_ordenes (id, uuid, fecha, cliente, direccion, telefono, tipo_servicio, descripcion, monto, saldo_pendiente, estado, observaciones, fecha_estimada_cobro)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+            const res = stmt.run(
+              newRow.id ? Number(newRow.id) : null,
+              uuid,
+              newRow.fecha,
+              String(newRow.cliente || ''),
+              String(newRow.direccion || ''),
+              newRow.telefono || null,
+              String(newRow.tipo_servicio || 'Desagote'),
+              newRow.descripcion || null,
+              Number(newRow.monto || 0),
+              Number(newRow.saldo_pendiente ?? newRow.monto ?? 0),
+              newRow.estado || 'Pendiente',
+              newRow.observaciones || null,
+              newRow.fecha_estimada_cobro || null
+            );
+            console.log('[RealtimeManager] SQLite insertado en atmos_ordenes:', { id: res.lastInsertRowid, uuid });
+          }
+        } else if (eventType === 'DELETE') {
+          if (deletedUuid) {
+            const res = this.db.prepare('DELETE FROM atmos_ordenes WHERE uuid = ?').run(deletedUuid);
+            console.log('[RealtimeManager] Orden Atmosférico eliminada de SQLite por UUID:', { uuid: deletedUuid, changes: res.changes });
+          } else if (deletedId) {
+            const res = this.db.prepare('DELETE FROM atmos_ordenes WHERE id = ?').run(deletedId);
+            console.log('[RealtimeManager] Orden Atmosférico eliminada de SQLite por ID:', { id: deletedId, changes: res.changes });
           }
         }
       } catch (dbErr) {
