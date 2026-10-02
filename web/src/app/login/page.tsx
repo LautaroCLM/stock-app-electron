@@ -7,11 +7,11 @@ import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { ToastNotification, ToastMessage } from '@/components/ui/ToastNotification';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Lock, Mail, Building2, ShieldCheck, ArrowRight, Loader2, Zap } from 'lucide-react';
+import { Lock, Mail, Building2, ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, quickLogin, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { login, isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,33 +25,6 @@ export default function LoginPage() {
       router.push('/');
     }
   }, [isAuthenticated, isAuthLoading, router]);
-
-  const handleQuickLogin = async () => {
-    setIsSubmitting(true);
-    setError(null);
-    try {
-      const { error: loginError } = await quickLogin();
-      if (loginError) {
-        setError(loginError);
-        setToast({ id: Date.now().toString(), type: 'error', text: loginError });
-      } else {
-        setToast({
-          id: Date.now().toString(),
-          type: 'success',
-          text: 'Inicio de sesión rápido exitoso. Redirigiendo...',
-        });
-        setTimeout(() => {
-          router.push('/');
-        }, 300);
-      }
-    } catch (err: any) {
-      const msg = err?.message || 'Error al realizar inicio de sesión rápido.';
-      setError(msg);
-      setToast({ id: Date.now().toString(), type: 'error', text: msg });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,46 +106,6 @@ export default function LoginPage() {
         {/* Error Alert Box */}
         <ErrorAlert error={error} onDismiss={() => setError(null)} />
 
-        {/* Quick Access Button */}
-        <div className="p-4 bg-gradient-to-br from-blue-900/40 via-indigo-900/30 to-purple-900/40 border border-blue-500/30 rounded-2xl space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-blue-300 flex items-center space-x-1.5">
-              <Zap className="w-4 h-4 text-amber-400 animate-bounce" />
-              <span>Acceso Rápido sin Contraseña</span>
-            </span>
-            <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full font-mono">1-Click</span>
-          </div>
-          <p className="text-[11px] text-slate-300 leading-relaxed">
-            Presioná el botón a continuación para ingresar al sistema de forma inmediata sin tipear correo ni clave.
-          </p>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleQuickLogin}
-            disabled={isSubmitting}
-            className="w-full py-2.5 text-xs font-bold bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-all"
-          >
-            {isSubmitting ? (
-              <span className="flex items-center justify-center space-x-2">
-                <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-                <span>Ingresando de forma rápida...</span>
-              </span>
-            ) : (
-              <span className="flex items-center justify-center space-x-2">
-                <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
-                <span>Iniciar Sesión Rápido (Acceso Directo)</span>
-              </span>
-            )}
-          </Button>
-        </div>
-
-        <div className="relative flex items-center justify-center">
-          <div className="border-t border-slate-800 w-full" />
-          <span className="bg-slate-900 px-3 text-[11px] text-slate-500 font-medium uppercase tracking-wider whitespace-nowrap">
-            o con credenciales
-          </span>
-        </div>
-
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-4">
@@ -239,4 +172,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

@@ -22,7 +22,6 @@ interface AuthContextType {
   isLoading: boolean;
   onlineUserIds: Set<string>;
   login: (email: string, password: string) => Promise<{ error: string | null }>;
-  quickLogin: () => Promise<{ error: string | null }>;
   logout: () => Promise<void>;
   hasPermission: (module: PermissionModule, action: PermissionAction) => boolean;
 }
@@ -59,43 +58,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [user]);
 
-  const saveQuickSession = (u: UserProfile, c: Company) => {
-    setUser(u);
-    setCompany(c);
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('stock_app_quick_user', JSON.stringify({ user: u, company: c }));
-      } catch (err) {
-        console.warn('[AuthContext] Error guardando quick user:', err);
-      }
-    }
-  };
-
   const clearUser = useCallback(() => {
     setUser(null);
     setCompany(null);
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.removeItem('stock_app_quick_user');
-      } catch (e) {}
-    }
-  }, []);
-
-  const restoreSavedQuickUser = useCallback((): boolean => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('stock_app_quick_user');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (parsed?.user) {
-            setUser(parsed.user);
-            setCompany(parsed.company || { id: 'default-company', nombre: 'La Perla Desarrolladora S.A.' });
-            return true;
-          }
-        } catch (e) {}
-      }
-    }
-    return false;
   }, []);
 
   const loadUserProfile = useCallback(async (authUser: any) => {
@@ -126,13 +91,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           company: companyData,
           avatarUrl: profileData.avatar_url || authUser.user_metadata?.avatar_url,
         };
-        saveQuickSession(loadedUser, companyData);
+        setUser(loadedUser);
+        setCompany(companyData);
       } else {
         const defaultRole: UserRole = 'administrador';
         const defaultCompany: Company = {
           id: 'default-company',
           nombre: 'La Perla Desarrolladora S.A.',
-          cuit: '30-71955729-1',
+          cuit: '30-12345678-9',
         };
         const fallbackUser: UserProfile = {
           id: authUser.id,
@@ -142,7 +108,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           company_id: defaultCompany.id,
           company: defaultCompany,
         };
-        saveQuickSession(fallbackUser, defaultCompany);
+        setUser(fallbackUser);
+        setCompany(defaultCompany);
       }
     } catch (err) {
       console.warn('[AuthContext] Error cargando perfil desde Supabase:', err);
@@ -158,7 +125,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         company_id: defaultCompany.id,
         company: defaultCompany,
       };
-      saveQuickSession(fallbackUser, defaultCompany);
+      setUser(fallbackUser);
+      setCompany(defaultCompany);
     }
   }, []);
 
@@ -176,17 +144,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           await loadUserProfile(session.user);
         } else {
-          const restored = restoreSavedQuickUser();
-          if (!restored) {
-            clearUser();
-          }
+          clearUser();
         }
       } catch (err) {
         console.error('[AuthContext] Error obteniendo sesión:', err);
-        const restored = restoreSavedQuickUser();
-        if (!restored) {
-          clearUser();
-        }
+        clearUser();
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -212,7 +174,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [loadUserProfile, clearUser, restoreSavedQuickUser]);
+  }, [loadUserProfile, clearUser]);
 
   const login = async (email: string, password: string): Promise<{ error: string | null }> => {
     setIsLoading(true);
@@ -230,32 +192,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       setIsLoading(false);
       return { error: err.message || 'Error al conectar con Supabase Auth.' };
-    }
-  };
-
-  const quickLogin = async (): Promise<{ error: string | null }> => {
-    setIsLoading(true);
-    try {
-      const defaultCompany: Company = {
-        id: 'default-company',
-        nombre: 'La Perla Desarrolladora S.A.',
-        cuit: '30-71955729-1',
-      };
-      const quickUser: UserProfile = {
-        id: 'quick-user-operator',
-        name: 'Usuario Acceso Rápido',
-        email: 'laperla21@gmail.com',
-        role: 'administrador',
-        company_id: defaultCompany.id,
-        company: defaultCompany,
-      };
-
-      saveQuickSession(quickUser, defaultCompany);
-      setIsLoading(false);
-      return { error: null };
-    } catch (err: any) {
-      setIsLoading(false);
-      return { error: err.message || 'Error en el inicio de sesión rápido.' };
     }
   };
 
@@ -288,7 +224,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         onlineUserIds,
         login,
-        quickLogin,
         logout,
         hasPermission: checkPermission,
       }}

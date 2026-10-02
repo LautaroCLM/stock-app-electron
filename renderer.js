@@ -11752,26 +11752,28 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!codigo || !nombre) { alert('Código y nombre son obligatorios'); return; }
 
           if (editingId) {
-            const pObj = productos.find(x => Number(x.id) === Number(editingId));
             const res = await window.electronAPI.updateProduct({
-              id: editingId, uuid: pObj?.uuid || null, codigo, nombre, categoria, stock, precio, precio_costo, unidad, proveedor_id
+              id: editingId, codigo, nombre, categoria, stock, precio, precio_costo, unidad, proveedor_id
             });
+
+
 
             if (res && res.success) {
               await loadProducts();
               if (modalAdd) modalAdd.classList.remove('active');
               editingId = null;
               btnSave.textContent = 'Guardar';
-            } else alert(res?.error || 'Error actualizando producto.');
+            } else alert('Error actualizando producto.');
           } else {
             const res = await window.electronAPI.addProduct({
               codigo, nombre, categoria, stock, precio, precio_costo, unidad, proveedor_id
             });
 
+
             if (res && res.success) {
               await loadProducts();
               if (modalAdd) modalAdd.classList.remove('active');
-            } else alert(res?.error || 'Error guardando producto.');
+            } else alert('Error guardando producto.');
           }
         } catch (err) {
           console.error('Error guardando producto:', err);

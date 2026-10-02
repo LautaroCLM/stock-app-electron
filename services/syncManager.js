@@ -771,11 +771,9 @@ class SyncManager {
         const products = await supabaseProductService.getProducts();
         if (Array.isArray(products) && this.productService) {
           const remoteIds = new Set();
-          const remoteUuids = new Set();
           for (const p of products) {
             const pId = Number(p.id);
             if (!isNaN(pId)) remoteIds.add(pId);
-            if (p.uuid) remoteUuids.add(String(p.uuid).trim());
             // Si el producto tiene cambios pendientes en offlineQueue, no sobrescribir
             if (!pendingProductIds.has(pId)) {
               this.productService.upsertProduct(p);
@@ -786,15 +784,13 @@ class SyncManager {
           }
 
           // Detección segura de eliminaciones en Supabase:
-          // Si un producto existe en SQLite pero no en Supabase (verificado por UUID o ID), y NO está pendiente en offlineQueue, eliminar de SQLite local
-          if (this.db && (remoteUuids.size > 0 || remoteIds.size > 0)) {
-            const localProducts = this.db.prepare('SELECT id, uuid FROM productos').all();
+          // Si un producto existe en SQLite pero no en Supabase, y NO está pendiente en offlineQueue, eliminar de SQLite local
+          if (this.db && remoteIds.size > 0) {
+            const localProducts = this.db.prepare('SELECT id FROM productos').all();
             for (const lp of localProducts) {
               const localId = Number(lp.id);
-              const localUuid = lp.uuid ? String(lp.uuid).trim() : null;
-              const existsInRemote = (localUuid && remoteUuids.has(localUuid)) || remoteIds.has(localId);
-              if (!existsInRemote && !pendingProductIds.has(localId)) {
-                console.log(`[SyncManager] Producto ID ${localId} (UUID: ${localUuid}) ya no existe en Supabase. Eliminando de SQLite local...`);
+              if (!remoteIds.has(localId) && !pendingProductIds.has(localId)) {
+                console.log(`[SyncManager] Producto ID ${localId} ya no existe en Supabase. Eliminando de SQLite local...`);
                 this.db.prepare('DELETE FROM productos WHERE id = ?').run(localId);
               }
             }

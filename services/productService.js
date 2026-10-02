@@ -130,57 +130,44 @@ function createProductService(db, registrarAccion, syncManager = null) {
    * @returns {{ success: boolean, id?: number, uuid?: string, error?: string }}
    */
   function createProduct(product) {
-    if (!product) return { success: false, error: 'Datos de producto requeridos.' };
-
     const uuid = product.uuid || crypto.randomUUID();
-    const codigo = product.codigo ? String(product.codigo).trim() : '';
-    const nombre = product.nombre ? String(product.nombre).trim() : '';
+    const stmt = db.prepare(`
+      INSERT INTO productos (uuid, codigo, nombre, categoria, stock, precio, precio_costo, unidad, proveedor_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const info = stmt.run(
+      uuid,
+      product.codigo || '',
+      product.nombre || '',
+      product.categoria || '',
+      product.stock || 0,
+      product.precio || 0,
+      product.precio_costo || 0,
+      product.unidad || 'un',
+      (product.proveedor_id !== undefined && product.proveedor_id !== null && product.proveedor_id !== '')
+        ? Number(product.proveedor_id)
+        : null
+    );
 
-    try {
-      const stmt = db.prepare(`
-        INSERT INTO productos (uuid, codigo, nombre, categoria, stock, precio, precio_costo, unidad, proveedor_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-      const info = stmt.run(
-        uuid,
-        codigo,
-        nombre,
-        product.categoria || '',
-        product.stock || 0,
-        product.precio || 0,
-        product.precio_costo || 0,
-        product.unidad || 'un',
-        (product.proveedor_id !== undefined && product.proveedor_id !== null && product.proveedor_id !== '')
-          ? Number(product.proveedor_id)
-          : null
+    const newId = info.lastInsertRowid;
+    const fullProduct = { ...product, id: newId, uuid };
+
+    if (typeof registrarAccion === 'function') {
+      registrarAccion(
+        'Agregar producto',
+        `Producto: ${product.nombre} (${product.codigo}) - Stock: ${product.stock} ${product.unidad}`
       );
-
-      const newId = info.lastInsertRowid;
-      const fullProduct = { ...product, id: newId, uuid, codigo, nombre };
-
-      if (typeof registrarAccion === 'function') {
-        registrarAccion(
-          'Agregar producto',
-          `Producto: ${nombre} (${codigo}) - Stock: ${product.stock} ${product.unidad}`
-        );
-      }
-
-      // Dual Write asíncrono a Supabase (no bloqueante)
-      handleDualWrite(
-        supabaseProductService.createProduct(fullProduct),
-        'productos',
-        'INSERT',
-        fullProduct
-      );
-
-      return { success: true, id: newId, uuid };
-    } catch (err) {
-      console.error('[ProductService] Error en createProduct:', err.message);
-      if (err.code === 'SQLITE_CONSTRAINT_UNIQUE' || err.message.includes('UNIQUE constraint failed')) {
-        return { success: false, error: `Ya existe un producto con el código "${codigo}" y nombre "${nombre}".` };
-      }
-      return { success: false, error: err.message };
     }
+
+    // Dual Write asíncrono a Supabase (no bloqueante)
+    handleDualWrite(
+      supabaseProductService.createProduct(fullProduct),
+      'productos',
+      'INSERT',
+      fullProduct
+    );
+
+    return { success: true, id: newId, uuid };
   }
 
   // ── updateProduct (LOCAL SQLITE + DUAL WRITE SUPABASE) ───────────────────
@@ -190,102 +177,58 @@ function createProductService(db, registrarAccion, syncManager = null) {
    * @returns {{ success: boolean, uuid?: string, error?: string }}
    */
   function updateProduct(product) {
-    if (!product) return { success: false, error: 'Datos de producto requeridos.' };
-
-    const inputUuid = product.uuid ? String(product.uuid).trim() : null;
-    const inputId = product.id !== undefined && product.id !== null ? Number(product.id) : null;
-    const codigo = product.codigo ? String(product.codigo).trim() : '';
-    const nombre = product.nombre ? String(product.nombre).trim() : '';
-
-    let existing = null;
-    if (inputUuid) {
-      existing = db.prepare('SELECT id, uuid FROM productos WHERE uuid = ?').get(inputUuid);
+    let uuid = product.uuid;
+    if (!uuid && product.id) {
+      const existing = db.prepare('SELECT uuid FROM productos WHERE id = ?').get(product.id);
+      uuid = existing?.uuid;
     }
-    if (!existing && inputId) {
-      existing = db.prepare('SELECT id, uuid FROM productos WHERE id = ?').get(inputId);
-    }
-    if (!existing && codigo && nombre) {
-      existing = db.prepare('SELECT id, uuid FROM productos WHERE codigo = ? AND nombre = ?').get(codigo, nombre);
+    if (!uuid) {
+      uuid = crypto.randomUUID();
     }
 
-    const uuid = inputUuid || existing?.uuid || crypto.randomUUID();
-    const targetId = existing?.id || inputId;
+    const stmt = db.prepare(`
+      UPDATE productos
+      SET uuid = ?, codigo = ?, nombre = ?, categoria = ?, stock = ?, precio = ?, precio_costo = ?, unidad = ?, proveedor_id = ?
+      WHERE id = ? OR (uuid IS NOT NULL AND uuid = ?)
+    `);
 
-    try {
-      let info = { changes: 0 };
-      if (targetId) {
-        const stmt = db.prepare(`
-          UPDATE productos
-          SET uuid = ?, codigo = ?, nombre = ?, categoria = ?, stock = ?, precio = ?, precio_costo = ?, unidad = ?, proveedor_id = ?
-          WHERE id = ?
-        `);
-        info = stmt.run(
-          uuid,
-          codigo,
-          nombre,
-          product.categoria || '',
-          product.stock || 0,
-          product.precio || 0,
-          product.precio_costo || 0,
-          product.unidad || 'un',
-          (product.proveedor_id !== undefined && product.proveedor_id !== null && product.proveedor_id !== '')
-            ? Number(product.proveedor_id)
-            : null,
-          targetId
-        );
-      } else if (uuid) {
-        const stmt = db.prepare(`
-          UPDATE productos
-          SET uuid = ?, codigo = ?, nombre = ?, categoria = ?, stock = ?, precio = ?, precio_costo = ?, unidad = ?, proveedor_id = ?
-          WHERE uuid = ?
-        `);
-        info = stmt.run(
-          uuid,
-          codigo,
-          nombre,
-          product.categoria || '',
-          product.stock || 0,
-          product.precio || 0,
-          product.precio_costo || 0,
-          product.unidad || 'un',
-          (product.proveedor_id !== undefined && product.proveedor_id !== null && product.proveedor_id !== '')
-            ? Number(product.proveedor_id)
-            : null,
-          uuid
-        );
-      }
+    const info = stmt.run(
+      uuid,
+      product.codigo || '',
+      product.nombre || '',
+      product.categoria || '',
+      product.stock || 0,
+      product.precio || 0,
+      product.precio_costo || 0,
+      product.unidad || 'un',
+      (product.proveedor_id !== undefined && product.proveedor_id !== null && product.proveedor_id !== '')
+        ? Number(product.proveedor_id)
+        : null,
+      product.id || null,
+      uuid
+    );
 
-      const fullProduct = { ...product, id: targetId || product.id, uuid, codigo, nombre };
+    const fullProduct = { ...product, uuid };
 
-      if (info.changes === 0) {
-        const upsertRes = upsertProduct(fullProduct);
-        if (upsertRes && !upsertRes.success) {
-          return upsertRes;
-        }
-      }
+    if (info.changes === 0) {
+      upsertProduct(fullProduct);
+    }
 
-      if (typeof registrarAccion === 'function') {
-        registrarAccion(
-          'Editar producto',
-          `Producto: ${nombre} (${codigo}) - Precio venta: $${product.precio}, Precio costo: $${product.precio_costo}`
-        );
-      }
-
-      handleDualWrite(
-        supabaseProductService.updateProduct(fullProduct),
-        'productos',
-        'UPDATE',
-        fullProduct
+    if (typeof registrarAccion === 'function') {
+      registrarAccion(
+        'Editar producto',
+        `Producto: ${product.nombre} (${product.codigo}) - Precio venta: $${product.precio}, Precio costo: $${product.precio_costo}`
       );
-
-      return { success: true, uuid, id: targetId || fullProduct.id };
-    } catch (err) {
-      console.error('[ProductService] Error en updateProduct:', err.message);
-      if (err.code === 'SQLITE_CONSTRAINT_UNIQUE' || err.message.includes('UNIQUE constraint failed')) {
-        return { success: false, error: `Ya existe otro producto con el código "${codigo}" y nombre "${nombre}".` };
-      }
-      return { success: false, error: err.message };
     }
+
+    handleDualWrite(
+      supabaseProductService.updateProduct(fullProduct),
+      'productos',
+      'UPDATE',
+      fullProduct
+    );
+
+    return { success: true, uuid };
   }
 
   // ── deleteProduct (LOCAL SQLITE + DUAL WRITE SUPABASE) ───────────────────
